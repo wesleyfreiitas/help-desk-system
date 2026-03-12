@@ -162,43 +162,38 @@ export default function ProductListClient({ initialProducts }: { initialProducts
 
       {/* Edit Modal */}
       {editingProduct && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
-          backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999,
-          display: 'flex', alignItems: 'center', justifyContent: 'center'
-        }}>
-          <div style={{
-            background: 'var(--bg-main)', padding: '2rem', borderRadius: 'var(--radius-md)',
-            width: '100%', maxWidth: '500px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600 }}>Editar Produto</h3>
-              <button 
-                onClick={() => setEditingProduct(null)}
-                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
-              >
-                <X size={20} />
-              </button>
-            </div>
-            
-            <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-main)' }}>Nome do Produto *</label>
-                <input 
-                  type="text" 
-                  value={editForm.name}
-                  onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
-                  required
-                  style={{ width: '100%', padding: '0.6rem', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-sm)', background: 'var(--bg-main)', color: 'var(--text-main)', fontSize: '0.95rem', outline: 'none' }}
-                />
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ width: '100%', maxWidth: '500px' }}>
+            <form onSubmit={handleEditSubmit}>
+              <div className="modal-header">
+                <h3>Editar Produto</h3>
+                <button 
+                  type="button"
+                  onClick={() => setEditingProduct(null)}
+                  className="modal-close"
+                >
+                  <X size={20} />
+                </button>
               </div>
               
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label>Nome do Produto *</label>
+                  <input 
+                    type="text" 
+                    value={editForm.name}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                    required
+                    placeholder="Nome do produto"
+                  />
+                </div>
+              </div>
+              
+              <div className="modal-footer">
                 <button 
                   type="button" 
                   onClick={() => setEditingProduct(null)}
                   className="btn-outline"
-                  style={{ padding: '0.5rem 1rem' }}
                 >
                   Cancelar
                 </button>
@@ -206,7 +201,7 @@ export default function ProductListClient({ initialProducts }: { initialProducts
                   type="submit" 
                   className="btn-primary"
                   disabled={isSaving}
-                  style={{ padding: '0.5rem 1rem', width: 'auto' }}
+                  style={{ width: 'auto' }}
                 >
                   {isSaving ? 'Salvando...' : 'Salvar Alterações'}
                 </button>
