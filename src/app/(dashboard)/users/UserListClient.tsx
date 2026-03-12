@@ -57,23 +57,16 @@ export default function UserListClient({ initialUsers, currentUserId, clients }:
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+      <div className="table-header-filters">
         <div style={{ position: 'relative', width: '300px' }}>
           <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input 
             type="text" 
+            className="search-input"
             placeholder="Buscar por nome ou e-mail..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '0.6rem 1rem 0.6rem 2.25rem',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-sm)',
-              fontSize: '0.9rem',
-              outline: 'none',
-              background: 'var(--bg-main)'
-            }}
+            style={{ paddingLeft: '2.25rem', width: '100%' }}
           />
         </div>
         
