@@ -131,25 +131,49 @@ export async function getDashboardStats(whereClause: any, dateRange: { from: Dat
   }));
 
 
-  // 4. Series Temporais (Grafico de Linha)
+  // 4. Series Temporais (Graficos de Linha)
   const days = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
   const timeSeries = days.map(day => {
     const dayStr = format(day, 'dd/MM');
-    const opened = ticketsPeriod.filter(t => format(t.createdAt, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')).length;
-    const closed = ticketsPeriod.filter(t => t.resolvedAt && format(t.resolvedAt, 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')).length;
-    return { name: dayStr, abertos: opened, fechados: closed };
+    const isoDay = format(day, 'yyyy-MM-dd');
+    
+    const dayTickets = ticketsPeriod.filter(t => format(t.createdAt, 'yyyy-MM-dd') === isoDay);
+    const dayClosed = ticketsPeriod.filter(t => t.resolvedAt && format(t.resolvedAt, 'yyyy-MM-dd') === isoDay);
+    
+    // Media de espera no dia (em minutos)
+    const waits = dayTickets.filter(t => t.firstResponseAt).map(t => (t.firstResponseAt!.getTime() - t.createdAt.getTime()) / (1000 * 60));
+    const avgWait = waits.length > 0 ? (waits.reduce((a, b) => a + b, 0) / waits.length) : 0;
+    
+    // Media de encerramento no dia (em minutos)
+    const resolutions = dayClosed.map(t => (t.resolvedAt!.getTime() - t.createdAt.getTime()) / (1000 * 60));
+    const avgResolution = resolutions.length > 0 ? (resolutions.reduce((a, b) => a + b, 0) / resolutions.length) : 0;
+
+    return { 
+      name: dayStr, 
+      abertos: dayTickets.length, 
+      fechados: dayClosed.length,
+      espera: Math.round(avgWait),
+      encerramento: Math.round(avgResolution)
+    };
   });
 
-  // 5. Distribuição por Horário (Heatmap data)
-  const hourDistribution = Array.from({ length: 24 }, (_, i) => ({ hour: i, count: 0 }));
-  const weekdayDistribution = Array.from({ length: 7 }, (_, i) => ({ day: i, count: 0 }));
+  // 5. Distribuição por Horário (Heatmap data - Matriz 24x7)
+  const heatmapData = Array.from({ length: 7 }, (_, dayIndex) => {
+    return Array.from({ length: 24 }, (_, hourIndex) => ({
+      day: dayIndex,
+      hour: hourIndex,
+      count: 0
+    }));
+  });
   
   ticketsPeriod.forEach(t => {
     const hour = t.createdAt.getHours();
-    const day = t.createdAt.getDay();
-    hourDistribution[hour].count++;
-    weekdayDistribution[day].count++;
+    const day = t.createdAt.getDay(); // 0 (Dom) a 6 (Sab)
+    heatmapData[day][hour].count++;
   });
+
+  // Flatten heatmap para facilitar renderização
+  const flatHeatmap = heatmapData.flat();
 
   const reopenedTotal = ticketsPeriod.reduce((acc, t) => acc + (t.reopenedCount || 0), 0);
 
@@ -158,6 +182,6 @@ export async function getDashboardStats(whereClause: any, dateRange: { from: Dat
     backlog: { initial: initialBacklog, opened: createdCount, closed: closedCount, final: finalBalance },
     rankings: { clients: rankedClients, categories: rankedCategories, products: rankedProducts },
     timeSeries,
-    distribution: { hours: hourDistribution, weekdays: weekdayDistribution }
+    distribution: { heatmap: flatHeatmap }
   };
 }

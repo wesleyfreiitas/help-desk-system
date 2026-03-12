@@ -4,7 +4,7 @@ import { Clock, CheckCircle2, AlertCircle, Inbox, MessageSquare, TrendingUp, Inf
 import Link from 'next/link';
 import { getDashboardStats } from '@/lib/analytics';
 import { subDays, startOfDay, endOfDay } from 'date-fns';
-import { TimeSeriesChart, ProductRankingChart, SLARingChart, ProductDistributionPie } from './DashboardCharts';
+import { TimeSeriesChart, ProductRankingChart, SLARingChart, ProductDistributionPie, HeatmapChart, TimeTrendChart } from './DashboardCharts';
 
 export default async function DashboardPage(props: { searchParams?: Promise<{ from?: string; to?: string }> }) {
   const session = await getSession();
@@ -191,7 +191,43 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ fr
         </div>
       </div>
 
-      {/* Gráfico de Tendência (Linha) */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '1.5rem' }}>
+        {/* Heatmap de Horários */}
+        <div className="table-wrapper" style={{ margin: 0 }}>
+          <div className="table-header-filters">
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Distribuição por Horário <Info size={14} /></h3>
+          </div>
+          <HeatmapChart data={stats.distribution.heatmap} />
+        </div>
+
+        {/* Tickets por Produto (Donut) */}
+        <div className="table-wrapper" style={{ margin: 0 }}>
+          <div className="table-header-filters">
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Tickets por Produto <Info size={14} /></h3>
+          </div>
+          <ProductDistributionPie data={stats.rankings.products} />
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '1.5rem' }}>
+        {/* Tempo Medio de Espera */}
+        <div className="table-wrapper" style={{ margin: 0 }}>
+          <div className="table-header-filters">
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Tempo Médio de Espera <Info size={14} /></h3>
+          </div>
+          <TimeTrendChart data={stats.timeSeries} dataKey="espera" color="#6366f1" name="Minutos" />
+        </div>
+
+        {/* Tempo Medio ate Encerramento */}
+        <div className="table-wrapper" style={{ margin: 0 }}>
+          <div className="table-header-filters">
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Tempo Médio até Encerramento <Info size={14} /></h3>
+          </div>
+          <TimeTrendChart data={stats.timeSeries} dataKey="encerramento" color="#1e293b" name="Minutos" />
+        </div>
+      </div>
+
+      {/* Gráfico de Tendência Geral (Linha) */}
       <div className="table-wrapper" style={{ marginTop: '1.5rem' }}>
         <div className="table-header-filters">
           <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Abertos vs Fechados vs Backlog <Info size={14} /></h3>

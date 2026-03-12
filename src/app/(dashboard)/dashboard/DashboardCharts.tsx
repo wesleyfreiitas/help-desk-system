@@ -99,9 +99,89 @@ export function ProductDistributionPie({ data }: { data: any[] }) {
             ))}
           </Pie>
           <Tooltip />
-          <Legend layout="vertical" align="right" verticalAlign="middle" iconType="circle" wrapperStyle={{ fontSize: '11px' }} />
+          <Legend layout="horizontal" verticalAlign="bottom" align="center" iconType="circle" wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
         </PieChart>
       </ResponsiveContainer>
+    </div>
+  );
+}
+
+export function TimeTrendChart({ data, dataKey, color, name }: { data: any[], dataKey: string, color: string, name: string }) {
+  return (
+    <div style={{ width: '100%', height: 250 }}>
+      <ResponsiveContainer>
+        <AreaChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border-color)" />
+          <XAxis dataKey="name" stroke="var(--text-muted)" fontSize={10} tickLine={false} axisLine={false} />
+          <YAxis stroke="var(--text-muted)" fontSize={10} tickLine={false} axisLine={false} />
+          <Tooltip 
+            contentStyle={{ backgroundColor: 'var(--bg-main)', border: '1px solid var(--border-color)', borderRadius: '8px' }}
+            itemStyle={{ fontSize: '11px' }}
+          />
+          <defs>
+            <linearGradient id={`color${dataKey}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={color} stopOpacity={0.1}/>
+              <stop offset="95%" stopColor={color} stopOpacity={0}/>
+            </linearGradient>
+          </defs>
+          <Area type="monotone" dataKey={dataKey} stroke={color} fillOpacity={1} fill={`url(#color${dataKey})`} strokeWidth={2} name={name} />
+        </AreaChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
+export function HeatmapChart({ data }: { data: any[] }) {
+  const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const hours = ['00', '02', '04', '06', '08', '10', '12', '14', '16', '18', '20', '22'];
+
+  const getColor = (count: number) => {
+    if (count === 0) return '#f9fafb';
+    if (count < 5) return '#e0e7ff';
+    if (count < 10) return '#c7d2fe';
+    if (count < 15) return '#a5b4fc';
+    if (count < 20) return '#818cf8';
+    return '#6366f1';
+  };
+
+  return (
+    <div style={{ padding: '1rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '40px repeat(24, 1fr)', gap: '4px' }}>
+        <div /> {/* Top left spacer */}
+        {Array.from({ length: 24 }).map((_, i) => (
+          <div key={i} style={{ fontSize: '10px', color: 'var(--text-muted)', textAlign: 'center' }}>
+            {i % 2 === 0 ? i.toString().padStart(2, '0') : ''}
+          </div>
+        ))}
+        
+        {days.map((day, dIdx) => (
+          <React.Fragment key={day}>
+            <div style={{ fontSize: '11px', color: 'var(--text-main)', display: 'flex', alignItems: 'center' }}>{day}</div>
+            {Array.from({ length: 24 }).map((_, hIdx) => {
+              const cell = data.find(item => item.day === dIdx && item.hour === hIdx);
+              return (
+                <div 
+                  key={hIdx} 
+                  title={`${day}, ${hIdx}h: ${cell?.count || 0} chamados`}
+                  style={{ 
+                    height: '24px', 
+                    background: getColor(cell?.count || 0), 
+                    borderRadius: '4px',
+                    cursor: 'help'
+                  }} 
+                />
+              );
+            })}
+          </React.Fragment>
+        ))}
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '8px', marginTop: '1rem', fontSize: '11px', color: 'var(--text-muted)' }}>
+        <span>Menos</span>
+        {[0, 5, 10, 15, 20].map(v => (
+          <div key={v} style={{ width: '12px', height: '12px', borderRadius: '2px', background: getColor(v) }} />
+        ))}
+        <span>Mais</span>
+      </div>
     </div>
   );
 }
