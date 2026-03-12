@@ -307,43 +307,81 @@ export async function bulkImportClients(clients: any[]) {
     errors: [] as string[]
   };
 
-  for (const client of clients) {
+  // Nomes dos campos personalizados extras na planilha
+  const extraFields = ['Firewall', 'IP - Upphone', 'Integrações', 'Notas de Implantação'];
+  const fieldMapping: Record<string, string> = {};
+
+  // Garantir que os campos personalizados existem
+  for (const fieldName of extraFields) {
+    let field = await prisma.customField.findFirst({
+      where: { name: fieldName }
+    });
+
+    if (!field) {
+      field = await prisma.customField.create({
+        data: {
+          name: fieldName,
+          type: 'TEXT'
+        }
+      });
+    }
+    fieldMapping[fieldName] = field.id;
+  }
+
+  for (const clientData of clients) {
     try {
-      if (!client.name || !client.document) {
+      if (!clientData.name || !clientData.document) {
         results.errors.push(`Cliente ignorado: Nome ou Documento ausente.`);
         continue;
       }
 
-      const existing = await prisma.client.findUnique({
-        where: { document: client.document }
+      const existing = await prisma.client.findFirst({
+        where: { document: clientData.document }
       });
 
+      let client;
       if (existing) {
-        await prisma.client.update({
+        client = await prisma.client.update({
           where: { id: existing.id },
           data: {
-            name: client.name,
-            email: client.email || existing.email,
-            phone: client.phone || existing.phone,
-            website: client.website || existing.website,
-            deletedAt: null // Restore if soft-deleted
+            name: clientData.name,
+            email: clientData.email || existing.email,
+            deletedAt: null 
           }
         });
         results.updated++;
       } else {
-        await prisma.client.create({
+        client = await prisma.client.create({
           data: {
-            name: client.name,
-            document: client.document,
-            email: client.email || null,
-            phone: client.phone || null,
-            website: client.website || null
+            name: clientData.name,
+            document: clientData.document,
+            email: clientData.email || null
           }
         });
         results.created++;
       }
+
+      // Processar campos personalizados extras (D, E, F, G da planilha)
+      for (const fieldName of extraFields) {
+        const val = clientData.extras?.[fieldName];
+        if (val) {
+          const fieldId = fieldMapping[fieldName];
+          const customId = `cf_${client.id}_${fieldId}`;
+          
+          await prisma.customFieldValue.upsert({
+            where: { id: customId },
+            update: { value: val.toString() },
+            create: {
+              id: customId,
+              clientId: client.id,
+              fieldId: fieldId,
+              value: val.toString()
+            }
+          });
+        }
+      }
     } catch (err: any) {
-      results.errors.push(`Erro ao processar ${client.name}: ${err.message}`);
+      results.errors.push(`Erro ao processar ${clientData.name}: ${err.message}`);
     }
   }
 

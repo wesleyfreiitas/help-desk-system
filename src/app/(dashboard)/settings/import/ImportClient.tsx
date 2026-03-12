@@ -19,13 +19,17 @@ export default function ImportClient() {
       // Parse CSV-like format (semicolon or comma or tab)
       const rows = data.trim().split('\n');
       const clients = rows.map(row => {
-        const parts = row.split(/[;,\t]/);
+        const parts = row.split(/[;\t]/); // Spreadsheet usually pastes with Tabs
         return {
           name: parts[0]?.trim(),
-          document: parts[1]?.trim(),
-          email: parts[2]?.trim() || null,
-          phone: parts[3]?.trim() || null,
-          website: parts[4]?.trim() || null,
+          email: parts[1]?.trim() || null,
+          document: parts[2]?.trim(),
+          extras: {
+            'Firewall': parts[3]?.trim(),
+            'IP - Upphone': parts[4]?.trim(),
+            'Integrações': parts[5]?.trim(),
+            'Notas de Implantação': parts[6]?.trim(),
+          }
         };
       });
 
@@ -44,8 +48,8 @@ export default function ImportClient() {
       <div className="card-header">
         <h3 style={{ fontSize: '1.2rem', fontWeight: 600 }}>Importar Empresas</h3>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.25rem' }}>
-          Cole os dados ou importe de uma planilha. Formato esperado: <br />
-          <code>Razão Social ; CNPJ ; Email ; Telefone ; Website</code>
+          Copie os dados do seu Excel e cole abaixo. <br />
+          <strong>Colunas esperadas:</strong> Nome ; Email ; CNPJ ; Firewall ; IP ; Integrações ; Notas
         </p>
       </div>
 
@@ -53,8 +57,8 @@ export default function ImportClient() {
         <div style={{ marginBottom: '1.5rem' }}>
           <textarea
             className="input-field"
-            style={{ minHeight: '300px', fontFamily: 'monospace', fontSize: '0.9rem' }}
-            placeholder="Exemplo:\nEmpresa ABC ; 12.345.678/0001-00 ; contato@abc.com ; (11) 99999-9999 ; www.abc.com"
+            style={{ minHeight: '350px', fontFamily: 'monospace', fontSize: '0.85rem', whiteSpace: 'pre' }}
+            placeholder="Cole aqui as linhas do seu Excel..."
             value={data}
             onChange={(e) => setData(e.target.value)}
             disabled={isProcessing}
