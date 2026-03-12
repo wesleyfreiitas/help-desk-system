@@ -11,6 +11,7 @@ async function main() {
   await prisma.product.deleteMany();
   await prisma.user.deleteMany();
   await prisma.client.deleteMany();
+  await prisma.ticketOption.deleteMany();
 
   console.log('Dados antigos limpos. Semeando novos dados...');
 
@@ -98,6 +99,32 @@ async function main() {
       message: 'Olá, preciso de urgência nisso, o faturamento está parado.',
     },
   });
+
+  // Criar Opções de Ticket (Tipos)
+  const ticketTypes = [
+    { label: 'Pergunta', value: 'Pergunta', type: 'TYPE', order: 1 },
+    { label: 'Incidente', value: 'Incidente', type: 'TYPE', order: 2 },
+    { label: 'Problema', value: 'Problema', type: 'TYPE', order: 3 },
+    { label: 'Solicitação de recurso', value: 'Solicitação de recurso', type: 'TYPE', order: 4 },
+  ];
+
+  for (const tt of ticketTypes) {
+    await prisma.ticketOption.create({ data: tt });
+  }
+
+  // Criar Opções de Ticket (Status)
+  const ticketStatuses = [
+    { label: 'Aberto', value: 'ABERTO', type: 'STATUS', order: 1, color: '#e0f2fe' },
+    { label: 'Pendente', value: 'PENDENTE', type: 'STATUS', order: 2, color: '#fef3c7' },
+    { label: 'Resolvido', value: 'RESOLVIDO', type: 'STATUS', order: 3, color: '#dcfce3' },
+    { label: 'Fechado', value: 'FECHADO', type: 'STATUS', order: 4, color: '#f1f5f9' },
+    { label: 'Aguardando cliente', value: 'AGUARDANDO_CLIENTE', type: 'STATUS', order: 5, color: '#fce7f3' },
+    { label: 'Aguardando terceiros', value: 'AGUARDANDO_TERCEIRO', type: 'STATUS', order: 6, color: '#f1f5f9' },
+  ];
+
+  for (const ts of ticketStatuses) {
+    await prisma.ticketOption.create({ data: ts });
+  }
 
   console.log('Seed completo!');
 }
