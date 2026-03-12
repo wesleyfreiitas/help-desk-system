@@ -12,10 +12,10 @@ export default async function ImportPage() {
     <div style={{ maxWidth: '1000px' }}>
       <div style={{ marginBottom: '2rem' }}>
         <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
-          Importação de Empresas
+          Importação de Dados
         </h2>
         <p style={{ color: 'var(--text-muted)' }}>
-          Importe sua base de clientes de forma massiva através de colagem de dados.
+          Importe sua base de empresas e clientes de forma massiva através de colagem de dados.
         </p>
       </div>
 

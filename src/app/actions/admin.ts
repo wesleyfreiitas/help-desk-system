@@ -389,6 +389,80 @@ export async function bulkImportClients(clients: any[]) {
   return results;
 }
 
+export async function bulkImportUsers(users: any[]) {
+  const session = await getSession();
+  if (!session || session.user.role === 'CLIENT') throw new Error('Unauthorized');
+
+  const bcrypt = require('bcryptjs');
+  const defaultPassword = await bcrypt.hash('mudar123', 10);
+
+  const results = {
+    created: 0,
+    updated: 0,
+    errors: [] as string[]
+  };
+
+  for (const userData of users) {
+    try {
+      if (!userData.email || !userData.name) {
+        results.errors.push(`Usuário ignorado: Nome ou Email ausente.`);
+        continue;
+      }
+
+      // Tentar encontrar a empresa pelo CNPJ (Identificador Interno)
+      let clientId = null;
+      if (userData.companyDocument) {
+        const client = await prisma.client.findUnique({
+          where: { document: userData.companyDocument }
+        });
+        if (client) {
+          clientId = client.id;
+        } else {
+          // Fallback: tentar por nome se o CNPJ não bater
+          const clientByName = await prisma.client.findFirst({
+            where: { name: userData.companyName }
+          });
+          if (clientByName) clientId = clientByName.id;
+        }
+      }
+
+      const existing = await prisma.user.findUnique({
+        where: { email: userData.email }
+      });
+
+      if (existing) {
+        await prisma.user.update({
+          where: { id: existing.id },
+          data: {
+            name: userData.name,
+            phone: userData.phone || existing.phone,
+            clientId: clientId || existing.clientId,
+            deletedAt: null
+          }
+        });
+        results.updated++;
+      } else {
+        await prisma.user.create({
+          data: {
+            name: userData.name,
+            email: userData.email,
+            password: defaultPassword,
+            role: 'CLIENT',
+            phone: userData.phone || null,
+            clientId: clientId
+          }
+        });
+        results.created++;
+      }
+    } catch (err: any) {
+      results.errors.push(`Erro ao processar ${userData.name}: ${err.message}`);
+    }
+  }
+
+  revalidatePath('/users');
+  return results;
+}
+
 export async function updateCustomFieldValues(clientId: string, values: Record<string, string>) {
   const session = await getSession();
   if (!session || session.user.role === 'CLIENT') throw new Error('Unauthorized');
