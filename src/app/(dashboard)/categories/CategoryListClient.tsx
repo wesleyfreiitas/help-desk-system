@@ -70,23 +70,16 @@ export default function CategoryListClient({ initialCategories }: { initialCateg
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+      <div className="table-header-filters" style={{ borderTop: '1px solid var(--border-color)', marginTop: '0' }}>
         <div style={{ position: 'relative', width: '300px' }}>
           <Search size={16} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
           <input 
             type="text" 
+            className="search-input"
             placeholder="Buscar por nome..." 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '0.6rem 1rem 0.6rem 2.25rem',
-              border: '1px solid var(--border-color)',
-              borderRadius: 'var(--radius-sm)',
-              fontSize: '0.9rem',
-              outline: 'none',
-              background: 'var(--bg-main)'
-            }}
+            style={{ paddingLeft: '2.25rem', width: '100%' }}
           />
         </div>
         
@@ -116,7 +109,7 @@ export default function CategoryListClient({ initialCategories }: { initialCateg
             </th>
             <th>Nome</th>
             <th>Chamados Vinculados</th>
-            <th style={{ width: '60px', textAlign: 'center' }}>A\u00e7\u00f5es</th>
+            <th style={{ width: '60px', textAlign: 'center' }}>Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -158,54 +151,36 @@ export default function CategoryListClient({ initialCategories }: { initialCateg
         </tbody>
       </table>
 
-      {/* Edit Modal */}
       {editingCategory && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, 
-          backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 9999,
-          display: 'flex', alignItems: 'center', justifyContent: 'center'
-        }}>
-          <div style={{
-            background: 'var(--bg-main)', padding: '2rem', borderRadius: 'var(--radius-md)',
-            width: '100%', maxWidth: '400px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 600 }}>Editar Categoria</h3>
-              <button 
-                onClick={() => setEditingCategory(null)}
-                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
-              >
-                <X size={20} />
-              </button>
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ maxWidth: '400px' }}>
+            <div className="modal-header">
+              <h3>Editar Categoria</h3>
+              <button className="modal-close" onClick={() => setEditingCategory(null)}>&times;</button>
             </div>
             
             <form onSubmit={handleEditSubmit}>
-              <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 500, color: 'var(--text-main)' }}>
-                  Nome da Categoria
-                </label>
-                <input 
-                  type="text" 
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  required
-                  style={{
-                    width: '100%', padding: '0.75rem',
-                    border: '1px solid var(--border-color)',
-                    borderRadius: 'var(--radius-sm)',
-                    background: 'var(--bg-elevated)',
-                    color: 'var(--text-main)',
-                    fontSize: '1rem', outline: 'none'
-                  }}
-                />
+              <div className="modal-body">
+                <div className="modal-form">
+                  <div className="form-group">
+                    <label className="form-label">Nome da Categoria</label>
+                    <input 
+                      type="text" 
+                      className="form-control"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      required
+                      autoFocus
+                    />
+                  </div>
+                </div>
               </div>
               
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
+              <div className="modal-footer">
                 <button 
                   type="button" 
                   onClick={() => setEditingCategory(null)}
                   className="btn-outline"
-                  style={{ padding: '0.5rem 1rem' }}
                 >
                   Cancelar
                 </button>
@@ -213,7 +188,7 @@ export default function CategoryListClient({ initialCategories }: { initialCateg
                   type="submit" 
                   className="btn-primary"
                   disabled={isSaving}
-                  style={{ padding: '0.5rem 1rem', width: 'auto' }}
+                  style={{ width: 'auto' }}
                 >
                   {isSaving ? 'Salvando...' : 'Salvar Alterações'}
                 </button>

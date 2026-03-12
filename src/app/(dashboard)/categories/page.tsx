@@ -15,30 +15,26 @@ export default async function CategoriesPage() {
 
   return (
     <div className="table-wrapper">
-      <div className="table-header-filters">
-        <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Categorias de Chamados</h3>
-      </div>
+      <div className="table-header-filters" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Categorias de Chamados</h3>
+        </div>
 
-      {/* Formulário inline para criar categoria */}
-      <form action={createCategory} style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', alignItems: 'center' }}>
-        <input
-          type="text"
-          name="name"
-          placeholder="Nome da nova categoria"
-          required
-          style={{
-            flex: 1,
-            padding: '0.6rem 0.75rem',
-            border: '1px solid var(--border-color)',
-            borderRadius: 'var(--radius-sm)',
-            fontSize: '0.9rem',
-            outline: 'none',
-          }}
-        />
-        <button type="submit" className="btn-primary" style={{ width: 'auto', padding: '0.6rem 1.25rem' }}>
-          + Criar Categoria
-        </button>
-      </form>
+        {/* Formulário inline para criar categoria */}
+        <form action={createCategory} style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', background: 'var(--bg-main)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
+          <input
+            type="text"
+            name="name"
+            className="search-input"
+            placeholder="Nome da nova categoria"
+            required
+            style={{ flex: 1, paddingLeft: '1rem' }}
+          />
+          <button type="submit" className="btn-primary" style={{ width: 'auto' }}>
+            + Criar Categoria
+          </button>
+        </form>
+      </div>
 
       <CategoryListClient initialCategories={categories} />
     </div>
