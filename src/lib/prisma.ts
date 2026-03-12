@@ -1,17 +1,29 @@
 import { PrismaClient } from '@prisma/client';
 
-// Debug: Verificar se a variável existe no servidor
+// Debug: Verificar se a variável existe no servidor e qual o seu formato básico
 if (typeof window === 'undefined') {
-  console.log('[Prisma Debug] DATABASE_URL exists:', !!process.env.DATABASE_URL);
+  const url = process.env.DATABASE_URL || '';
+  const masked = url ? url.replace(/:([^@]+)@/, ':****@') : 'MISSING';
+  console.log('[Prisma Debug] DATABASE_URL Check:', {
+    exists: !!url,
+    startsWithPostgres: url.startsWith('postgresql://'),
+    preview: masked,
+    nodeEnv: process.env.NODE_ENV
+  });
 }
 
 const prismaClientSingleton = () => {
+  if (!process.env.DATABASE_URL) {
+    console.error('[Prisma Error] DATABASE_URL is not defined in process.env');
+  }
+  
   return new PrismaClient({
     datasources: {
       db: {
         url: process.env.DATABASE_URL,
       },
     },
+    log: ['error', 'warn'],
   });
 };
 
