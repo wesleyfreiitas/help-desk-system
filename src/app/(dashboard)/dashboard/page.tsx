@@ -8,11 +8,12 @@ export default async function DashboardPage() {
   if (!session) return null;
   const user = session.user;
 
-  // Filtragem baseada em Role
-  const whereClause = user.role === 'CLIENT' 
-    ? { clientId: user.clientId } 
-    : {};
-
+  // Filtragem baseada em Role (Sincronizada com a lista de chamados)
+  const isOrgUser = ['CLIENT', 'ORG_MANAGER', 'ORG_MEMBER'].includes(user.role);
+  const whereClause: any = isOrgUser
+    ? { clientId: user.clientId, deletedAt: null }
+    : { deletedAt: null };
+    
   // Busca dados
   const total = await prisma.ticket.count({ where: whereClause });
   const opens = await prisma.ticket.count({ 
