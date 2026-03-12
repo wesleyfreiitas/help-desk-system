@@ -297,6 +297,60 @@ export async function updateUser(userId: string, data: { name: string, email: st
   revalidatePath('/users');
 }
 
+export async function bulkImportClients(clients: any[]) {
+  const session = await getSession();
+  if (!session || session.user.role === 'CLIENT') throw new Error('Unauthorized');
+
+  const results = {
+    created: 0,
+    updated: 0,
+    errors: [] as string[]
+  };
+
+  for (const client of clients) {
+    try {
+      if (!client.name || !client.document) {
+        results.errors.push(`Cliente ignorado: Nome ou Documento ausente.`);
+        continue;
+      }
+
+      const existing = await prisma.client.findUnique({
+        where: { document: client.document }
+      });
+
+      if (existing) {
+        await prisma.client.update({
+          where: { id: existing.id },
+          data: {
+            name: client.name,
+            email: client.email || existing.email,
+            phone: client.phone || existing.phone,
+            website: client.website || existing.website,
+            deletedAt: null // Restore if soft-deleted
+          }
+        });
+        results.updated++;
+      } else {
+        await prisma.client.create({
+          data: {
+            name: client.name,
+            document: client.document,
+            email: client.email || null,
+            phone: client.phone || null,
+            website: client.website || null
+          }
+        });
+        results.created++;
+      }
+    } catch (err: any) {
+      results.errors.push(`Erro ao processar ${client.name}: ${err.message}`);
+    }
+  }
+
+  revalidatePath('/companies');
+  return results;
+}
+
 export async function updateCustomFieldValues(clientId: string, values: Record<string, string>) {
   const session = await getSession();
   if (!session || session.user.role === 'CLIENT') throw new Error('Unauthorized');

@@ -11,6 +11,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
           <Link href="/settings/options" className="settings-tab">Opções de Ticket</Link>
           <Link href="/settings/sla" className="settings-tab">SLAs</Link>
           <Link href="/settings/canned-responses" className="settings-tab">Respostas Rápidas</Link>
+          <Link href="/settings/import" className="settings-tab">Importação de Dados</Link>
         </nav>
       </div>
       <div className="settings-content">
