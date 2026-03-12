@@ -1,0 +1,26 @@
+import { ReactNode } from 'react';
+import Sidebar from '@/components/Sidebar';
+import Header from '@/components/Header';
+import { getSession } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+
+export default async function DashboardLayout({ children }: { children: ReactNode }) {
+  const session = await getSession();
+  
+  if (!session) {
+    redirect('/login');
+  }
+
+  return (
+    <div className="app-layout">
+      <Sidebar user={session.user} />
+      
+      <main className="main-content">
+        <Header user={session.user} />
+        <div className="page-container">
+          {children}
+        </div>
+      </main>
+    </div>
+  );
+}

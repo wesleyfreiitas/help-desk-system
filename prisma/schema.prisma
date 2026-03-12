@@ -1,0 +1,167 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   // ADMIN, ATTENDANT, ORG_MANAGER, ORG_MEMBER, CLIENT
+  phone     String?
+  clientId  String?
+  client    Client?  @relation(fields: [clientId], references: [id])
+  tickets   Ticket[] @relation("TicketAssignee")
+  ticketsCreated Ticket[] @relation("TicketRequester")
+  ticketsOpenedByMe Ticket[] @relation("TicketCreatedBy")
+  interactions Interaction[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+}
+
+model Client {
+  id        String   @id @default(cuid())
+  name      String   // Razão Social
+  document  String   @unique // CNPJ
+  email     String?
+  phone     String?
+  website   String?
+  users     User[]
+  tickets   Ticket[]
+  customFields CustomFieldValue[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+}
+
+model CustomField {
+  id        String   @id @default(cuid())
+  name      String
+  type      String   // TEXT, NUMBER, BOOLEAN, SELECT, MULTISELECT
+  options   String?  // JSON string for select options
+  values    CustomFieldValue[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CustomFieldValue {
+  id          String      @id @default(cuid())
+  clientId    String
+  client      Client      @relation(fields: [clientId], references: [id])
+  fieldId     String
+  field       CustomField @relation(fields: [fieldId], references: [id])
+  value       String      // Serialized value
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@unique([clientId, fieldId])
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  tickets     Ticket[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  deletedAt   DateTime?
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  tickets   Ticket[]
+  deletedAt DateTime?
+}
+
+model Ticket {
+  id              String   @id @default(cuid())
+  protocol        String   @unique
+  title           String
+  description     String
+  status          String   // ABERTO, EM_ANDAMENTO, PENDENTE, AGUARDANDO_CLIENTE, AGUARDANDO_TERCEIRO, RESOLVIDO, FECHADO, CANCELADO
+  priority        String   // ALTA, MEDIA, BAIXA
+  type            String?  // Problema, Incidente, Pergunta, Solicitação de recurso, Reembolso
+  source          String   @default("Portal")
+  tags            String?  // armazena as tags separadas por vírgula
+  categoryId      String?
+  category        Category? @relation(fields: [categoryId], references: [id])
+  clientId        String
+  client          Client   @relation(fields: [clientId], references: [id])
+  productId       String?
+  product         Product? @relation(fields: [productId], references: [id])
+  assigneeId      String?
+  assignee        User?    @relation("TicketAssignee", fields: [assigneeId], references: [id])
+  requesterId     String?
+  requester       User?    @relation("TicketRequester", fields: [requesterId], references: [id])
+  createdById     String?
+  createdBy       User?    @relation("TicketCreatedBy", fields: [createdById], references: [id])
+  interactions    Interaction[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  firstResponseAt DateTime?
+  resolvedAt      DateTime?
+  slaResponseDate DateTime?
+  slaResolveDate  DateTime?
+  isSlaPaused     Boolean  @default(false)
+  totalWorkTime   Int      @default(0)
+  lastWorkStartedAt DateTime?
+  deletedAt       DateTime?
+}
+
+model TicketOption {
+  id    String @id @default(cuid())
+  type  String // TYPE, SOURCE, STATUS, PRIORITY
+  label String
+  value String
+  color String?
+  order Int @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Interaction {
+  id          String   @id @default(cuid())
+  ticketId    String
+  ticket      Ticket   @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  message     String
+  isInternal  Boolean  @default(false)
+  attachments Attachment[]
+  createdAt   DateTime @default(now())
+}
+
+model Attachment {
+  id            String   @id @default(cuid())
+  interactionId String
+  interaction   Interaction @relation(fields: [interactionId], references: [id], onDelete: Cascade)
+  url           String
+  filename      String
+  createdAt     DateTime @default(now())
+}
+model SlaPolicy {
+  id              String   @id @default(cuid())
+  priority        String   @unique // BAIXA, MEDIA, ALTA, URGENTE
+  responseTime    Int      // em minutos
+  resolutionTime  Int      // em minutos
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model CannedResponse {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
