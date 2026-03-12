@@ -54,7 +54,7 @@ export default async function TicketsPage(props: { searchParams: Promise<{ query
     }),
     user.role !== 'CLIENT' ? prisma.client.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' } }) : Promise.resolve([]),
     user.role !== 'CLIENT' ? prisma.user.findMany({ where: { role: { in: ['ADMIN', 'ATTENDANT'] }, deletedAt: null }, orderBy: { name: 'asc' } }) : Promise.resolve([]),
-    prisma.$queryRaw`SELECT * FROM TicketOption ORDER BY "order" ASC` as Promise<any[]>,
+    prisma.$queryRaw`SELECT * FROM "TicketOption" ORDER BY "order" ASC` as Promise<any[]>,
     prisma.category.findMany({ where: { deletedAt: null }, orderBy: { name: 'asc' } })
   ]);
 

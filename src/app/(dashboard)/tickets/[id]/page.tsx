@@ -53,7 +53,7 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
   });
 
   // Opções Dinâmicas para os Selects
-  const allOptions = (await prisma.$queryRaw`SELECT * FROM TicketOption ORDER BY "order" ASC`) as any[];
+  const allOptions = (await prisma.$queryRaw`SELECT * FROM "TicketOption" ORDER BY "order" ASC`) as any[];
 
   const typeOptions = allOptions.filter((o: any) => o.type === 'TYPE').map((o: any) => ({ id: o.value, name: o.label }));
   const statusOptions = allOptions.filter((o: any) => o.type === 'STATUS').map((o: any) => ({ id: o.value, name: o.label }));

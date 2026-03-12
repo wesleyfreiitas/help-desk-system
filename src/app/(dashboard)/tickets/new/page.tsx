@@ -42,7 +42,7 @@ export default async function NewTicketPage() {
   });
 
   // Opções Dinâmicas
-  const allOptions = (await prisma.$queryRaw`SELECT * FROM TicketOption ORDER BY "order" ASC`) as any[];
+  const allOptions = (await prisma.$queryRaw`SELECT * FROM "TicketOption" ORDER BY "order" ASC`) as any[];
 
   const typeOptions = allOptions.filter(o => o.type === 'TYPE');
   const sourceOptions = allOptions.filter(o => o.type === 'SOURCE');
