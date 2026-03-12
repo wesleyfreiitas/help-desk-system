@@ -126,6 +126,18 @@ async function main() {
     await prisma.ticketOption.create({ data: ts });
   }
 
+  // Criar Opções de Ticket (Prioridades)
+  const ticketPriorities = [
+    { label: 'Baixo', value: 'BAIXA', type: 'PRIORITY', order: 1, color: '#10b981' },
+    { label: 'Médio', value: 'MEDIA', type: 'PRIORITY', order: 2, color: '#3b82f6' },
+    { label: 'Alto', value: 'ALTA', type: 'PRIORITY', order: 3, color: '#f59e0b' },
+    { label: 'Urgente', value: 'URGENTE', type: 'PRIORITY', order: 4, color: '#ef4444' },
+  ];
+
+  for (const tp of ticketPriorities) {
+    await prisma.ticketOption.create({ data: tp });
+  }
+
   console.log('Seed completo!');
 }
 
