@@ -109,6 +109,8 @@ model Ticket {
   updatedAt       DateTime @updatedAt
   firstResponseAt DateTime?
   resolvedAt      DateTime?
+  reopenedCount   Int      @default(0)
+  closedAt        DateTime?
   slaResponseDate DateTime?
   slaResolveDate  DateTime?
   isSlaPaused     Boolean  @default(false)

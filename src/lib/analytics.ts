@@ -23,7 +23,8 @@ export async function getDashboardStats(whereClause: any, dateRange: { from: Dat
       priority: true,
       clientId: true,
       categoryId: true,
-      productId: true
+      productId: true,
+      reopenedCount: true
     }
   });
 
@@ -150,8 +151,10 @@ export async function getDashboardStats(whereClause: any, dateRange: { from: Dat
     weekdayDistribution[day].count++;
   });
 
+  const reopenedTotal = ticketsPeriod.reduce((acc, t) => acc + (t.reopenedCount || 0), 0);
+
   return {
-    metrics: { mttr, mfrr, slaCompliance, createdCount, pendingCount, closedCount },
+    metrics: { mttr, mfrr, slaCompliance, createdCount, pendingCount, closedCount, reopenedTotal },
     backlog: { initial: initialBacklog, opened: createdCount, closed: closedCount, final: finalBalance },
     rankings: { clients: rankedClients, categories: rankedCategories, products: rankedProducts },
     timeSeries,

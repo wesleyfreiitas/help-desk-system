@@ -199,6 +199,26 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ fr
         <TimeSeriesChart data={stats.timeSeries} />
       </div>
 
+      {/* Chamados Reabertos */}
+      <div className="table-wrapper" style={{ marginTop: '1.5rem' }}>
+        <div className="table-header-filters">
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Chamados Reabertos <Info size={14} /></h3>
+        </div>
+        <div style={{ padding: '2rem', textAlign: 'center' }}>
+          {stats.metrics.reopenedTotal > 0 ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' }}>
+              <div style={{ fontSize: '2.5rem', fontWeight: 700, color: '#ef4444' }}>{stats.metrics.reopenedTotal}</div>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontWeight: 600 }}>Total de Reaberturas</div>
+                <div style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>No período selecionado</div>
+              </div>
+            </div>
+          ) : (
+            <div style={{ color: 'var(--text-muted)' }}>Sem dados disponíveis</div>
+          )}
+        </div>
+      </div>
+
       {/* Chamados Recentes (Tabela Original) */}
       <div className="table-wrapper" style={{ marginTop: '1.5rem' }}>
          <div className="table-header-filters">

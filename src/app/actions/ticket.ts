@@ -117,6 +117,12 @@ export async function changeTicketStatus(ticketId: string, formData: FormData) {
     updateData.resolvedAt = now;
   }
 
+  // Lógica de Reabertura
+  if (['ABERTO', 'EM_ANDAMENTO', 'PENDENTE'].includes(status) && ['RESOLVIDO', 'FECHADO'].includes(ticket.status)) {
+    updateData.reopenedCount = (ticket.reopenedCount || 0) + 1;
+    updateData.resolvedAt = null; // Limpa data de resolução se reabriu
+  }
+
   await prisma.ticket.update({
     where: { id: ticketId },
     data: updateData
@@ -275,6 +281,12 @@ export async function updateTicketField(ticketId: string, field: string, value: 
 
     if (value === 'RESOLVIDO' || value === 'FECHADO') {
       data.resolvedAt = now;
+    }
+
+    // Lógica de Reabertura
+    if (['ABERTO', 'EM_ANDAMENTO', 'PENDENTE'].includes(value) && ['RESOLVIDO', 'FECHADO'].includes(currentTicket.status)) {
+      data.reopenedCount = (currentTicket.reopenedCount || 0) + 1;
+      data.resolvedAt = null;
     }
   }
 
