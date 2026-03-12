@@ -1,29 +1,22 @@
 import { PrismaClient } from '@prisma/client';
 
-// Debug: Verificar se a variável existe no servidor e qual o seu formato básico
-if (typeof window === 'undefined') {
-  const url = process.env.DATABASE_URL || '';
-  const masked = url ? url.replace(/:([^@]+)@/, ':****@') : 'MISSING';
-  console.log('[Prisma Debug] DATABASE_URL Check:', {
-    exists: !!url,
-    startsWithPostgres: url.startsWith('postgresql://'),
-    preview: masked,
-    nodeEnv: process.env.NODE_ENV
-  });
-}
-
 const prismaClientSingleton = () => {
-  if (!process.env.DATABASE_URL) {
-    console.error('[Prisma Error] DATABASE_URL is not defined in process.env');
-  }
+  let databaseUrl = process.env.DATABASE_URL || '';
   
+  // Solução para o erro "prepared statement already exists":
+  // Quando usamos o Pooler do Supabase (porta 6543), o Prisma NÃO pode usar prepared statements.
+  // Adicionamos ?pgbouncer=true se ele não estiver lá.
+  if (databaseUrl.includes(':6543') && !databaseUrl.includes('pgbouncer=true')) {
+    const separator = databaseUrl.includes('?') ? '&' : '?';
+    databaseUrl = `${databaseUrl}${separator}pgbouncer=true&connection_limit=1`;
+  }
+
   return new PrismaClient({
     datasources: {
       db: {
-        url: process.env.DATABASE_URL,
+        url: databaseUrl,
       },
     },
-    log: ['error', 'warn'],
   });
 };
 
