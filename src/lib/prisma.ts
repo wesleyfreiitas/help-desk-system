@@ -1,15 +1,24 @@
 import { PrismaClient } from '@prisma/client';
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
+// Debug: Verificar se a variável existe no servidor
+if (typeof window === 'undefined') {
+  console.log('[Prisma Debug] DATABASE_URL exists:', !!process.env.DATABASE_URL);
+}
 
-// Forçamos a criação de uma nova instância e passamos a URL explicitamente
-// Isso resolve o erro de "Environment variable not found" na Vercel
-export const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL
-    }
-  }
-});
+const prismaClientSingleton = () => {
+  return new PrismaClient({
+    datasources: {
+      db: {
+        url: process.env.DATABASE_URL,
+      },
+    },
+  });
+};
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+declare global {
+  var prisma: undefined | ReturnType<typeof prismaClientSingleton>;
+}
+
+export const prisma = globalThis.prisma ?? prismaClientSingleton();
+
+if (process.env.NODE_ENV !== 'production') globalThis.prisma = prisma;
