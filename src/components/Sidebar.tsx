@@ -26,7 +26,7 @@ export default function Sidebar({ user }: { user: any }) {
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
-        🚀 HelpDesk
+        🚀 Upp HelpDesk
       </div>
 
       <nav className="sidebar-nav">
