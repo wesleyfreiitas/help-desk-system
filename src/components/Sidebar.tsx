@@ -26,7 +26,12 @@ export default function Sidebar({ user }: { user: any }) {
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
-        🚀 Upp HelpDesk
+        <img 
+          src="https://suporte.absolutatelecom.com.br/arquivos/files/logo_u_black.png" 
+          alt="Upp HelpDesk" 
+          style={{ height: '32px', width: 'auto', objectFit: 'contain' }}
+        />
+        <span style={{ marginLeft: '10px' }}>Upp HelpDesk</span>
       </div>
 
       <nav className="sidebar-nav">

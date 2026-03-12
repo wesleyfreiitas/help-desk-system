@@ -10,8 +10,13 @@ export default function LoginPage() {
     <div className="login-container">
       <div className="login-box">
         <div className="login-header">
-          <h1>HelpDesk</h1>
-          <p>Faça login para continuar, "admin@helpdesk.com", senha "123456"</p>
+          <img 
+            src="https://suporte.absolutatelecom.com.br/arquivos/files/logo_u_black.png" 
+            alt="Upp Logo" 
+            style={{ height: '60px', width: 'auto', marginBottom: '1rem', objectFit: 'contain' }}
+          />
+          <h1>Upp HelpDesk</h1>
+          <p>Faça login para continuar</p>
         </div>
         
         <form action={formAction} className="login-form">
