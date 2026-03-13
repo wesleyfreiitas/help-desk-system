@@ -1,16 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { Upload, FileText, CheckCircle2, AlertCircle, Loader2, Users, Building2 } from 'lucide-react';
-import { bulkImportClients, bulkImportUsers } from '@/app/actions/admin';
+import { Upload, FileText, CheckCircle2, AlertCircle, Loader2, Users, Building2, Ticket } from 'lucide-react';
+import { bulkImportClients, bulkImportUsers, bulkImportTickets } from '@/app/actions/admin';
 
-type ImportType = 'companies' | 'users';
+type ImportType = 'companies' | 'users' | 'tickets';
 
 export default function ImportTool() {
   const [importType, setImportType] = useState<ImportType>('companies');
   const [data, setData] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [result, setResult] = useState<{ created: number, updated: number, errors: string[] } | null>(null);
+  const [result, setResult] = useState<{ created: number, updated?: number, errors: string[] } | null>(null);
 
   const handleImport = async () => {
     if (!data.trim()) return;
@@ -38,18 +38,40 @@ export default function ImportTool() {
         });
         const res = await bulkImportClients(clients);
         setResult(res);
-      } else {
+      } else if (importType === 'users') {
         const users = rows.map(row => {
           const parts = row.split(/[;\t]/);
           return {
             name: parts[0]?.trim(),
             email: parts[1]?.trim(),
             phone: parts[2]?.trim() || null,
-            companyDocument: parts[3]?.trim(), // Identificador Interno
-            companyName: parts[6]?.trim(), // Organização
+            companyDocument: parts[3]?.trim(),
+            companyName: parts[6]?.trim(),
           };
         });
         const res = await bulkImportUsers(users);
+        setResult(res);
+      } else {
+        const tickets = rows.map(row => {
+          const parts = row.split(/[;\t]/);
+          return {
+            title: parts[0]?.trim(),
+            description: parts[1]?.trim(),
+            productName: parts[2]?.trim(),
+            categoryName: parts[3]?.trim(),
+            assigneeName: parts[4]?.trim(),
+            requesterName: parts[5]?.trim(),
+            companyName: parts[6]?.trim(),
+            problemResolved: parts[7]?.trim(),
+            priority: parts[8]?.trim(),
+            deadline: parts[9]?.trim(),
+            createdAt: parts[10]?.trim(),
+            resolvedAt: parts[11]?.trim(),
+            firstResponseAt: parts[12]?.trim(),
+            reopened: parts[13]?.trim(),
+          };
+        });
+        const res = await bulkImportTickets(tickets);
         setResult(res);
       }
 
@@ -64,7 +86,7 @@ export default function ImportTool() {
   return (
     <div className="card">
       <div className="card-header" style={{ paddingBottom: 0 }}>
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
           <button 
             onClick={() => { setImportType('companies'); setResult(null); }}
             style={{ 
@@ -76,7 +98,7 @@ export default function ImportTool() {
             }}
           >
             <Building2 size={18} />
-            Importar Empresas
+            Empresas
           </button>
           <button 
             onClick={() => { setImportType('users'); setResult(null); }}
@@ -89,19 +111,34 @@ export default function ImportTool() {
             }}
           >
             <Users size={18} />
-            Importar Clientes
+            Clientes
+          </button>
+          <button 
+            onClick={() => { setImportType('tickets'); setResult(null); }}
+            style={{ 
+              display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', borderRadius: '8px', 
+              border: '1px solid ' + (importType === 'tickets' ? 'var(--primary-color)' : 'var(--border-color)'),
+              background: importType === 'tickets' ? 'var(--primary-light)' : 'transparent',
+              color: importType === 'tickets' ? 'var(--primary-color)' : 'var(--text-muted)',
+              cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s'
+            }}
+          >
+            <Ticket size={18} />
+            Chamados
           </button>
         </div>
 
         <h3 style={{ fontSize: '1.2rem', fontWeight: 600 }}>
-          {importType === 'companies' ? 'Importação de Empresas' : 'Importação de Clientes (Usuários)'}
+          {importType === 'companies' ? 'Importação de Empresas' : importType === 'users' ? 'Importação de Clientes' : 'Importação de Chamados'}
         </h3>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.25rem' }}>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.25rem', lineHeight: '1.4' }}>
           Copie os dados do seu Excel e cole abaixo. <br />
           {importType === 'companies' ? (
-            <><strong>Colunas esperadas:</strong> <code>Nome ; Email ; CNPJ ; Firewall ; IP ; Integrações ; Notas</code></>
+            <><strong>Colunas:</strong> <code>Nome ; Email ; CNPJ ; Firewall ; IP ; Integrações ; Notas</code></>
+          ) : importType === 'users' ? (
+            <><strong>Colunas:</strong> <code>Nome ; Email ; Telefone ; CNPJ Org ; ... ; ... ; Nome Org</code></>
           ) : (
-            <><strong>Colunas esperadas:</strong> <code>Nome ; Email ; Telefone ; CNPJ Organização ; ... ; ... ; Nome Organização</code></>
+            <><strong>Colunas:</strong> <code>Assunto ; Msg ; Prod ; Cat ; Atendente ; Cliente ; Empresa ; Resolvido? ; Prioridade ; Deadline ; Criação ; Finalização ; Resposta ; Reaberto?</code></>
           )}
         </p>
       </div>
@@ -110,8 +147,8 @@ export default function ImportTool() {
         <div style={{ marginBottom: '1.5rem' }}>
           <textarea
             className="input-field"
-            style={{ minHeight: '350px', fontFamily: 'monospace', fontSize: '0.85rem', whiteSpace: 'pre' }}
-            placeholder={importType === 'companies' ? "Cole aqui as linhas de empresas..." : "Cole aqui as linhas de clientes..."}
+            style={{ minHeight: '350px', fontFamily: 'monospace', fontSize: '0.8rem', whiteSpace: 'pre' }}
+            placeholder={`Cole aqui as linhas de ${importType === 'companies' ? 'empresas' : importType === 'users' ? 'clientes' : 'chamados'}...`}
             value={data}
             onChange={(e) => setData(e.target.value)}
             disabled={isProcessing}
@@ -125,10 +162,12 @@ export default function ImportTool() {
                 <CheckCircle2 size={18} />
                 <span style={{ fontWeight: 600 }}>{result.created} criados</span>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#6366f1' }}>
-                <CheckCircle2 size={18} />
-                <span style={{ fontWeight: 600 }}>{result.updated} atualizados</span>
-              </div>
+              {result.updated !== undefined && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#6366f1' }}>
+                  <CheckCircle2 size={18} />
+                  <span style={{ fontWeight: 600 }}>{result.updated} atualizados</span>
+                </div>
+              )}
               {result.errors.length > 0 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444' }}>
                   <AlertCircle size={18} />
@@ -159,7 +198,7 @@ export default function ImportTool() {
             ) : (
               <>
                 <Upload size={18} style={{ marginRight: '0.5rem' }} />
-                Confirmar Importação de {importType === 'companies' ? 'Empresas' : 'Clientes'}
+                Confirmar Importação de {importType === 'companies' ? 'Empresas' : importType === 'users' ? 'Clientes' : 'Chamados'}
               </>
             )}
           </button>

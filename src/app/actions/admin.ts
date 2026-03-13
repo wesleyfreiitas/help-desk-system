@@ -463,6 +463,132 @@ export async function bulkImportUsers(users: any[]) {
   return results;
 }
 
+export async function bulkImportTickets(ticketsData: any[]) {
+  const session = await getSession();
+  if (!session || session.user.role === 'CLIENT') throw new Error('Unauthorized');
+
+  const results = {
+    created: 0,
+    errors: [] as string[]
+  };
+
+  // Helper para converter string de data PT-BR para Date object
+  const parseDate = (dateStr: string) => {
+    if (!dateStr || dateStr.toLowerCase() === 'n/a') return null;
+    try {
+      // Formato esperado: DD/MM/YYYY HH:MM:SS
+      const [datePart, timePart] = dateStr.split(' ');
+      const [day, month, year] = datePart.split('/').map(Number);
+      const [hours, minutes, seconds] = (timePart || '00:00:00').split(':').map(Number);
+      return new Date(year, month - 1, day, hours, minutes, seconds);
+    } catch {
+      return null;
+    }
+  };
+
+  for (const t of ticketsData) {
+    try {
+      if (!t.title) continue;
+
+      // 1. Vincular Empresa (Client) - Usando Preferencialmente o nome exato
+      let client = await prisma.client.findFirst({
+        where: { name: { contains: t.companyName, mode: 'insensitive' } }
+      });
+
+      if (!client) {
+        results.errors.push(`Erro no chamado "${t.title}": Empresa "${t.companyName}" não encontrada.`);
+        continue;
+      }
+
+      // 2. Vincular Produto
+      let product = null;
+      if (t.productName) {
+        product = await prisma.product.findFirst({
+          where: { name: { contains: t.productName, mode: 'insensitive' } }
+        });
+        if (!product) {
+          product = await prisma.product.create({ data: { name: t.productName } });
+        }
+      }
+
+      // 3. Vincular Categoria
+      let category = null;
+      if (t.categoryName) {
+        category = await prisma.category.findFirst({
+          where: { name: { contains: t.categoryName, mode: 'insensitive' } }
+        });
+        if (!category) {
+          category = await prisma.category.create({ data: { name: t.categoryName } });
+        }
+      }
+
+      // 4. Vincular Atendente (User)
+      let assignee = null;
+      if (t.assigneeName) {
+        assignee = await prisma.user.findFirst({
+          where: { name: { contains: t.assigneeName, mode: 'insensitive' } }
+        });
+      }
+
+      // 5. Vincular Requester (User do Cliente)
+      let requester = null;
+      if (t.requesterName) {
+        requester = await prisma.user.findFirst({
+          where: { 
+            name: { contains: t.requesterName, mode: 'insensitive' },
+            clientId: client.id
+          }
+        });
+      }
+
+      // Mapeamento de Status
+      const statusMap: Record<string, string> = {
+        'Sim': 'RESOLVIDO',
+        'Não': 'ABERTO'
+      };
+      
+      // Mapeamento de Prioridade
+      const priorityMap: Record<string, string> = {
+        'Baixa': 'BAIXA',
+        'Normal': 'MEDIA',
+        'Alta': 'ALTA',
+        'Urgente': 'ALTA'
+      };
+
+      // Gerar protocolo único (Baseado no tempo se não houver)
+      const protocol = `IMP-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
+      await prisma.ticket.create({
+        data: {
+          protocol,
+          title: t.title,
+          description: t.description || 'Importado via planilha',
+          status: statusMap[t.problemResolved] || 'ABERTO',
+          priority: priorityMap[t.priority] || 'BAIXA',
+          clientId: client.id,
+          productId: product?.id,
+          categoryId: category?.id,
+          assigneeId: assignee?.id,
+          requesterId: requester?.id,
+          createdAt: parseDate(t.createdAt) || new Date(),
+          resolvedAt: parseDate(t.resolvedAt),
+          firstResponseAt: parseDate(t.firstResponseAt),
+          slaResolveDate: parseDate(t.deadline),
+          reopenedCount: t.reopened === 'Sim' ? 1 : 0,
+        }
+      });
+
+      results.created++;
+    } catch (err: any) {
+      results.errors.push(`Erro crítico no chamado "${t.title}": ${err.message}`);
+    }
+  }
+
+  revalidatePath('/tickets');
+  revalidatePath('/dashboard');
+  return results;
+}
+
 export async function updateCustomFieldValues(clientId: string, values: Record<string, string>) {
   const session = await getSession();
   if (!session || session.user.role === 'CLIENT') throw new Error('Unauthorized');
