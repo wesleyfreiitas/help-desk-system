@@ -354,7 +354,6 @@ export default function TicketListClient({ tickets, userId, users, options }: Pr
 
                     <div
                       className="ticket-title-row"
-                      style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', width: 'fit-content' }}
                       onMouseEnter={() => {
                         if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
                         hoverTimeoutRef.current = setTimeout(() => setHoveredTicketId(ticket.id), 500);
