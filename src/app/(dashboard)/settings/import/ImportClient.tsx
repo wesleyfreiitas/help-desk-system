@@ -12,6 +12,51 @@ export default function ImportTool() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<{ created: number, updated?: number, errors: string[] } | null>(null);
 
+  const parseExcelPaste = (text: string) => {
+    const rows: string[][] = [];
+    let currentRow: string[] = [];
+    let currentField = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      const nextChar = text[i + 1];
+
+      if (inQuotes) {
+        if (char === '"' && nextChar === '"') {
+          currentField += '"';
+          i++; // Skip the next quote
+        } else if (char === '"') {
+          inQuotes = false;
+        } else {
+          currentField += char;
+        }
+      } else {
+        if (char === '"') {
+          inQuotes = true;
+        } else if (char === '\t') {
+          currentRow.push(currentField);
+          currentField = '';
+        } else if (char === '\n' || (char === '\r' && nextChar === '\n')) {
+          currentRow.push(currentField);
+          rows.push(currentRow);
+          currentRow = [];
+          currentField = '';
+          if (char === '\r') i++; // Skip \n
+        } else if (char !== '\r') {
+          currentField += char;
+        }
+      }
+    }
+
+    if (currentField || currentRow.length > 0) {
+      currentRow.push(currentField);
+      rows.push(currentRow);
+    }
+
+    return rows;
+  };
+
   const handleImport = async () => {
     if (!data.trim()) return;
 
@@ -19,11 +64,10 @@ export default function ImportTool() {
       setIsProcessing(true);
       setResult(null);
 
-      const rows = data.trim().split('\n');
+      const parsedRows = parseExcelPaste(data);
       
       if (importType === 'companies') {
-        const clients = rows.map(row => {
-          const parts = row.split(/[;\t]/);
+        const clients = parsedRows.map(parts => {
           return {
             name: parts[0]?.trim(),
             email: parts[1]?.trim() || null,
@@ -39,8 +83,7 @@ export default function ImportTool() {
         const res = await bulkImportClients(clients);
         setResult(res);
       } else if (importType === 'users') {
-        const users = rows.map(row => {
-          const parts = row.split(/[;\t]/);
+        const users = parsedRows.map(parts => {
           return {
             name: parts[0]?.trim(),
             email: parts[1]?.trim(),
@@ -52,8 +95,7 @@ export default function ImportTool() {
         const res = await bulkImportUsers(users);
         setResult(res);
       } else {
-        const tickets = rows.map(row => {
-          const parts = row.split(/[;\t]/);
+        const tickets = parsedRows.map(parts => {
           return {
             title: parts[0]?.trim(),
             description: parts[1]?.trim(),
