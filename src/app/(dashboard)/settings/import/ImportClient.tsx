@@ -111,6 +111,8 @@ export default function ImportTool() {
             resolvedAt: parts[11]?.trim(),
             firstResponseAt: parts[12]?.trim(),
             reopened: parts[13]?.trim(),
+            requesterEmail: parts[14]?.trim(),
+            companyDocument: parts[15]?.trim(),
           };
         });
         const res = await bulkImportTickets(tickets);
@@ -180,7 +182,7 @@ export default function ImportTool() {
           ) : importType === 'users' ? (
             <><strong>Colunas:</strong> <code>Nome ; Email ; Telefone ; CNPJ Org ; ... ; ... ; Nome Org</code></>
           ) : (
-            <><strong>Colunas:</strong> <code>Assunto ; Msg ; Prod ; Cat ; Atendente ; Cliente ; Empresa ; Resolvido? ; Prioridade ; Deadline ; Criação ; Finalização ; Resposta ; Reaberto?</code></>
+            <><strong>Colunas (16):</strong> <code>Assunto ; Msg ; Prod ; Cat ; Atendente ; Cliente ; Empresa ; Resolvido? ; Prioridade ; Deadline ; Criação ; Finalização ; Resposta ; Reaberto? ; Email Cliente ; CNPJ Empresa</code></>
           )}
         </p>
       </div>

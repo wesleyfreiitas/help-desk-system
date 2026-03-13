@@ -491,20 +491,35 @@ export async function bulkImportTickets(ticketsData: any[]) {
       if (!t.title) continue;
 
       // 1. Vincular ou Criar Empresa (Base para os outros vínculos)
-      let client = await prisma.client.findFirst({
-        where: { name: { contains: t.companyName, mode: 'insensitive' } }
-      });
+      let client = null;
+      
+      // Tentar encontrar pello CNPJ primeiro se houver
+      if (t.companyDocument && t.companyDocument.toLowerCase() !== 'n/a') {
+        client = await prisma.client.findFirst({
+          where: { document: t.companyDocument }
+        });
+      }
+
+      // Se não encontrou por CNPJ, tenta pelo Nome
       if (!client && t.companyName) {
+        client = await prisma.client.findFirst({
+          where: { name: { contains: t.companyName, mode: 'insensitive' } }
+        });
+      }
+
+      // Se ainda não encontrou e tem Nome + CNPJ, cria a empresa
+      if (!client && t.companyName && t.companyDocument && t.companyDocument.toLowerCase() !== 'n/a') {
         client = await prisma.client.create({
           data: {
             name: t.companyName,
-            document: `IMP-${Date.now()}-${Math.floor(Math.random() * 1000)}`, // Placeholder CNPJ obrigatório
-            email: `contato@${t.companyName.toLowerCase().replace(/\s+/g, '')}.com.br` // Email fictício
+            document: t.companyDocument,
+            email: t.requesterEmail || `contato@${t.companyName.toLowerCase().replace(/\s+/g, '')}.com.br`
           }
         });
       }
+
       if (!client) {
-        results.errors.push(`Erro no chamado "${t.title}": Empresa "${t.companyName}" não informada.`);
+        results.errors.push(`Erro no chamado "${t.title}": Empresa não encontrada e dados insuficientes para criação (exige Nome e CNPJ).`);
         continue;
       }
 
@@ -535,14 +550,49 @@ export async function bulkImportTickets(ticketsData: any[]) {
         where: { name: { contains: t.assigneeName, mode: 'insensitive' }, role: { in: ['ADMIN', 'ATTENDANT'] } }
       }) : null;
 
-      // 5. Vincular Requerente (Contatoda Empresa)
-      const requester = t.requesterName ? await prisma.user.findFirst({
-        where: {
-          name: { contains: t.requesterName, mode: 'insensitive' },
-          role: 'CLIENT',
-          clientId: client.id
+      // 5. Vincular/Criar Requerente (Cliente)
+      let requester = null;
+      
+      // Tentar por Email primeiro (Mais preciso)
+      if (t.requesterEmail && t.requesterEmail.toLowerCase() !== 'n/a') {
+        requester = await prisma.user.findFirst({
+          where: { email: { equals: t.requesterEmail, mode: 'insensitive' } }
+        });
+
+        if (requester) {
+          // Se encontrou usuário mas ele estava em outra empresa, atualiza o vínculo
+          if (requester.clientId !== client.id) {
+            requester = await prisma.user.update({
+              where: { id: requester.id },
+              data: { clientId: client.id }
+            });
+          }
+        } else {
+          // Criar novo usuário se tiver Nome + Email
+          if (t.requesterName) {
+            requester = await prisma.user.create({
+              data: {
+                name: t.requesterName,
+                email: t.requesterEmail.toLowerCase(),
+                password: '!', // Login desabilitado até resetar senha
+                role: 'CLIENT',
+                clientId: client.id
+              }
+            });
+          }
         }
-      }) : null;
+      }
+
+      // Fallback: se não encontrou por email, tenta por nome dentro da empresa
+      if (!requester && t.requesterName) {
+        requester = await prisma.user.findFirst({
+          where: {
+            name: { contains: t.requesterName, mode: 'insensitive' },
+            role: 'CLIENT',
+            clientId: client.id
+          }
+        });
+      }
 
       // Mapeamento de Status
       const statusMap: Record<string, string> = {
