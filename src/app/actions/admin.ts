@@ -490,17 +490,25 @@ export async function bulkImportTickets(ticketsData: any[]) {
     try {
       if (!t.title) continue;
 
-      // 1. Vincular Empresa (Client) - Usando Preferencialmente o nome exato
+      // 1. Vincular ou Criar Empresa (Base para os outros vínculos)
       let client = await prisma.client.findFirst({
         where: { name: { contains: t.companyName, mode: 'insensitive' } }
       });
-
+      if (!client && t.companyName) {
+        client = await prisma.client.create({
+          data: {
+            name: t.companyName,
+            document: `IMP-${Date.now()}-${Math.floor(Math.random() * 1000)}`, // Placeholder CNPJ obrigatório
+            email: `contato@${t.companyName.toLowerCase().replace(/\s+/g, '')}.com.br` // Email fictício
+          }
+        });
+      }
       if (!client) {
-        results.errors.push(`Erro no chamado "${t.title}": Empresa "${t.companyName}" não encontrada.`);
+        results.errors.push(`Erro no chamado "${t.title}": Empresa "${t.companyName}" não informada.`);
         continue;
       }
 
-      // 2. Vincular Produto
+      // 2. Vincular ou Criar Produto
       let product = null;
       if (t.productName) {
         product = await prisma.product.findFirst({
@@ -511,7 +519,7 @@ export async function bulkImportTickets(ticketsData: any[]) {
         }
       }
 
-      // 3. Vincular Categoria
+      // 3. Vincular ou Criar Categoria
       let category = null;
       if (t.categoryName) {
         category = await prisma.category.findFirst({
@@ -522,24 +530,19 @@ export async function bulkImportTickets(ticketsData: any[]) {
         }
       }
 
-      // 4. Vincular Atendente (User)
-      let assignee = null;
-      if (t.assigneeName) {
-        assignee = await prisma.user.findFirst({
-          where: { name: { contains: t.assigneeName, mode: 'insensitive' } }
-        });
-      }
+      // 4. Vincular Atendente
+      const assignee = t.assigneeName ? await prisma.user.findFirst({
+        where: { name: { contains: t.assigneeName, mode: 'insensitive' }, role: { in: ['ADMIN', 'ATTENDANT'] } }
+      }) : null;
 
-      // 5. Vincular Requester (User do Cliente)
-      let requester = null;
-      if (t.requesterName) {
-        requester = await prisma.user.findFirst({
-          where: { 
-            name: { contains: t.requesterName, mode: 'insensitive' },
-            clientId: client.id
-          }
-        });
-      }
+      // 5. Vincular Requerente (Contatoda Empresa)
+      const requester = t.requesterName ? await prisma.user.findFirst({
+        where: {
+          name: { contains: t.requesterName, mode: 'insensitive' },
+          role: 'CLIENT',
+          clientId: client.id
+        }
+      }) : null;
 
       // Mapeamento de Status
       const statusMap: Record<string, string> = {
