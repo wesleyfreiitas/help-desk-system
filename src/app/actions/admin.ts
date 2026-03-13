@@ -558,11 +558,16 @@ export async function bulkImportTickets(ticketsData: any[]) {
       // Gerar protocolo único (Baseado no tempo se não houver)
       const protocol = `IMP-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
+      // Higienização: Reduzir múltiplas quebras de linha consecutivas para apenas uma
+      const cleanDescription = (t.description || 'Importado via planilha')
+        .replace(/\n\s*\n+/g, '\n') // Substitui 2 ou mais quebras (mesmo com espaços entre elas) por apenas uma
+        .trim();
+
       await prisma.ticket.create({
         data: {
           protocol,
           title: t.title,
-          description: t.description || 'Importado via planilha',
+          description: cleanDescription,
           status: statusMap[t.problemResolved] || 'ABERTO',
           priority: priorityMap[t.priority] || 'BAIXA',
           clientId: client.id,
