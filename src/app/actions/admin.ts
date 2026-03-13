@@ -558,9 +558,10 @@ export async function bulkImportTickets(ticketsData: any[]) {
       // Gerar protocolo único (Baseado no tempo se não houver)
       const protocol = `IMP-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-      // Higienização: Reduzir múltiplas quebras de linha consecutivas para apenas uma
+      // Higienização: Normaliza quebras de linha e remove linhas vazias/com espaços
       const cleanDescription = (t.description || 'Importado via planilha')
-        .replace(/\n\s*\n+/g, '\n') // Substitui 2 ou mais quebras (mesmo com espaços entre elas) por apenas uma
+        .replace(/\r\n|\r/g, '\n') // Normaliza para Unix (\n)
+        .replace(/\n\s*\n+/g, '\n') // Substitui 2 ou mais quebras por apenas uma
         .trim();
 
       await prisma.ticket.create({
