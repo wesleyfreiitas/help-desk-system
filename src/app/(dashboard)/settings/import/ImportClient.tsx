@@ -54,7 +54,14 @@ export default function ImportTool() {
       rows.push(currentRow);
     }
 
-    return rows;
+    // Filtrar linhas completamente vazias e tentar remover cabeçalhos
+    const validRows = rows.filter(row => row.some(cell => cell.trim().length > 0));
+    const firstCell = validRows[0]?.[0]?.toLowerCase() || '';
+    if (firstCell.includes('nome') || firstCell.includes('assunto')) {
+      validRows.shift(); // Remove a primeira linha se for detectada como cabeçalho
+    }
+
+    return validRows;
   };
 
   const handleImport = async () => {

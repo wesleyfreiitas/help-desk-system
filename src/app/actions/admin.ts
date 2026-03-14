@@ -476,11 +476,20 @@ export async function bulkImportTickets(ticketsData: any[]) {
   const parseDate = (dateStr: string) => {
     if (!dateStr || dateStr.toLowerCase() === 'n/a') return null;
     try {
+      // Remover aspas extras que possam ter vindo na colagem e espaços
+      const cleanStr = dateStr.replace(/"/g, '').trim();
+      if (!cleanStr || cleanStr.toLowerCase() === 'data de criação' || cleanStr.toLowerCase() === 'deadline') return null;
+
       // Formato esperado: DD/MM/YYYY HH:MM:SS
-      const [datePart, timePart] = dateStr.split(' ');
+      const [datePart, timePart] = cleanStr.split(' ');
       const [day, month, year] = datePart.split('/').map(Number);
+      
+      if (!day || !month || !year) return null;
+
       const [hours, minutes, seconds] = (timePart || '00:00:00').split(':').map(Number);
-      return new Date(year, month - 1, day, hours, minutes, seconds);
+      
+      const d = new Date(year, month - 1, day, hours || 0, minutes || 0, seconds || 0);
+      return isNaN(d.getTime()) ? null : d;
     } catch {
       return null;
     }
