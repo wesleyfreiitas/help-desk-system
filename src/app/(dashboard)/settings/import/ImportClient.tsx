@@ -76,7 +76,7 @@ export default function ImportClient({ organizationId }: { organizationId: strin
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
-      encoding: "ISO-8859-1", // Força leitura de caracteres especiais comuns em Excel BR
+      encoding: "UTF-8", // Usa suporte universal (UTF-8). Necessário que o arquivo CSV seja gerado neste padrão.
       complete: (results) => {
         if (results.meta.fields) {
           setColumns(results.meta.fields);
@@ -186,6 +186,7 @@ export default function ImportClient({ organizationId }: { organizationId: strin
       </div>
 
       {step === 1 && (
+        <div>
         <div 
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -198,7 +199,8 @@ export default function ImportClient({ organizationId }: { organizationId: strin
             textAlign: 'center',
             cursor: 'pointer',
             backgroundColor: isDragging ? 'rgba(99, 102, 241, 0.05)' : 'transparent',
-            transition: 'all 0.2s ease'
+            transition: 'all 0.2s ease',
+            marginBottom: '1rem'
           }}
         >
           <UploadCloud size={48} color={isDragging ? 'var(--primary-color)' : 'var(--text-muted)'} style={{ margin: '0 auto', marginBottom: '1rem' }} />
@@ -212,6 +214,14 @@ export default function ImportClient({ organizationId }: { organizationId: strin
             style={{ display: 'none' }} 
           />
         </div>
+        
+        <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+          <AlertTriangle size={20} color="#eab308" style={{ flexShrink: 0, marginTop: '2px' }} />
+          <div style={{ fontSize: '0.9rem', color: '#475569' }}>
+            <span style={{ fontWeight: 600, color: '#334155' }}>Dica importante:</span> Se os seus chamados possuem <strong style={{ color: '#0f172a' }}>emojis ou caracteres complexos</strong>, certifique-se de salvar sua planilha no Excel através do formato <strong>"CSV UTF-8 (delimitado por vírgulas) (*.csv)"</strong>.
+          </div>
+        </div>
+      </div>
       )}
 
       {step === 2 && (
