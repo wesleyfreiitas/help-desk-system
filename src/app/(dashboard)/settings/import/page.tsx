@@ -1,25 +1,22 @@
+import React from 'react';
+import ImportClient from './ImportClient';
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
-import ImportClient from './ImportClient';
 
 export default async function ImportPage() {
   const session = await getSession();
-  if (!session || session.user.role === 'CLIENT') {
-    redirect('/dashboard');
-  }
+  if (!session) redirect('/login');
 
   return (
-    <div style={{ maxWidth: '1000px' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
-          Importação de Dados
-        </h2>
-        <p style={{ color: 'var(--text-muted)' }}>
-          Importe sua base de empresas e clientes de forma massiva através de colagem de dados.
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-main)' }}>Importar Dados</h3>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginTop: '0.25rem' }}>
+          Faça upload de arquivos CSV para importar chamados legados e carregar o banco de dados.
         </p>
       </div>
-
-      <ImportClient />
+      
+      <ImportClient organizationId={session.orgId || session.clientId} />
     </div>
   );
 }

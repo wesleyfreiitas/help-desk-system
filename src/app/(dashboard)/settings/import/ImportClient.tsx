@@ -1,254 +1,303 @@
 'use client';
 
-import { useState } from 'react';
-import { Upload, FileText, CheckCircle2, AlertCircle, Loader2, Users, Building2, Ticket } from 'lucide-react';
-import { bulkImportClients, bulkImportUsers, bulkImportTickets } from '@/app/actions/admin';
+import React, { useState, useRef } from 'react';
+import { UploadCloud, FileText, CheckCircle, AlertTriangle, X, Play } from 'lucide-react';
+import Papa from 'papaparse';
 
-type ImportType = 'companies' | 'users' | 'tickets';
-
-export default function ImportTool() {
-  const [importType, setImportType] = useState<ImportType>('companies');
-  const [data, setData] = useState<string>('');
+export default function ImportClient({ organizationId }: { organizationId: string | null }) {
+  const [file, setFile] = useState<File | null>(null);
+  const [parsedData, setParsedData] = useState<any[]>([]);
+  const [columns, setColumns] = useState<string[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [step, setStep] = useState<1 | 2 | 3>(1); // 1: Upload, 2: Preview & Map, 3: Processing
   const [isProcessing, setIsProcessing] = useState(false);
-  const [result, setResult] = useState<{ created: number, updated?: number, errors: string[] } | null>(null);
+  const [results, setResults] = useState<{ success: number; errors: number; log: string[] } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const parseExcelPaste = (text: string) => {
-    const rows: string[][] = [];
-    let currentRow: string[] = [];
-    let currentField = '';
-    let inQuotes = false;
+  // Field mapping state (CSV Column -> System Field)
+  const [mapping, setMapping] = useState<Record<string, string>>({
+    protocol: '',
+    title: '',
+    description: '',
+    status: '',
+    priority: '',
+    requesterEmail: '',
+    createdAt: ''
+  });
 
-    for (let i = 0; i < text.length; i++) {
-      const char = text[i];
-      const nextChar = text[i + 1];
+  const systemFields = [
+    { key: 'protocol', label: 'Protocolo', required: false },
+    { key: 'title', label: 'Título / Assunto', required: true },
+    { key: 'description', label: 'Descrição', required: false },
+    { key: 'status', label: 'Status', required: false },
+    { key: 'priority', label: 'Prioridade', required: false },
+    { key: 'requesterEmail', label: 'E-mail do Solicitante', required: true },
+    { key: 'createdAt', label: 'Data de Criação', required: false },
+  ];
 
-      if (inQuotes) {
-        if (char === '"' && nextChar === '"') {
-          currentField += '"';
-          i++; // Skip the next quote
-        } else if (char === '"') {
-          inQuotes = false;
-        } else {
-          currentField += char;
-        }
-      } else {
-        if (char === '"') {
-          inQuotes = true;
-        } else if (char === '\t') {
-          currentRow.push(currentField);
-          currentField = '';
-        } else if (char === '\n' || (char === '\r' && nextChar === '\n')) {
-          currentRow.push(currentField);
-          rows.push(currentRow);
-          currentRow = [];
-          currentField = '';
-          if (char === '\r') i++; // Skip \n
-        } else if (char !== '\r') {
-          currentField += char;
-        }
-      }
-    }
-
-    if (currentField || currentRow.length > 0) {
-      currentRow.push(currentField);
-      rows.push(currentRow);
-    }
-
-    return rows;
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
   };
 
-  const handleImport = async () => {
-    if (!data.trim()) return;
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      processFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      processFile(e.target.files[0]);
+    }
+  };
+
+  const processFile = (file: File) => {
+    if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+      alert('Por favor, selecione um arquivo CSV válido.');
+      return;
+    }
+    
+    setFile(file);
+    
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        if (results.meta.fields) {
+          setColumns(results.meta.fields);
+          setParsedData(results.data);
+          
+          // Auto-map columns if names are similar
+          const autoMap = { ...mapping };
+          results.meta.fields.forEach(field => {
+            const lower = field.toLowerCase();
+            if (lower.includes('titulo') || lower.includes('assunto') || lower.includes('title')) autoMap.title = field;
+            if (lower.includes('desc') || lower.includes('detalhe')) autoMap.description = field;
+            if (lower.includes('status') || lower.includes('situação')) autoMap.status = field;
+            if (lower.includes('prioridade')) autoMap.priority = field;
+            if (lower.includes('email') || lower.includes('solicitante')) autoMap.requesterEmail = field;
+            if (lower.includes('protocolo') || lower.includes('id')) autoMap.protocol = field;
+            if (lower.includes('data') || lower.includes('criado') || lower.includes('date')) autoMap.createdAt = field;
+          });
+          setMapping(autoMap);
+          setStep(2);
+        }
+      },
+      error: (err) => {
+        console.error('Error parsing CSV:', err);
+        alert('Erro ao processar o arquivo CSV.');
+      }
+    });
+  };
+
+  const handleMappingChange = (systemField: string, csvColumn: string) => {
+    setMapping(prev => ({ ...prev, [systemField]: csvColumn }));
+  };
+
+  const startImport = async () => {
+    // Validate required fields
+    const missing = systemFields.filter(f => f.required && !mapping[f.key]);
+    if (missing.length > 0) {
+      alert(`Por favor, mapeie os campos obrigatórios: ${missing.map(m => m.label).join(', ')}`);
+      return;
+    }
+
+    setStep(3);
+    setIsProcessing(true);
+
+    // Transform data based on mapping
+    const payload = parsedData.map(row => {
+      const item: any = {};
+      Object.keys(mapping).forEach(sysKey => {
+        const csvKey = mapping[sysKey];
+        if (csvKey && row[csvKey]) {
+          item[sysKey] = row[csvKey];
+        }
+      });
+      return item;
+    });
 
     try {
-      setIsProcessing(true);
-      setResult(null);
-
-      const parsedRows = parseExcelPaste(data);
+      // Call server action array payload
+      const { importTickets } = await import('@/app/actions/import');
+      const response = await importTickets(payload, organizationId || '');
       
-      if (importType === 'companies') {
-        const clients = parsedRows.map(parts => {
-          return {
-            name: parts[0]?.trim(),
-            email: parts[1]?.trim() || null,
-            document: parts[2]?.trim(),
-            extras: {
-              'Firewall': parts[3]?.trim(),
-              'IP - Upphone': parts[4]?.trim(),
-              'Integrações': parts[5]?.trim(),
-              'Notas de Implantação': parts[6]?.trim(),
-            }
-          };
-        });
-        const res = await bulkImportClients(clients);
-        setResult(res);
-      } else if (importType === 'users') {
-        const users = parsedRows.map(parts => {
-          return {
-            name: parts[0]?.trim(),
-            email: parts[1]?.trim(),
-            phone: parts[2]?.trim() || null,
-            companyDocument: parts[3]?.trim(),
-            companyName: parts[6]?.trim(),
-          };
-        });
-        const res = await bulkImportUsers(users);
-        setResult(res);
-      } else {
-        const tickets = parsedRows.map(parts => {
-          return {
-            title: parts[0]?.trim(),
-            description: parts[1]?.trim(),
-            productName: parts[2]?.trim(),
-            categoryName: parts[3]?.trim(),
-            assigneeName: parts[4]?.trim(),
-            requesterName: parts[5]?.trim(),
-            companyName: parts[6]?.trim(),
-            priority: parts[7]?.trim(),
-            deadline: parts[8]?.trim(),
-            createdAt: parts[9]?.trim(),
-            closed: parts[10]?.trim(),             // Fechado
-            hasFirstResponse: parts[11]?.trim(),   // Primeira Resposta
-            resolvedAt: parts[12]?.trim(),         // Data de Finalização
-            firstResponseAt: parts[13]?.trim(),    // Data de Primeira Resposta
-            reopened: parts[14]?.trim(),           // Reaberto
-            requesterEmail: parts[15]?.trim(),     // Email
-            companyDocument: parts[16]?.trim(),    // CNPJ
-          };
-        });
-        const res = await bulkImportTickets(tickets);
-        setResult(res);
-      }
-
-      setData('');
+      setResults(response);
+      setIsProcessing(false);
+      
     } catch (error: any) {
-      alert(error.message || 'Erro ao importar dados');
-    } finally {
+      setResults({
+        success: 0,
+        errors: payload.length,
+        log: [error.message || 'Erro crítico durante a importação.']
+      });
       setIsProcessing(false);
     }
   };
 
-  return (
-    <div className="card">
-      <div className="card-header" style={{ paddingBottom: 0 }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
-          <button 
-            onClick={() => { setImportType('companies'); setResult(null); }}
-            style={{ 
-              display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', borderRadius: '8px', 
-              border: '1px solid ' + (importType === 'companies' ? 'var(--primary-color)' : 'var(--border-color)'),
-              background: importType === 'companies' ? 'var(--primary-light)' : 'transparent',
-              color: importType === 'companies' ? 'var(--primary-color)' : 'var(--text-muted)',
-              cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s'
-            }}
-          >
-            <Building2 size={18} />
-            Empresas
-          </button>
-          <button 
-            onClick={() => { setImportType('users'); setResult(null); }}
-            style={{ 
-              display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', borderRadius: '8px', 
-              border: '1px solid ' + (importType === 'users' ? 'var(--primary-color)' : 'var(--border-color)'),
-              background: importType === 'users' ? 'var(--primary-light)' : 'transparent',
-              color: importType === 'users' ? 'var(--primary-color)' : 'var(--text-muted)',
-              cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s'
-            }}
-          >
-            <Users size={18} />
-            Clientes
-          </button>
-          <button 
-            onClick={() => { setImportType('tickets'); setResult(null); }}
-            style={{ 
-              display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.25rem', borderRadius: '8px', 
-              border: '1px solid ' + (importType === 'tickets' ? 'var(--primary-color)' : 'var(--border-color)'),
-              background: importType === 'tickets' ? 'var(--primary-light)' : 'transparent',
-              color: importType === 'tickets' ? 'var(--primary-color)' : 'var(--text-muted)',
-              cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s'
-            }}
-          >
-            <Ticket size={18} />
-            Chamados
-          </button>
-        </div>
+  const resetProcess = () => {
+    setFile(null);
+    setParsedData([]);
+    setColumns([]);
+    setStep(1);
+    setResults(null);
+  };
 
-        <h3 style={{ fontSize: '1.2rem', fontWeight: 600 }}>
-          {importType === 'companies' ? 'Importação de Empresas' : importType === 'users' ? 'Importação de Clientes' : 'Importação de Chamados'}
-        </h3>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.25rem', lineHeight: '1.4' }}>
-          Copie os dados do seu Excel e cole abaixo. <br />
-          {importType === 'companies' ? (
-            <><strong>Colunas:</strong> <code>Nome ; Email ; CNPJ ; Firewall ; IP ; Integrações ; Notas</code></>
-          ) : importType === 'users' ? (
-            <><strong>Colunas:</strong> <code>Nome ; Email ; Telefone ; CNPJ Org ; ... ; ... ; Nome Org</code></>
-          ) : (
-            <><strong>Colunas:</strong> <code>Assunto ; Mensagem ; Produto ; Categoria ; Atendente ; Cliente ; Empresa ; Prioridade ; Deadline ; Criação ; Fechado ; 1ª Resposta ; Data Finalização ; Data 1ª Resposta ; Reaberto ; Email ; CNPJ</code></>
-          )}
-        </p>
+  return (
+    <div className="card" style={{ padding: '2rem' }}>
+      
+      {/* Progress Steps */}
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '2rem', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: step >= 1 ? 1 : 0.5, fontWeight: step === 1 ? 600 : 400 }}>
+          <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: step >= 1 ? 'var(--primary-color)' : '#e2e8f0', color: step >= 1 ? '#fff' : 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>1</div>
+          <span>Upload</span>
+        </div>
+        <div style={{ height: '2px', flex: 1, background: step >= 2 ? 'var(--primary-color)' : '#e2e8f0' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: step >= 2 ? 1 : 0.5, fontWeight: step === 2 ? 600 : 400 }}>
+          <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: step >= 2 ? 'var(--primary-color)' : '#e2e8f0', color: step >= 2 ? '#fff' : 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>2</div>
+          <span>Validar & Mapear</span>
+        </div>
+        <div style={{ height: '2px', flex: 1, background: step >= 3 ? 'var(--primary-color)' : '#e2e8f0' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: step >= 3 ? 1 : 0.5, fontWeight: step === 3 ? 600 : 400 }}>
+          <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: step >= 3 ? 'var(--primary-color)' : '#e2e8f0', color: step >= 3 ? '#fff' : 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>3</div>
+          <span>Processar</span>
+        </div>
       </div>
 
-      <div className="card-body">
-        <div style={{ marginBottom: '1.5rem' }}>
-          <textarea
-            className="input-field"
-            style={{ minHeight: '350px', fontFamily: 'monospace', fontSize: '0.8rem', whiteSpace: 'pre' }}
-            placeholder={`Cole aqui as linhas de ${importType === 'companies' ? 'empresas' : importType === 'users' ? 'clientes' : 'chamados'}...`}
-            value={data}
-            onChange={(e) => setData(e.target.value)}
-            disabled={isProcessing}
+      {step === 1 && (
+        <div 
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={() => fileInputRef.current?.click()}
+          style={{ 
+            border: `2px dashed ${isDragging ? 'var(--primary-color)' : 'var(--border-color)'}`,
+            borderRadius: '8px',
+            padding: '4rem 2rem',
+            textAlign: 'center',
+            cursor: 'pointer',
+            backgroundColor: isDragging ? 'rgba(99, 102, 241, 0.05)' : 'transparent',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <UploadCloud size={48} color={isDragging ? 'var(--primary-color)' : 'var(--text-muted)'} style={{ margin: '0 auto', marginBottom: '1rem' }} />
+          <h4 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '0.5rem' }}>Arraste seu arquivo CSV para cá</h4>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>ou clique para selecionar do seu computador</p>
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            onChange={handleFileChange} 
+            accept=".csv" 
+            style={{ display: 'none' }} 
           />
         </div>
+      )}
 
-        {result && (
-          <div style={{ marginBottom: '1.5rem', padding: '1rem', borderRadius: '8px', background: 'var(--bg-sidebar)', border: '1px solid var(--border-color)' }}>
-            <div style={{ display: 'flex', gap: '1.5rem', marginBottom: '1rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#10b981' }}>
-                <CheckCircle2 size={18} />
-                <span style={{ fontWeight: 600 }}>{result.created} criados</span>
+      {step === 2 && (
+        <div style={{ animation: 'fadeIn 0.3s ease-out' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', padding: '1rem', background: 'var(--bg-main)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <FileText size={24} color="var(--primary-color)" />
+              <div>
+                <div style={{ fontWeight: 600 }}>{file?.name}</div>
+                <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{parsedData.length} registros encontrados</div>
               </div>
-              {result.updated !== undefined && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#6366f1' }}>
-                  <CheckCircle2 size={18} />
-                  <span style={{ fontWeight: 600 }}>{result.updated} atualizados</span>
-                </div>
-              )}
-              {result.errors.length > 0 && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#ef4444' }}>
-                  <AlertCircle size={18} />
-                  <span style={{ fontWeight: 600 }}>{result.errors.length} erros</span>
-                </div>
-              )}
             </div>
-
-            {result.errors.length > 0 && (
-              <div style={{ maxHeight: '150px', overflowY: 'auto', fontSize: '0.85rem', color: '#ef4444' }}>
-                {result.errors.map((err, i) => <div key={i}>• {err}</div>)}
-              </div>
-            )}
+            <button className="btn btn-secondary" onClick={resetProcess} style={{ padding: '0.5rem', height: 'auto' }}>
+              <X size={18} />
+            </button>
           </div>
-        )}
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
-          <button 
-            className="btn-primary" 
-            onClick={handleImport} 
-            disabled={isProcessing || !data.trim()}
-          >
-            {isProcessing ? (
-              <>
-                <Loader2 size={18} className="animate-spin" style={{ marginRight: '0.5rem' }} />
-                Processando...
-              </>
-            ) : (
-              <>
-                <Upload size={18} style={{ marginRight: '0.5rem' }} />
-                Confirmar Importação de {importType === 'companies' ? 'Empresas' : importType === 'users' ? 'Clientes' : 'Chamados'}
-              </>
-            )}
-          </button>
+          <h4 style={{ fontWeight: 600, marginBottom: '1rem' }}>Mapeamento de Colunas</h4>
+          <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+            Combine as colunas do seu arquivo CSV com os campos do sistema.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+            {systemFields.map(field => (
+              <div key={field.key} style={{ padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '8px', background: '#fff' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <label style={{ fontWeight: 500, fontSize: '0.9rem' }}>
+                    {field.label} {field.required && <span style={{ color: '#ef4444' }}>*</span>}
+                  </label>
+                </div>
+                <select 
+                  className="input" 
+                  value={mapping[field.key] || ''} 
+                  onChange={(e) => handleMappingChange(field.key, e.target.value)}
+                  style={{ width: '100%' }}
+                >
+                  <option value="">-- Ignorar este campo --</option>
+                  {columns.map(col => (
+                    <option key={col} value={col}>{col}</option>
+                  ))}
+                </select>
+                {mapping[field.key] && parsedData[0] && (
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    Ex: {parsedData[0][mapping[field.key]]}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+            <button className="btn btn-secondary" onClick={resetProcess}>Cancelar</button>
+            <button className="btn btn-primary" onClick={startImport}>
+              <Play size={16} />
+              Iniciar Importação
+            </button>
+          </div>
         </div>
-      </div>
+      )}
+
+      {step === 3 && (
+        <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
+          {isProcessing ? (
+            <div>
+              <div className="spinner" style={{ margin: '0 auto', marginBottom: '1rem', width: '40px', height: '40px', border: '3px solid var(--border-color)', borderTopColor: 'var(--primary-color)', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+              <h4 style={{ fontSize: '1.2rem', fontWeight: 600 }}>Processando Importação...</h4>
+              <p style={{ color: 'var(--text-muted)', marginTop: '0.5rem' }}>Aguarde enquanto os registros são criados no banco de dados.</p>
+            </div>
+          ) : (
+            <div style={{ animation: 'scaleIn 0.3s ease-out' }}>
+              <CheckCircle size={64} color="#10b981" style={{ margin: '0 auto', marginBottom: '1.5rem' }} />
+              <h4 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '0.5rem' }}>Importação Finalizada!</h4>
+              
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', margin: '2rem 0' }}>
+                <div style={{ padding: '1rem 2rem', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px' }}>
+                  <div style={{ fontSize: '2rem', fontWeight: 700, color: '#15803d' }}>{results?.success}</div>
+                  <div style={{ color: '#166534', fontWeight: 500 }}>Registros Importados</div>
+                </div>
+                {results?.errors && results.errors > 0 ? (
+                  <div style={{ padding: '1rem 2rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '2rem', fontWeight: 700, color: '#b91c1c' }}>{results?.errors}</div>
+                    <div style={{ color: '#991b1b', fontWeight: 500 }}>Erros Encontrados</div>
+                  </div>
+                ) : null}
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
+                <button className="btn btn-primary" onClick={resetProcess}>Nova Importação</button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+      `}} />
     </div>
   );
 }
