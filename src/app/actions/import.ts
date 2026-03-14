@@ -30,42 +30,42 @@ export async function importTickets(payload: any[], targetClientId: string) {
   let errorCount = 0;
   const log: string[] = [];
 
-  // --- Auto-seed Ticket Options granular ---
-  const existingTypesCount = await prisma.ticketOption.count({ where: { type: 'TYPE' } });
-  if (existingTypesCount === 0) {
-    const ticketTypes = [
-      { label: 'Pergunta', value: 'Pergunta', type: 'TYPE', order: 1 },
-      { label: 'Incidente', value: 'Incidente', type: 'TYPE', order: 2 },
-      { label: 'Problema', value: 'Problema', type: 'TYPE', order: 3 },
-      { label: 'Solicitação de recurso', value: 'Solicitação de recurso', type: 'TYPE', order: 4 },
-    ];
-    for (const tt of ticketTypes) await prisma.ticketOption.create({ data: tt });
+  // --- Auto-seed Ticket Options granular (Option by Option) ---
+  const ticketTypes = [
+    { label: 'Pergunta', value: 'Pergunta', type: 'TYPE', order: 1 },
+    { label: 'Incidente', value: 'Incidente', type: 'TYPE', order: 2 },
+    { label: 'Problema', value: 'Problema', type: 'TYPE', order: 3 },
+    { label: 'Solicitação de recurso', value: 'Solicitação de recurso', type: 'TYPE', order: 4 },
+  ];
+  for (const tt of ticketTypes) {
+    const exists = await prisma.ticketOption.findFirst({ where: { type: 'TYPE', value: tt.value } });
+    if (!exists) await prisma.ticketOption.create({ data: tt });
   }
 
-  const existingStatusCount = await prisma.ticketOption.count({ where: { type: 'STATUS' } });
-  if (existingStatusCount === 0) {
-    const ticketStatuses = [
-      { label: 'Aberto', value: 'ABERTO', type: 'STATUS', order: 1, color: '#e0f2fe' },
-      { label: 'Em Andamento', value: 'EM_ANDAMENTO', type: 'STATUS', order: 2, color: '#fed7aa' },
-      { label: 'Pendente', value: 'PENDENTE', type: 'STATUS', order: 3, color: '#fef3c7' },
-      { label: 'Resolvido', value: 'RESOLVIDO', type: 'STATUS', order: 4, color: '#dcfce3' },
-      { label: 'Fechado', value: 'FECHADO', type: 'STATUS', order: 5, color: '#f1f5f9' },
-      { label: 'Aguardando cliente', value: 'AGUARDANDO_CLIENTE', type: 'STATUS', order: 6, color: '#fce7f3' },
-      { label: 'Aguardando terceiros', value: 'AGUARDANDO_TERCEIRO', type: 'STATUS', order: 7, color: '#f1f5f9' },
-      { label: 'Cancelado', value: 'CANCELADO', type: 'STATUS', order: 8, color: '#fee2e2' },
-    ];
-    for (const ts of ticketStatuses) await prisma.ticketOption.create({ data: ts });
+  const ticketStatuses = [
+    { label: 'Aberto', value: 'ABERTO', type: 'STATUS', order: 1, color: '#e0f2fe' },
+    { label: 'Em Andamento', value: 'EM_ANDAMENTO', type: 'STATUS', order: 2, color: '#fed7aa' },
+    { label: 'Pendente', value: 'PENDENTE', type: 'STATUS', order: 3, color: '#fef3c7' },
+    { label: 'Resolvido', value: 'RESOLVIDO', type: 'STATUS', order: 4, color: '#dcfce3' },
+    { label: 'Fechado', value: 'FECHADO', type: 'STATUS', order: 5, color: '#f1f5f9' },
+    { label: 'Aguardando cliente', value: 'AGUARDANDO_CLIENTE', type: 'STATUS', order: 6, color: '#fce7f3' },
+    { label: 'Aguardando terceiros', value: 'AGUARDANDO_TERCEIRO', type: 'STATUS', order: 7, color: '#f1f5f9' },
+    { label: 'Cancelado', value: 'CANCELADO', type: 'STATUS', order: 8, color: '#fee2e2' },
+  ];
+  for (const ts of ticketStatuses) {
+    const exists = await prisma.ticketOption.findFirst({ where: { type: 'STATUS', value: ts.value } });
+    if (!exists) await prisma.ticketOption.create({ data: ts });
   }
 
-  const existingPriorityCount = await prisma.ticketOption.count({ where: { type: 'PRIORITY' } });
-  if (existingPriorityCount === 0) {
-    const ticketPriorities = [
-      { label: 'Baixa', value: 'BAIXA', type: 'PRIORITY', order: 1, color: '#10b981' },
-      { label: 'Média', value: 'MEDIA', type: 'PRIORITY', order: 2, color: '#3b82f6' },
-      { label: 'Alta', value: 'ALTA', type: 'PRIORITY', order: 3, color: '#f59e0b' },
-      { label: 'Urgente', value: 'URGENTE', type: 'PRIORITY', order: 4, color: '#ef4444' },
-    ];
-    for (const tp of ticketPriorities) await prisma.ticketOption.create({ data: tp });
+  const ticketPriorities = [
+    { label: 'Baixa', value: 'BAIXA', type: 'PRIORITY', order: 1, color: '#10b981' },
+    { label: 'Média', value: 'MEDIA', type: 'PRIORITY', order: 2, color: '#3b82f6' },
+    { label: 'Alta', value: 'ALTA', type: 'PRIORITY', order: 3, color: '#f59e0b' },
+    { label: 'Urgente', value: 'URGENTE', type: 'PRIORITY', order: 4, color: '#ef4444' },
+  ];
+  for (const tp of ticketPriorities) {
+    const exists = await prisma.ticketOption.findFirst({ where: { type: 'PRIORITY', value: tp.value } });
+    if (!exists) await prisma.ticketOption.create({ data: tp });
   }
 
   // Mapeamento em memória para evitar consultas desnecessárias
