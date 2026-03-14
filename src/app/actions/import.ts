@@ -30,9 +30,9 @@ export async function importTickets(payload: any[], targetClientId: string) {
   let errorCount = 0;
   const log: string[] = [];
 
-  // --- Auto-seed Ticket Options se o banco estiver vazio ---
-  const existingOptionsCount = await prisma.ticketOption.count();
-  if (existingOptionsCount === 0) {
+  // --- Auto-seed Ticket Options granular ---
+  const existingTypesCount = await prisma.ticketOption.count({ where: { type: 'TYPE' } });
+  if (existingTypesCount === 0) {
     const ticketTypes = [
       { label: 'Pergunta', value: 'Pergunta', type: 'TYPE', order: 1 },
       { label: 'Incidente', value: 'Incidente', type: 'TYPE', order: 2 },
@@ -40,7 +40,10 @@ export async function importTickets(payload: any[], targetClientId: string) {
       { label: 'Solicitação de recurso', value: 'Solicitação de recurso', type: 'TYPE', order: 4 },
     ];
     for (const tt of ticketTypes) await prisma.ticketOption.create({ data: tt });
+  }
 
+  const existingStatusCount = await prisma.ticketOption.count({ where: { type: 'STATUS' } });
+  if (existingStatusCount === 0) {
     const ticketStatuses = [
       { label: 'Aberto', value: 'ABERTO', type: 'STATUS', order: 1, color: '#e0f2fe' },
       { label: 'Em Andamento', value: 'EM_ANDAMENTO', type: 'STATUS', order: 2, color: '#fed7aa' },
@@ -52,7 +55,10 @@ export async function importTickets(payload: any[], targetClientId: string) {
       { label: 'Cancelado', value: 'CANCELADO', type: 'STATUS', order: 8, color: '#fee2e2' },
     ];
     for (const ts of ticketStatuses) await prisma.ticketOption.create({ data: ts });
+  }
 
+  const existingPriorityCount = await prisma.ticketOption.count({ where: { type: 'PRIORITY' } });
+  if (existingPriorityCount === 0) {
     const ticketPriorities = [
       { label: 'Baixa', value: 'BAIXA', type: 'PRIORITY', order: 1, color: '#10b981' },
       { label: 'Média', value: 'MEDIA', type: 'PRIORITY', order: 2, color: '#3b82f6' },
@@ -72,14 +78,26 @@ export async function importTickets(payload: any[], targetClientId: string) {
     try {
       if (!row.title) throw new Error('Título é obrigatório');
 
-      // 1. Ignorando criação de Empresa (Company/Client individual) pois
-      // no schema atual: Tickets vinculam a 1 Client raiz (clientId) e 1 Requester (User).
-      // A importação deve forçar o vinculo com a conta atual do Painel (clientId).
+      // 1. Resolver Empresa (Baseado em nome do CSV)
+      let clientIdToUse = clientId; // Default to main/current
+      const companyName = row.companyName?.trim();
+      if (companyName) {
+        if (companyCache[companyName]) {
+          clientIdToUse = companyCache[companyName];
+        } else {
+          let clientRecord = await prisma.client.findFirst({ where: { name: companyName } });
+          if (!clientRecord) {
+            clientRecord = await prisma.client.create({ data: { name: companyName, document: Math.random().toString().substring(2, 14) } });
+          }
+          companyCache[companyName] = clientRecord.id;
+          clientIdToUse = clientRecord.id;
+        }
+      }
 
-      // 2. Resolver Requester (Solicitante)
-      let requesterId: string | undefined = undefined;
-      const email = row.requesterEmail?.trim().toLowerCase();
-      if (email) {
+      // 2. Resolver Requester (Criar se não existir no Client)
+      let requesterId = session.user.id;
+      if (row.requesterEmail) {
+        const email = row.requesterEmail.toLowerCase().trim();
         if (userCache[email]) {
           requesterId = userCache[email];
         } else {
@@ -87,11 +105,11 @@ export async function importTickets(payload: any[], targetClientId: string) {
           if (!userRow) {
             userRow = await prisma.user.create({
               data: {
-                name: email.split('@')[0],
                 email,
-                password: 'imported-user-no-login',
+                name: row.requesterName || email.split('@')[0],
+                password: 'imported-password', 
                 role: 'CLIENT',
-                clientId: clientId
+                clientId: clientIdToUse
               }
             });
           }
@@ -132,11 +150,17 @@ export async function importTickets(payload: any[], targetClientId: string) {
         }
       }
 
-      // 5. Resolver Atendente (AssignedTo) - OPCIONAL baseado em Nome (como parece ser na planilha)
+      // 5. Resolver Atendente (AssignedTo) - OPCIONAL baseado em Nome
       let assignedToId = null;
       const assigneeName = row.assignedTo?.trim();
-      if (assigneeName) {
-        let assignee = await prisma.user.findFirst({ where: { name: { equals: assigneeName, mode: 'insensitive' }, clientId, role: { in: ['ATTENDANT', 'ORG_MEMBER', 'ORG_MANAGER', 'ADMIN'] } } });
+      if (assigneeName && assigneeName.length > 2) {
+        // Remove clientId restriction because Agents are global. Use 'contains' to match 'Alex Costa' to 'Alex'.
+        let assignee = await prisma.user.findFirst({ 
+          where: { 
+            name: { contains: assigneeName, mode: 'insensitive' }, 
+            role: { in: ['ADMIN', 'ATTENDANT'] } 
+          } 
+        });
         if (assignee) {
           assignedToId = assignee.id;
         }
