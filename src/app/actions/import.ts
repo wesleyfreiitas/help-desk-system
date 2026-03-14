@@ -104,7 +104,7 @@ export async function importTickets(payload: any[], targetClientId: string) {
       let assignedToId = null;
       const assigneeName = row.assignedTo?.trim();
       if (assigneeName) {
-        let assignee = await prisma.user.findFirst({ where: { name: assigneeName, clientId, role: { in: ['ORG_MEMBER', 'ORG_MANAGER', 'ADMIN'] } } });
+        let assignee = await prisma.user.findFirst({ where: { name: { equals: assigneeName, mode: 'insensitive' }, clientId, role: { in: ['ATTENDANT', 'ORG_MEMBER', 'ORG_MANAGER', 'ADMIN'] } } });
         if (assignee) {
           assignedToId = assignee.id;
         }
@@ -133,15 +133,31 @@ export async function importTickets(payload: any[], targetClientId: string) {
       const protocolNumber = Math.floor(100000 + Math.random() * 900000).toString();
       const finalProtocol = row.protocol && row.protocol.trim() !== '' ? row.protocol.trim() : `IMP-${protocolNumber}`;
 
-      // 8. Status e Priority (Normalização Simples)
-      const rawStatus = (row.status || '').toUpperCase();
-      const isClosed = rawStatus.includes('FECHAD') || rawStatus.includes('RESOLVID');
-      const validStatuses = ['ABERTO', 'EM_ANDAMENTO', 'PENDENTE', 'AGUARDANDO_CLIENTE', 'AGUARDANDO_TERCEIRO', 'RESOLVIDO', 'FECHADO', 'CANCELADO'];
-      const finalStatus = validStatuses.includes(rawStatus) ? rawStatus : (isClosed ? 'FECHADO' : 'ABERTO');
+      // 8. Normalização Avançada de Status, Prioridade e Tipo
+      const normalizeStr = (s?: string) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().trim();
+      
+      const rawStatus = normalizeStr(row.status);
+      const isClosed = rawStatus.includes('FECHAD') || rawStatus.includes('RESOLVID') || rawStatus.includes('FINALIZ');
+      
+      let finalStatus = 'ABERTO';
+      if (['ABERTO', 'NOVO'].includes(rawStatus)) finalStatus = 'ABERTO';
+      else if (['EM_ANDAMENTO', 'EM ANDAMENTO', 'ANDAMENTO'].includes(rawStatus)) finalStatus = 'EM_ANDAMENTO';
+      else if (['PENDENTE', 'ESPERA'].includes(rawStatus)) finalStatus = 'PENDENTE';
+      else if (['RESPOSTA', 'AGUARDANDO CLIENTE'].includes(rawStatus)) finalStatus = 'AGUARDANDO_CLIENTE';
+      else if (['TERCEIRO', 'AGUARDANDO TERCEIRO'].includes(rawStatus)) finalStatus = 'AGUARDANDO_TERCEIRO';
+      else if (rawStatus.includes('RESOLVID')) finalStatus = 'RESOLVIDO';
+      else if (rawStatus.includes('FECHAD')) finalStatus = 'FECHADO';
+      else if (rawStatus.includes('CANCELAD')) finalStatus = 'CANCELADO';
+      else finalStatus = isClosed ? 'FECHADO' : 'ABERTO';
 
-      const rawPriority = (row.priority || '').toUpperCase();
-      const validPriorities = ['BAIXA', 'MEDIA', 'ALTA'];
-      const priority = validPriorities.includes(rawPriority) ? rawPriority : 'MEDIA';
+      const rawPriority = normalizeStr(row.priority);
+      let finalPriority = 'MEDIA';
+      if (['BAIXA', 'BAIXO'].includes(rawPriority)) finalPriority = 'BAIXA';
+      else if (['MEDIA', 'MEDIO', 'NORMAL'].includes(rawPriority)) finalPriority = 'MEDIA';
+      else if (['ALTA', 'ALTO'].includes(rawPriority)) finalPriority = 'ALTA';
+      else if (['URGENTE', 'CRITICA', 'CRITICO'].includes(rawPriority)) finalPriority = 'URGENTE';
+
+      const rawType = row.type ? row.type.trim() : null; // Apenas repassamos. A interface trata os valores corretos.
 
       // 9. Inserir no Banco
       await prisma.ticket.create({
@@ -150,7 +166,8 @@ export async function importTickets(payload: any[], targetClientId: string) {
           title: row.title,
           description: row.description || 'Importado via CSV',
           status: finalStatus as any,
-          priority: priority as any,
+          priority: finalPriority as any,
+          type: rawType,
           createdAt,
           ...(resolvedAt ? { resolvedAt } : {}),
           client: { connect: { id: clientId } },

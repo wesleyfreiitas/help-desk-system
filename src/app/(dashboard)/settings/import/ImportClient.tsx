@@ -31,6 +31,7 @@ export default function ImportClient({ organizationId }: { organizationId: strin
     { key: 'description', label: 'Mensagem / Descrição', required: false },
     { key: 'status', label: 'Status', required: false },
     { key: 'priority', label: 'Prioridade', required: false },
+    { key: 'type', label: 'Tipo', required: false },
     { key: 'requesterEmail', label: 'E-mail do Cliente', required: true },
     { key: 'companyName', label: 'Nome da Empresa/Cliente', required: false },
     { key: 'product', label: 'Produto', required: false },
@@ -75,6 +76,7 @@ export default function ImportClient({ organizationId }: { organizationId: strin
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
+      encoding: "ISO-8859-1", // Força leitura de caracteres especiais comuns em Excel BR
       complete: (results) => {
         if (results.meta.fields) {
           setColumns(results.meta.fields);
@@ -93,7 +95,8 @@ export default function ImportClient({ organizationId }: { organizationId: strin
             if (lower.includes('data de criacao') || lower.includes('data de criação') || lower.includes('date')) autoMap.createdAt = field;
             if (lower.includes('produto')) autoMap.product = field;
             if (lower.includes('categoria')) autoMap.category = field;
-            if (lower.includes('atendente')) autoMap.assignedTo = field;
+            if (lower.includes('atendente') || lower.includes('responsável')) autoMap.assignedTo = field;
+            if (lower.includes('tipo') || lower.includes('classificação')) autoMap.type = field;
             if (lower.includes('empresa') || lower.includes('cliente')) autoMap.companyName = field;
             if (lower.includes('finalizacao') || lower.includes('finalização') || lower.includes('fechado')) autoMap.resolvedAt = field;
           });
