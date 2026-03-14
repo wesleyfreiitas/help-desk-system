@@ -54,14 +54,7 @@ export default function ImportTool() {
       rows.push(currentRow);
     }
 
-    // Filtrar linhas completamente vazias e tentar remover cabeçalhos
-    const validRows = rows.filter(row => row.some(cell => cell.trim().length > 0));
-    const firstCell = validRows[0]?.[0]?.toLowerCase() || '';
-    if (firstCell.includes('nome') || firstCell.includes('assunto')) {
-      validRows.shift(); // Remove a primeira linha se for detectada como cabeçalho
-    }
-
-    return validRows;
+    return rows;
   };
 
   const handleImport = async () => {
@@ -114,13 +107,13 @@ export default function ImportTool() {
             priority: parts[7]?.trim(),
             deadline: parts[8]?.trim(),
             createdAt: parts[9]?.trim(),
-            problemResolved: parts[10]?.trim(),
-            firstResponseDone: parts[11]?.trim(),
-            resolvedAt: parts[12]?.trim(),
-            firstResponseAt: parts[13]?.trim(),
-            reopened: parts[14]?.trim(),
-            requesterEmail: parts[15]?.trim(),
-            companyDocument: parts[16]?.trim(),
+            closed: parts[10]?.trim(),             // Fechado
+            hasFirstResponse: parts[11]?.trim(),   // Primeira Resposta
+            resolvedAt: parts[12]?.trim(),         // Data de Finalização
+            firstResponseAt: parts[13]?.trim(),    // Data de Primeira Resposta
+            reopened: parts[14]?.trim(),           // Reaberto
+            requesterEmail: parts[15]?.trim(),     // Email
+            companyDocument: parts[16]?.trim(),    // CNPJ
           };
         });
         const res = await bulkImportTickets(tickets);
@@ -190,7 +183,7 @@ export default function ImportTool() {
           ) : importType === 'users' ? (
             <><strong>Colunas:</strong> <code>Nome ; Email ; Telefone ; CNPJ Org ; ... ; ... ; Nome Org</code></>
           ) : (
-            <><strong>Colunas:</strong> <code>Assunto ; Msg ; Prod ; Cat ; Atendente ; Cliente ; Emp ; Prio ; Deadline ; Criação ; Fechado ; Prim Rep ; Finalização ; Data Resp ; Reaberto ; Email ; CNPJ</code></>
+            <><strong>Colunas:</strong> <code>Assunto ; Mensagem ; Produto ; Categoria ; Atendente ; Cliente ; Empresa ; Prioridade ; Deadline ; Criação ; Fechado ; 1ª Resposta ; Data Finalização ; Data 1ª Resposta ; Reaberto ; Email ; CNPJ</code></>
           )}
         </p>
       </div>

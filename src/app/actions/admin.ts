@@ -476,20 +476,11 @@ export async function bulkImportTickets(ticketsData: any[]) {
   const parseDate = (dateStr: string) => {
     if (!dateStr || dateStr.toLowerCase() === 'n/a') return null;
     try {
-      // Remover aspas extras que possam ter vindo na colagem e espaços
-      const cleanStr = dateStr.replace(/"/g, '').trim();
-      if (!cleanStr || cleanStr.toLowerCase() === 'data de criação' || cleanStr.toLowerCase() === 'deadline') return null;
-
       // Formato esperado: DD/MM/YYYY HH:MM:SS
-      const [datePart, timePart] = cleanStr.split(' ');
+      const [datePart, timePart] = dateStr.split(' ');
       const [day, month, year] = datePart.split('/').map(Number);
-      
-      if (!day || !month || !year) return null;
-
       const [hours, minutes, seconds] = (timePart || '00:00:00').split(':').map(Number);
-      
-      const d = new Date(year, month - 1, day, hours || 0, minutes || 0, seconds || 0);
-      return isNaN(d.getTime()) ? null : d;
+      return new Date(year, month - 1, day, hours, minutes, seconds);
     } catch {
       return null;
     }
@@ -499,32 +490,38 @@ export async function bulkImportTickets(ticketsData: any[]) {
     try {
       if (!t.title) continue;
 
-      // 1. Vincular Empresa (Client) - Usando CNPJ primeiro, depois Nome
+      // 1. Vincular Empresa (Client) - Usando Preferencialmente o CNPJ se houver
       let client = null;
       if (t.companyDocument) {
         client = await prisma.client.findFirst({
           where: { document: t.companyDocument }
         });
       }
-      if (!client) {
+
+      if (!client && t.companyName) {
         client = await prisma.client.findFirst({
           where: { name: { contains: t.companyName, mode: 'insensitive' } }
         });
       }
 
       if (!client) {
-        results.errors.push(`Erro no chamado "${t.title}": Empresa "${t.companyName}" não encontrada.`);
-        continue;
+        // Se a empresa não existir, vamos criar para não perder o chamado histórico
+        client = await prisma.client.create({
+          data: {
+            name: t.companyName || 'Empresa Desconhecida',
+            document: t.companyDocument || null,
+          }
+        });
       }
 
       // 2. Vincular Produto
       let product = null;
       if (t.productName) {
         product = await prisma.product.findFirst({
-          where: { name: { contains: t.productName, mode: 'insensitive' }, clientId: client.id }
+          where: { name: { contains: t.productName, mode: 'insensitive' } }
         });
         if (!product) {
-          product = await prisma.product.create({ data: { name: t.productName, clientId: client.id } });
+          product = await prisma.product.create({ data: { name: t.productName } });
         }
       }
 
@@ -547,13 +544,14 @@ export async function bulkImportTickets(ticketsData: any[]) {
         });
       }
 
-      // 5. Vincular Requester (User do Cliente) - Usando Email primeiro, depois Nome
+      // 5. Vincular Requester (User do Cliente)
       let requester = null;
       if (t.requesterEmail) {
-        requester = await prisma.user.findFirst({
+        requester = await prisma.user.findUnique({
           where: { email: t.requesterEmail }
         });
       }
+      
       if (!requester && t.requesterName) {
         requester = await prisma.user.findFirst({
           where: { 
@@ -563,7 +561,22 @@ export async function bulkImportTickets(ticketsData: any[]) {
         });
       }
 
-      // Mapeamento de Status (Fechado -> RESOLVIDO)
+      // Cria um usuário caso não tenha encontrado Email nem Nome na base
+      if (!requester && t.requesterEmail && t.requesterName) {
+        const bcrypt = require('bcryptjs');
+        const defaultPassword = await bcrypt.hash('mudar123', 10);
+        requester = await prisma.user.create({
+          data: {
+            name: t.requesterName,
+            email: t.requesterEmail,
+            password: defaultPassword,
+            role: 'CLIENT',
+            clientId: client.id
+          }
+        });
+      }
+
+      // Mapeamento de Status (Coluna 'Fechado')
       const statusMap: Record<string, string> = {
         'Sim': 'RESOLVIDO',
         'Não': 'ABERTO'
@@ -585,7 +598,7 @@ export async function bulkImportTickets(ticketsData: any[]) {
           protocol,
           title: t.title,
           description: t.description || 'Importado via planilha',
-          status: statusMap[t.problemResolved] || 'ABERTO',
+          status: statusMap[t.closed] || 'ABERTO', // Mapeado da coluna 'Fechado'
           priority: priorityMap[t.priority] || 'BAIXA',
           clientId: client.id,
           productId: product?.id,
