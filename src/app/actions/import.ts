@@ -42,6 +42,18 @@ export async function importTickets(payload: any[], targetClientId: string) {
     if (!exists) await prisma.ticketOption.create({ data: tt });
   }
 
+  const ticketSources = [
+    { label: 'Portal', value: 'Portal', type: 'SOURCE', order: 1 },
+    { label: 'Email', value: 'Email', type: 'SOURCE', order: 2 },
+    { label: 'Telefone', value: 'Telefone', type: 'SOURCE', order: 3 },
+    { label: 'Chat', value: 'Chat', type: 'SOURCE', order: 4 },
+    { label: 'WhatsApp', value: 'WhatsApp', type: 'SOURCE', order: 5 },
+  ];
+  for (const src of ticketSources) {
+    const exists = await prisma.ticketOption.findFirst({ where: { type: 'SOURCE', value: src.value } });
+    if (!exists) await prisma.ticketOption.create({ data: src });
+  }
+
   const ticketStatuses = [
     { label: 'Aberto', value: 'ABERTO', type: 'STATUS', order: 1, color: '#e0f2fe' },
     { label: 'Em Andamento', value: 'EM_ANDAMENTO', type: 'STATUS', order: 2, color: '#fed7aa' },
@@ -214,6 +226,7 @@ export async function importTickets(payload: any[], targetClientId: string) {
       else if (['URGENTE', 'CRITICA', 'CRITICO'].includes(rawPriority)) finalPriority = 'URGENTE';
 
       const rawType = row.type ? row.type.trim() : null; // Apenas repassamos. A interface trata os valores corretos.
+      const rawSource = row.source ? row.source.trim() : "Portal";
 
       // 9. Inserir no Banco
       await prisma.ticket.create({
@@ -224,6 +237,7 @@ export async function importTickets(payload: any[], targetClientId: string) {
           status: finalStatus as any,
           priority: finalPriority as any,
           type: rawType,
+          source: rawSource,
           createdAt,
           ...(resolvedAt ? { resolvedAt } : {}),
           client: { connect: { id: clientId } },

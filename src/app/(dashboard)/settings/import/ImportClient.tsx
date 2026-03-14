@@ -32,6 +32,7 @@ export default function ImportClient({ organizationId }: { organizationId: strin
     { key: 'status', label: 'Status', required: false },
     { key: 'priority', label: 'Prioridade', required: false },
     { key: 'type', label: 'Tipo', required: false },
+    { key: 'source', label: 'Fonte/Origem', required: false },
     { key: 'requesterEmail', label: 'E-mail do Cliente', required: true },
     { key: 'companyName', label: 'Nome da Empresa/Cliente', required: false },
     { key: 'product', label: 'Produto', required: false },
@@ -97,6 +98,7 @@ export default function ImportClient({ organizationId }: { organizationId: strin
             if (lower.includes('categoria')) autoMap.category = field;
             if (lower.includes('atendente') || lower.includes('responsável')) autoMap.assignedTo = field;
             if (lower.includes('tipo') || lower.includes('classificação')) autoMap.type = field;
+            if (lower.includes('fonte') || lower.includes('origem') || lower.includes('canal')) autoMap.source = field;
             if (lower.includes('empresa') || lower.includes('cliente')) autoMap.companyName = field;
             if (lower.includes('finalizacao') || lower.includes('finalização') || lower.includes('fechado')) autoMap.resolvedAt = field;
           });
