@@ -28,11 +28,16 @@ export default function ImportClient({ organizationId }: { organizationId: strin
   const systemFields = [
     { key: 'protocol', label: 'Protocolo', required: false },
     { key: 'title', label: 'Título / Assunto', required: true },
-    { key: 'description', label: 'Descrição', required: false },
+    { key: 'description', label: 'Mensagem / Descrição', required: false },
     { key: 'status', label: 'Status', required: false },
     { key: 'priority', label: 'Prioridade', required: false },
-    { key: 'requesterEmail', label: 'E-mail do Solicitante', required: true },
+    { key: 'requesterEmail', label: 'E-mail do Cliente', required: true },
+    { key: 'companyName', label: 'Nome da Empresa/Cliente', required: false },
+    { key: 'product', label: 'Produto', required: false },
+    { key: 'category', label: 'Categoria', required: false },
+    { key: 'assignedTo', label: 'Atendente', required: false },
     { key: 'createdAt', label: 'Data de Criação', required: false },
+    { key: 'resolvedAt', label: 'Data de Finalização', required: false },
   ];
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -80,12 +85,17 @@ export default function ImportClient({ organizationId }: { organizationId: strin
           results.meta.fields.forEach(field => {
             const lower = field.toLowerCase();
             if (lower.includes('titulo') || lower.includes('assunto') || lower.includes('title')) autoMap.title = field;
-            if (lower.includes('desc') || lower.includes('detalhe')) autoMap.description = field;
+            if (lower.includes('desc') || lower.includes('mensagem')) autoMap.description = field;
             if (lower.includes('status') || lower.includes('situação')) autoMap.status = field;
             if (lower.includes('prioridade')) autoMap.priority = field;
-            if (lower.includes('email') || lower.includes('solicitante')) autoMap.requesterEmail = field;
+            if (lower.includes('email') || lower.includes('e-mail')) autoMap.requesterEmail = field;
             if (lower.includes('protocolo') || lower.includes('id')) autoMap.protocol = field;
-            if (lower.includes('data') || lower.includes('criado') || lower.includes('date')) autoMap.createdAt = field;
+            if (lower.includes('data de criacao') || lower.includes('data de criação') || lower.includes('date')) autoMap.createdAt = field;
+            if (lower.includes('produto')) autoMap.product = field;
+            if (lower.includes('categoria')) autoMap.category = field;
+            if (lower.includes('atendente')) autoMap.assignedTo = field;
+            if (lower.includes('empresa') || lower.includes('cliente')) autoMap.companyName = field;
+            if (lower.includes('finalizacao') || lower.includes('finalização') || lower.includes('fechado')) autoMap.resolvedAt = field;
           });
           setMapping(autoMap);
           setStep(2);

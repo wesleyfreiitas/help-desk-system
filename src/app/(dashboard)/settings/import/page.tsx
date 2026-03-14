@@ -16,7 +16,7 @@ export default async function ImportPage() {
         </p>
       </div>
       
-      <ImportClient organizationId={session.orgId || session.clientId} />
+      <ImportClient organizationId={session?.user?.clientId || null} />
     </div>
   );
 }
