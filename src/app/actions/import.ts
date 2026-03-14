@@ -10,9 +10,20 @@ export async function importTickets(payload: any[], targetClientId: string) {
     throw new Error('Acesso negado.');
   }
 
-  const clientId = targetClientId || session.user.clientId;
+  let clientId = targetClientId || session.user.clientId;
+  
   if (!clientId) {
-    throw new Error('ID do Cliente/Organização não definido.');
+    if (session.user.role === 'ADMIN') {
+      const firstClient = await prisma.client.findFirst();
+      if (firstClient) {
+        clientId = firstClient.id;
+      } else {
+        const dummyClient = await prisma.client.create({ data: { name: 'Organização Principal', document: '000' } });
+        clientId = dummyClient.id;
+      }
+    } else {
+      throw new Error('ID da Organização não definido para o usuário atual.');
+    }
   }
 
   let successCount = 0;
