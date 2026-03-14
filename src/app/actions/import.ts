@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 
 export async function importTickets(payload: any[], targetClientId: string) {
   const session = await getSession();
-  if (!session || (session.role !== 'ADMIN' && session.role !== 'ORG_MANAGER')) {
+  if (!session || (session.role === 'CLIENT')) {
     throw new Error('Acesso negado.');
   }
 
