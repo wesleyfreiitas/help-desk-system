@@ -87,23 +87,10 @@ export default function CategoryListClient({ initialCategories }: { initialCateg
           <button 
             onClick={handleBulkDelete} 
             disabled={isDeleting}
-            className="btn-danger-soft" 
-            style={{ 
-              display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', 
-              borderRadius: 'var(--radius-md)', fontWeight: 600, cursor: 'pointer',
-              background: '#fee2e2', color: '#dc2626', border: '1px solid #fecaca',
-              transition: 'var(--transition)'
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.background = '#dc2626';
-              e.currentTarget.style.color = 'white';
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.background = '#fee2e2';
-              e.currentTarget.style.color = '#dc2626';
-            }}
+            className="btn-primary" 
+            style={{ width: 'auto', background: '#fee2e2', color: '#991b1b', border: '1px solid #fca5a5' }}
           >
-            <Trash2 size={16} />
+            <Trash2 size={16} style={{ marginRight: '0.5rem' }} />
             Excluir ({selectedIds.size})
           </button>
         )}

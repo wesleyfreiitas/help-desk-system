@@ -490,51 +490,36 @@ export async function bulkImportTickets(ticketsData: any[]) {
     try {
       if (!t.title) continue;
 
-      // 1. Vincular ou Criar Empresa (Base para os outros vínculos)
+      // 1. Vincular Empresa (Client) - Usando CNPJ primeiro, depois Nome
       let client = null;
-      
-      // Tentar encontrar pello CNPJ primeiro se houver
-      if (t.companyDocument && t.companyDocument.toLowerCase() !== 'n/a') {
+      if (t.companyDocument) {
         client = await prisma.client.findFirst({
           where: { document: t.companyDocument }
         });
       }
-
-      // Se não encontrou por CNPJ, tenta pelo Nome
-      if (!client && t.companyName) {
+      if (!client) {
         client = await prisma.client.findFirst({
           where: { name: { contains: t.companyName, mode: 'insensitive' } }
         });
       }
 
-      // Se ainda não encontrou e tem Nome + CNPJ, cria a empresa
-      if (!client && t.companyName && t.companyDocument && t.companyDocument.toLowerCase() !== 'n/a') {
-        client = await prisma.client.create({
-          data: {
-            name: t.companyName,
-            document: t.companyDocument,
-            email: t.requesterEmail || `contato@${t.companyName.toLowerCase().replace(/\s+/g, '')}.com.br`
-          }
-        });
-      }
-
       if (!client) {
-        results.errors.push(`Erro no chamado "${t.title}": Empresa não encontrada e dados insuficientes para criação (exige Nome e CNPJ).`);
+        results.errors.push(`Erro no chamado "${t.title}": Empresa "${t.companyName}" não encontrada.`);
         continue;
       }
 
-      // 2. Vincular ou Criar Produto
+      // 2. Vincular Produto
       let product = null;
       if (t.productName) {
         product = await prisma.product.findFirst({
-          where: { name: { contains: t.productName, mode: 'insensitive' } }
+          where: { name: { contains: t.productName, mode: 'insensitive' }, clientId: client.id }
         });
         if (!product) {
-          product = await prisma.product.create({ data: { name: t.productName } });
+          product = await prisma.product.create({ data: { name: t.productName, clientId: client.id } });
         }
       }
 
-      // 3. Vincular ou Criar Categoria
+      // 3. Vincular Categoria
       let category = null;
       if (t.categoryName) {
         category = await prisma.category.findFirst({
@@ -545,56 +530,31 @@ export async function bulkImportTickets(ticketsData: any[]) {
         }
       }
 
-      // 4. Vincular Atendente
-      const assignee = t.assigneeName ? await prisma.user.findFirst({
-        where: { name: { contains: t.assigneeName, mode: 'insensitive' }, role: { in: ['ADMIN', 'ATTENDANT'] } }
-      }) : null;
-
-      // 5. Vincular/Criar Requerente (Cliente)
-      let requester = null;
-      
-      // Tentar por Email primeiro (Mais preciso)
-      if (t.requesterEmail && t.requesterEmail.toLowerCase() !== 'n/a') {
-        requester = await prisma.user.findFirst({
-          where: { email: { equals: t.requesterEmail, mode: 'insensitive' } }
+      // 4. Vincular Atendente (User)
+      let assignee = null;
+      if (t.assigneeName) {
+        assignee = await prisma.user.findFirst({
+          where: { name: { contains: t.assigneeName, mode: 'insensitive' } }
         });
-
-        if (requester) {
-          // Se encontrou usuário mas ele estava em outra empresa, atualiza o vínculo
-          if (requester.clientId !== client.id) {
-            requester = await prisma.user.update({
-              where: { id: requester.id },
-              data: { clientId: client.id }
-            });
-          }
-        } else {
-          // Criar novo usuário se tiver Nome + Email
-          if (t.requesterName) {
-            requester = await prisma.user.create({
-              data: {
-                name: t.requesterName,
-                email: t.requesterEmail.toLowerCase(),
-                password: '!', // Login desabilitado até resetar senha
-                role: 'CLIENT',
-                clientId: client.id
-              }
-            });
-          }
-        }
       }
 
-      // Fallback: se não encontrou por email, tenta por nome dentro da empresa
+      // 5. Vincular Requester (User do Cliente) - Usando Email primeiro, depois Nome
+      let requester = null;
+      if (t.requesterEmail) {
+        requester = await prisma.user.findFirst({
+          where: { email: t.requesterEmail }
+        });
+      }
       if (!requester && t.requesterName) {
         requester = await prisma.user.findFirst({
-          where: {
+          where: { 
             name: { contains: t.requesterName, mode: 'insensitive' },
-            role: 'CLIENT',
             clientId: client.id
           }
         });
       }
 
-      // Mapeamento de Status
+      // Mapeamento de Status (Fechado -> RESOLVIDO)
       const statusMap: Record<string, string> = {
         'Sim': 'RESOLVIDO',
         'Não': 'ABERTO'
@@ -608,20 +568,14 @@ export async function bulkImportTickets(ticketsData: any[]) {
         'Urgente': 'ALTA'
       };
 
-      // Gerar protocolo único (Baseado no tempo se não houver)
+      // Gerar protocolo único
       const protocol = `IMP-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-
-      // Higienização: Normaliza quebras de linha e remove linhas vazias/com espaços
-      const cleanDescription = (t.description || 'Importado via planilha')
-        .replace(/\r\n|\r/g, '\n') // Normaliza para Unix (\n)
-        .replace(/\n\s*\n+/g, '\n') // Substitui 2 ou mais quebras por apenas uma
-        .trim();
 
       await prisma.ticket.create({
         data: {
           protocol,
           title: t.title,
-          description: cleanDescription,
+          description: t.description || 'Importado via planilha',
           status: statusMap[t.problemResolved] || 'ABERTO',
           priority: priorityMap[t.priority] || 'BAIXA',
           clientId: client.id,

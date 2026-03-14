@@ -104,15 +104,16 @@ export default function ImportTool() {
             assigneeName: parts[4]?.trim(),
             requesterName: parts[5]?.trim(),
             companyName: parts[6]?.trim(),
-            problemResolved: parts[7]?.trim(),
-            priority: parts[8]?.trim(),
-            deadline: parts[9]?.trim(),
-            createdAt: parts[10]?.trim(),
-            resolvedAt: parts[11]?.trim(),
-            firstResponseAt: parts[12]?.trim(),
-            reopened: parts[13]?.trim(),
-            requesterEmail: parts[14]?.trim(),
-            companyDocument: parts[15]?.trim(),
+            priority: parts[7]?.trim(),
+            deadline: parts[8]?.trim(),
+            createdAt: parts[9]?.trim(),
+            problemResolved: parts[10]?.trim(),
+            firstResponseDone: parts[11]?.trim(),
+            resolvedAt: parts[12]?.trim(),
+            firstResponseAt: parts[13]?.trim(),
+            reopened: parts[14]?.trim(),
+            requesterEmail: parts[15]?.trim(),
+            companyDocument: parts[16]?.trim(),
           };
         });
         const res = await bulkImportTickets(tickets);
@@ -182,7 +183,7 @@ export default function ImportTool() {
           ) : importType === 'users' ? (
             <><strong>Colunas:</strong> <code>Nome ; Email ; Telefone ; CNPJ Org ; ... ; ... ; Nome Org</code></>
           ) : (
-            <><strong>Colunas (16):</strong> <code>Assunto ; Msg ; Prod ; Cat ; Atendente ; Cliente ; Empresa ; Resolvido? ; Prioridade ; Deadline ; Criação ; Finalização ; Resposta ; Reaberto? ; Email Cliente ; CNPJ Empresa</code></>
+            <><strong>Colunas:</strong> <code>Assunto ; Msg ; Prod ; Cat ; Atendente ; Cliente ; Emp ; Prio ; Deadline ; Criação ; Fechado ; Prim Rep ; Finalização ; Data Resp ; Reaberto ; Email ; CNPJ</code></>
           )}
         </p>
       </div>

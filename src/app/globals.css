@@ -990,11 +990,10 @@ ul {
   background-color: #ec4899;
 }
 
-.ticket-center {
+.ticket-content {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  flex: 1;
   gap: 0.25rem;
 }
 
@@ -1027,8 +1026,6 @@ ul {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  max-width: 100%;
-  min-width: 0;
 }
 
 .ticket-title {
@@ -1058,19 +1055,7 @@ ul {
   gap: 0.5rem;
   font-size: 0.85rem;
   color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 100%;
-}
-
-.ticket-meta-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  flex-wrap: wrap;
 }
 
 .ticket-meta-dot {
