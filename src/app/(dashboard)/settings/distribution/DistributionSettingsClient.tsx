@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Save, User, ArrowRight, BarChart3, Settings2 } from 'lucide-react';
+import { Save, User, ArrowRight, BarChart3, Settings2, Check } from 'lucide-react';
 import { updateSystemSetting } from '@/app/actions/settings';
 
 export default function DistributionSettingsClient({ initialConfig, staff }: { initialConfig: any, staff: any[] }) {
@@ -30,83 +30,84 @@ export default function DistributionSettingsClient({ initialConfig, staff }: { i
   };
 
   return (
-    <div className="space-y-6 max-w-4xl">
-      <div className="card-custom p-6">
-        <label className="flex items-center gap-3 cursor-pointer mb-6">
-          <input 
-            type="checkbox" 
-            checked={config.enabled} 
-            onChange={e => setConfig({ ...config, enabled: e.target.checked })}
-            className="w-5 h-5 accent-primary"
-          />
-          <span className="font-semibold text-lg">Ativar Distribuição Automática</span>
-        </label>
+    <div className="distribution-container">
+      <div className="card-custom main-card">
+        {/* Toggle Ativar */}
+        <div className="activation-section">
+          <label className="switch-container">
+            <input 
+              type="checkbox" 
+              checked={config.enabled} 
+              onChange={e => setConfig({ ...config, enabled: e.target.checked })}
+            />
+            <span className="slider"></span>
+            <span className="label-text">Ativar Distribuição Automática</span>
+          </label>
+        </div>
 
         {config.enabled && (
-          <div className="space-y-6 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="settings-content animate-in">
             {/* Escolha do Modo */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="section-title">Algoritmo de Atribuição</div>
+            <div className="modes-grid">
               <div 
                 onClick={() => setConfig({ ...config, mode: 'SEQUENTIAL' })}
-                className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${config.mode === 'SEQUENTIAL' ? 'border-primary bg-blue-50/50' : 'border-slate-100 hover:border-slate-200'}`}
+                className={`mode-card ${config.mode === 'SEQUENTIAL' ? 'active' : ''}`}
               >
-                <div className="flex gap-4">
-                  <div className={`p-3 rounded-lg ${config.mode === 'SEQUENTIAL' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-400'}`}>
-                    <ArrowRight size={24} />
-                  </div>
-                  <div>
-                    <h4 className="font-bold">Sequencial (Round-Robin)</h4>
-                    <p className="text-xs text-slate-500 mt-1">Distribui um para cada atendente na ordem da lista.</p>
-                  </div>
+                <div className="mode-icon">
+                  <ArrowRight size={24} />
                 </div>
+                <div className="mode-info">
+                  <h4 className="mode-name">Sequencial (Round-Robin)</h4>
+                  <p className="mode-desc">Distribui um para cada atendente seguindo a ordem da lista.</p>
+                </div>
+                {config.mode === 'SEQUENTIAL' && <div className="check-badge"><Check size={14} /></div>}
               </div>
 
               <div 
                 onClick={() => setConfig({ ...config, mode: 'LEAST_ASSIGNED' })}
-                className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${config.mode === 'LEAST_ASSIGNED' ? 'border-primary bg-blue-50/50' : 'border-slate-100 hover:border-slate-200'}`}
+                className={`mode-card ${config.mode === 'LEAST_ASSIGNED' ? 'active' : ''}`}
               >
-                <div className="flex gap-4">
-                  <div className={`p-3 rounded-lg ${config.mode === 'LEAST_ASSIGNED' ? 'bg-primary text-white' : 'bg-slate-100 text-slate-400'}`}>
-                    <BarChart3 size={24} />
-                  </div>
-                  <div>
-                    <h4 className="font-bold">Menor Carga</h4>
-                    <p className="text-xs text-slate-500 mt-1">Distribui para o atendente que estiver com menos chamados abertos.</p>
-                  </div>
+                <div className="mode-icon">
+                  <BarChart3 size={24} />
                 </div>
+                <div className="mode-info">
+                  <h4 className="mode-name">Menor Carga</h4>
+                  <p className="mode-desc">Atribui para o atendente com menos chamados abertos no momento.</p>
+                </div>
+                {config.mode === 'LEAST_ASSIGNED' && <div className="check-badge"><Check size={14} /></div>}
               </div>
             </div>
 
             {/* Seleção de Atendentes */}
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="font-bold flex items-center gap-2">
-                  <User size={18} className="text-slate-400" />
-                  Atendentes Elegíveis
-                </h4>
-                <div className="text-xs text-slate-500">{config.attendantIds.length} selecionado(s)</div>
+            <div className="attendants-section">
+              <div className="section-header">
+                <div className="section-title">
+                  <User size={18} />
+                  Atendentes Participantes
+                </div>
+                <div className="count-badge">{config.attendantIds.length} selecionado(s)</div>
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="staff-grid">
                 {staff.map(member => (
                   <div 
                     key={member.id}
                     onClick={() => toggleAttendant(member.id)}
-                    className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${config.attendantIds.includes(member.id) ? 'bg-slate-50 border-primary/30 ring-1 ring-primary/10' : 'bg-white border-slate-100 hover:bg-slate-50'}`}
+                    className={`staff-item ${config.attendantIds.includes(member.id) ? 'selected' : ''}`}
                   >
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${config.attendantIds.includes(member.id) ? 'bg-primary text-white' : 'bg-slate-200 text-slate-500'}`}>
+                    <div className="staff-avatar">
                       {member.name.substring(0, 2).toUpperCase()}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-semibold truncate">{member.name}</div>
-                      <div className="text-[10px] text-slate-400 uppercase tracking-wider">{member.role}</div>
+                    <div className="staff-info">
+                      <div className="staff-name">{member.name}</div>
+                      <div className="staff-role">{member.role}</div>
                     </div>
-                    <input 
-                      type="checkbox" 
-                      readOnly 
-                      checked={config.attendantIds.includes(member.id)}
-                      className="accent-primary"
-                    />
+                    <div className="staff-checkbox">
+                      <div className={`custom-check ${config.attendantIds.includes(member.id) ? 'checked' : ''}`}>
+                         {config.attendantIds.includes(member.id) && <Check size={12} />}
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -114,10 +115,11 @@ export default function DistributionSettingsClient({ initialConfig, staff }: { i
           </div>
         )}
 
-        <div className="mt-8 pt-6 border-t flex items-center justify-between">
-          <div className="flex-1">
+        {/* Footer com Botão */}
+        <div className="card-footer">
+          <div className="message-area">
             {message && (
-              <div className={`text-sm font-medium ${message.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+              <div className={`status-message ${message.type}`}>
                 {message.text}
               </div>
             )}
@@ -125,26 +127,354 @@ export default function DistributionSettingsClient({ initialConfig, staff }: { i
           <button 
             onClick={handleSave}
             disabled={loading}
-            className="btn-primary flex items-center gap-2 min-w-[140px] justify-center"
+            className="btn-primary save-btn"
           >
             {loading ? 'Salvando...' : <><Save size={18} /> Salvar Configuração</>}
           </button>
         </div>
       </div>
 
-      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 flex gap-4">
-        <div className="bg-blue-600 text-white p-2 rounded-lg h-fit">
-          <Settings2 size={20} />
+      {/* Info Box */}
+      <div className="info-box">
+        <div className="info-icon">
+          <Settings2 size={24} />
         </div>
-        <div>
-          <h5 className="font-bold text-blue-900 text-sm">Como funciona?</h5>
-          <p className="text-blue-700 text-xs mt-1 leading-relaxed">
-            A distribuição automática só afetará chamados criados com o status <strong>"ABERTO"</strong> 
-            e que <strong>não tenham um atendente selecionado manualmente</strong>. 
-            Se você ou o cliente atribuírem alguém no momento da criação, a redistribuição automática será ignorada.
+        <div className="info-text">
+          <h5>Como a distribuição funciona?</h5>
+          <p>
+            A atribuição ocorre apenas em chamados criados com o status <strong>"ABERTO"</strong> 
+            e que <strong>não tiveram</strong> um atendente selecionado manualmente no formulário. 
+            Se um atendente for escolhido manualmente, a regra de distribuição é ignorada.
           </p>
         </div>
       </div>
+
+      <style jsx>{`
+        .distribution-container {
+          max-width: 900px;
+          margin: 0 auto;
+        }
+
+        .main-card {
+           padding: 2rem !important;
+           margin-bottom: 1.5rem;
+        }
+
+        .activation-section {
+          padding-bottom: 2rem;
+          border-bottom: 1px solid var(--border-color);
+          margin-bottom: 2rem;
+        }
+
+        .switch-container {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          cursor: pointer;
+          user-select: none;
+        }
+
+        .switch-container input {
+          display: none;
+        }
+
+        .slider {
+          position: relative;
+          width: 44px;
+          height: 24px;
+          background-color: #cbd5e1;
+          border-radius: 99px;
+          transition: var(--transition);
+        }
+
+        .slider:before {
+          content: "";
+          position: absolute;
+          height: 18px;
+          width: 18px;
+          left: 3px;
+          bottom: 3px;
+          background-color: white;
+          border-radius: 50%;
+          transition: var(--transition);
+          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        input:checked + .slider {
+          background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+          transform: translateX(20px);
+        }
+
+        .label-text {
+          font-size: 1.1rem;
+          font-weight: 600;
+          color: var(--text-main);
+        }
+
+        .section-title {
+          font-size: 0.9rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          color: var(--text-muted);
+          letter-spacing: 0.05em;
+          margin-bottom: 1.25rem;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        .modes-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+          gap: 1rem;
+          margin-bottom: 2.5rem;
+        }
+
+        .mode-card {
+          position: relative;
+          display: flex;
+          gap: 1.25rem;
+          padding: 1.5rem;
+          border-radius: var(--radius-lg);
+          border: 2px solid var(--border-color);
+          cursor: pointer;
+          transition: var(--transition);
+          background: var(--surface);
+        }
+
+        .mode-card:hover {
+          border-color: #cbd5e1;
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-md);
+        }
+
+        .mode-card.active {
+          border-color: var(--primary);
+          background-color: var(--primary-light);
+        }
+
+        .mode-icon {
+          width: 48px;
+          height: 48px;
+          border-radius: var(--radius-md);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: var(--bg-color);
+          color: var(--text-muted);
+          transition: var(--transition);
+          flex-shrink: 0;
+        }
+
+        .mode-card.active .mode-icon {
+          background-color: var(--primary);
+          color: white;
+        }
+
+        .mode-info {
+          flex: 1;
+        }
+
+        .mode-name {
+          font-size: 1rem;
+          font-weight: 700;
+          color: var(--text-main);
+          margin-bottom: 0.25rem;
+        }
+
+        .mode-desc {
+          font-size: 0.85rem;
+          color: var(--text-muted);
+          line-height: 1.4;
+        }
+
+        .check-badge {
+          position: absolute;
+          top: -8px;
+          right: -8px;
+          width: 22px;
+          height: 22px;
+          background: var(--primary);
+          color: white;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: 2px solid white;
+          box-shadow: var(--shadow-sm);
+        }
+
+        .attendants-section {
+          margin-top: 2rem;
+        }
+
+        .section-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1.25rem;
+        }
+
+        .count-badge {
+          font-size: 0.75rem;
+          font-weight: 600;
+          background: #f1f5f9;
+          padding: 4px 10px;
+          border-radius: 99px;
+          color: var(--text-muted);
+        }
+
+        .staff-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+          gap: 0.75rem;
+        }
+
+        .staff-item {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          padding: 1rem;
+          border-radius: var(--radius-md);
+          border: 1px solid var(--border-color);
+          background: var(--surface);
+          cursor: pointer;
+          transition: var(--transition);
+        }
+
+        .staff-item:hover {
+          background-color: var(--bg-color);
+        }
+
+        .staff-item.selected {
+          border-color: var(--primary-hover);
+          background-color: var(--primary-light);
+          box-shadow: 0 0 0 1px var(--primary-hover);
+        }
+
+        .staff-avatar {
+          width: 36px;
+          height: 36px;
+          border-radius: 50%;
+          background-color: var(--border-color);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: var(--text-muted);
+          flex-shrink: 0;
+        }
+
+        .selected .staff-avatar {
+          background-color: var(--primary);
+          color: white;
+        }
+
+        .staff-info {
+          flex: 1;
+          min-width: 0;
+        }
+
+        .staff-name {
+          font-size: 0.9rem;
+          font-weight: 600;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .staff-role {
+          font-size: 0.7rem;
+          text-transform: uppercase;
+          letter-spacing: 0.025em;
+          color: var(--text-muted);
+        }
+
+        .custom-check {
+          width: 20px;
+          height: 20px;
+          border-radius: 4px;
+          border: 2px solid var(--border-color);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: var(--transition);
+          background: white;
+        }
+
+        .custom-check.checked {
+          background: var(--primary);
+          border-color: var(--primary);
+          color: white;
+        }
+
+        .card-footer {
+          margin-top: 3rem;
+          padding-top: 1.5rem;
+          border-top: 1px solid var(--border-color);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 2rem;
+        }
+
+        .message-area {
+          flex: 1;
+        }
+
+        .status-message {
+          font-size: 0.9rem;
+          font-weight: 500;
+        }
+
+        .status-message.success { color: var(--success); }
+        .status-message.error { color: var(--danger); }
+
+        .save-btn {
+          min-width: 180px;
+          height: 48px;
+        }
+
+        .info-box {
+          background-color: #eff6ff;
+          border: 1px solid #bfdbfe;
+          border-radius: var(--radius-lg);
+          padding: 1.25rem;
+          display: flex;
+          gap: 1rem;
+        }
+
+        .info-icon {
+          color: var(--primary);
+          flex-shrink: 0;
+        }
+
+        .info-text h5 {
+          font-size: 0.95rem;
+          font-weight: 700;
+          color: #1e3a8a;
+          margin-bottom: 0.25rem;
+        }
+
+        .info-text p {
+          font-size: 0.85rem;
+          color: #1e40af;
+          line-height: 1.5;
+        }
+
+        .animate-in {
+          animation: slideUp 0.3s ease-out forwards;
+        }
+
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }
