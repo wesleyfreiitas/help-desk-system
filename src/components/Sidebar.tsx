@@ -55,7 +55,9 @@ export default function Sidebar({ user }: { user: any }) {
             {getInitials(user.name)}
           </div>
           <div className="user-info">
-            <span className="user-name" title={user.name}>{user.name}</span>
+            <Link href="/profile" className="user-name" title="Ver Perfil" style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
+              {user.name}
+            </Link>
             <span className="user-role">{user.role}</span>
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 import { useActionState } from 'react';
 import { authenticate } from '@/app/actions/auth';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [state, formAction, isPending] = useActionState(authenticate, undefined);
@@ -32,7 +33,12 @@ export default function LoginPage() {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Senha</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <label htmlFor="password">Senha</label>
+              <Link href="/forgot-password" style={{ fontSize: '0.8rem', color: 'var(--primary)', fontWeight: 500 }}>
+                Esqueceu a senha?
+              </Link>
+            </div>
             <input 
               type="password" 
               name="password" 
