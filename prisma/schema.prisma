@@ -23,6 +23,7 @@ model User {
   ticketsCreated Ticket[] @relation("TicketRequester")
   ticketsOpenedByMe Ticket[] @relation("TicketCreatedBy")
   interactions Interaction[]
+  accessLogs   AccessLog[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deletedAt DateTime?
@@ -181,5 +182,15 @@ model PasswordResetToken {
   token     String   @unique
   email     String   @unique
   expires   DateTime
+  createdAt DateTime @default(now())
+}
+model AccessLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  ip        String?
+  browser   String?
+  os        String?
+  userAgent String?
   createdAt DateTime @default(now())
 }

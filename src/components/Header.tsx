@@ -13,6 +13,7 @@ export default function Header({ user }: { user: any }) {
     if (pathname.startsWith('/clients')) return 'Gestão de Clientes';
     if (pathname.startsWith('/products')) return 'Catálogo de Produtos';
     if (pathname.startsWith('/users')) return 'Administração de Usuários';
+    if (pathname.startsWith('/reports/audit')) return 'Relatório de Auditoria de Acesso';
     if (pathname === '/profile') return 'Meu Perfil';
     return 'Bem-vindo';
   };

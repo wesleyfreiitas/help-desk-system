@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { login as setSession, getSession } from '@/lib/auth';
 import { getSSOConfig } from './sso';
+import { getClientInfo } from '@/lib/client-info';
 import { redirect } from 'next/navigation';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
@@ -37,6 +38,22 @@ export async function authenticate(prevState: any, formData: FormData) {
     role: user.role,
     clientId: user.clientId,
   });
+
+  // Gravar Log de Acesso
+  try {
+    const clientInfo = await getClientInfo();
+    await prisma.accessLog.create({
+      data: {
+        userId: user.id,
+        ip: clientInfo.ip,
+        browser: clientInfo.browser,
+        os: clientInfo.os,
+        userAgent: clientInfo.userAgent,
+      },
+    });
+  } catch (logError) {
+    console.error('Falha ao gravar log de acesso:', logError);
+  }
 
   redirect('/dashboard');
 }
@@ -97,10 +114,13 @@ export async function autoLoginAction(userId: string, companyId: string) {
       });
     } else if (user.role !== mappedRole) {
       // Opcional: Atualizar cargo se mudou na Uppchannel
-      user = await prisma.user.update({
-        where: { id: user.id },
-        data: { role: mappedRole }
-      });
+      // SEGURANÇA: Não fazemos downgrade automático se o usuário já for ADMIN localmente
+      if (user.role !== 'ADMIN' || mappedRole === 'ADMIN') {
+        user = await prisma.user.update({
+          where: { id: user.id },
+          data: { role: mappedRole }
+        });
+      }
     }
 
     // Criar a sessão antes de retornar
@@ -111,6 +131,22 @@ export async function autoLoginAction(userId: string, companyId: string) {
       role: user.role,
       clientId: user.clientId,
     });
+
+    // Gravar Log de Acesso (SSO)
+    try {
+      const clientInfo = await getClientInfo();
+      await prisma.accessLog.create({
+        data: {
+          userId: user.id,
+          ip: clientInfo.ip,
+          browser: clientInfo.browser,
+          os: clientInfo.os,
+          userAgent: clientInfo.userAgent,
+        },
+      });
+    } catch (logError) {
+      console.error('Falha ao gravar log de acesso (SSO):', logError);
+    }
 
     console.log(`Auto-login session created for: ${user.email}.`);
     return { success: true };
