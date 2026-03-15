@@ -1,28 +1,89 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { 
+  Settings, 
+  Database, 
+  MessageSquare, 
+  ShieldCheck, 
+  Clock, 
+  Mail, 
+  Users, 
+  Share2, 
+  FileJson, 
+  Smartphone,
+  CheckSquare
+} from 'lucide-react';
+
+const groups = [
+  {
+    title: 'Atendimento',
+    items: [
+      { label: 'Visão Geral', href: '/settings', icon: Settings },
+      { label: 'Campos Personalizados', href: '/settings/custom-fields', icon: Database },
+      { label: 'Opções de Ticket', href: '/settings/options', icon: CheckSquare },
+      { label: 'SLAs', href: '/settings/sla', icon: Clock },
+      { label: 'Respostas Rápidas', href: '/settings/canned-responses', icon: MessageSquare },
+    ]
+  },
+  {
+    title: 'Canais e Integrações',
+    items: [
+      { label: 'WhatsApp', href: '/settings/integrations/whatsapp', icon: Smartphone },
+      { label: 'E-mail (SMTP)', href: '/settings/email', icon: Mail },
+    ]
+  },
+  {
+    title: 'Segurança e Acesso',
+    items: [
+      { label: 'Permissões', href: '/settings/permissions', icon: ShieldCheck },
+      { label: 'SSO (Auto-Login)', href: '/settings/sso', icon: Users },
+    ]
+  },
+  {
+    title: 'Sistema',
+    items: [
+      { label: 'Organização', href: '/settings/organization', icon: Settings },
+      { label: 'Distribuição', href: '/settings/distribution', icon: Share2 },
+      { label: 'Importar Dados', href: '/settings/import', icon: FileJson },
+    ]
+  }
+];
 
 export default function SettingsLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
   return (
     <div className="settings-layout">
-      <div className="settings-header">
-        <h2 className="settings-title">Configurações</h2>
-        <nav className="settings-tabs">
-          <Link href="/settings/custom-fields" className="settings-tab">Campos Personalizados</Link>
-          <Link href="/settings/options" className="settings-tab">Opções de Ticket</Link>
-          <Link href="/settings/sla" className="settings-tab">SLAs</Link>
-          <Link href="/settings/canned-responses" className="settings-tab">Respostas Rápidas</Link>
-          <Link href="/settings/permissions" className="settings-tab">Permissões</Link>
-          <Link href="/settings/sso" className="settings-tab">SSO (Login Automático)</Link>
-          <Link href="/settings/organization" className="settings-tab">Organização</Link>
-          <Link href="/settings/integrations/whatsapp" className="settings-tab">WhatsApp</Link>
-          <Link href="/settings/email" className="settings-tab">E-mail (SMTP)</Link>
-          <Link href="/settings/distribution" className="settings-tab">Distribuição</Link>
-          <Link href="/settings/import" className="settings-tab">Importar Dados</Link>
-        </nav>
-      </div>
-      <div className="settings-content">
+      <aside className="settings-sidebar">
+        {groups.map((group, gIdx) => (
+          <div key={gIdx} className="settings-nav-group">
+            <h4 className="settings-nav-group-title">{group.title}</h4>
+            <nav>
+              {group.items.map((item, iIdx) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href;
+                return (
+                  <Link 
+                    key={iIdx} 
+                    href={item.href} 
+                    className={`settings-nav-item ${isActive ? 'active' : ''}`}
+                  >
+                    <Icon size={18} />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        ))}
+      </aside>
+      
+      <main className="settings-content-wrapper">
         {children}
-      </div>
+      </main>
     </div>
   );
 }
