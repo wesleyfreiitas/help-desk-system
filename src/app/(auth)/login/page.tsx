@@ -34,23 +34,30 @@ function LoginContent() {
         setIsAutoLogging(true);
         
         try {
+          console.log('Calling autoLoginAction...');
           const result = await autoLoginAction(userParam, companyParam);
           
           if (result && result.success) {
-            console.log('Auto-login successful, navigating to dashboard...');
-            router.push('/dashboard');
+            console.log('Auto-login successful, forcing redirect to dashboard...');
+            // window.location.href é mais garantido em iframes do que o roteador do Next
+            window.location.href = '/dashboard';
             return;
           }
 
           if (result && result.error) {
-            console.error('Auto-login failed:', result.error);
+            console.error('Auto-login failed with error:', result.error);
             setAutoLoginError(result.error);
             setIsAutoLogging(false);
             loginAttemptInProgress.current = false;
           }
-        } catch (err) {
+        } catch (err: any) {
           console.error('Unexpected error during auto-login:', err);
-          setAutoLoginError('Erro ao tentar realizar login automático.');
+          // Se for o erro de redirecionamento do Next, ignoramos
+          if (err.message === 'NEXT_REDIRECT') {
+            console.log('Next.js redirecting...');
+            return;
+          }
+          setAutoLoginError('Erro técnico na autenticação. Verifique o console.');
           setIsAutoLogging(false);
           loginAttemptInProgress.current = false;
         }
