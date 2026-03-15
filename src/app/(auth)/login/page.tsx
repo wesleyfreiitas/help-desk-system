@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useEffect, useState, Suspense, useRef } from 'react';
-import { authenticate, autoLoginAction, checkSessionAction } from '@/app/actions/auth';
+import { authenticate, autoLoginAction } from '@/app/actions/auth';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 
@@ -11,7 +11,6 @@ function LoginContent() {
   const router = useRouter();
   const [isAutoLogging, setIsAutoLogging] = useState(false);
   const [autoLoginError, setAutoLoginError] = useState<string | null>(null);
-  
   const loginAttemptInProgress = useRef(false);
 
   useEffect(() => {
@@ -19,64 +18,37 @@ function LoginContent() {
     const companyParam = searchParams.get('company');
 
     if (userParam && companyParam && !loginAttemptInProgress.current) {
-      console.log('✅ [SSO] Parâmetros detectados:', { user: userParam, company: companyParam });
-      
       const performAutoLogin = async () => {
         try {
-          console.log('🔎 [SSO] Verificando sessão existente...');
-          const alreadyLogged = await checkSessionAction();
-          
-          if (alreadyLogged) {
-            console.log('✨ [SSO] Usuário já autenticado. Pulando para o Dashboard.');
-            router.replace('/dashboard');
-            return;
-          }
-
-          console.log('🚀 [SSO] Iniciando chamada de auto-login no servidor...');
+          console.log('🚀 [SSO] Iniciando auto-login...');
           loginAttemptInProgress.current = true;
           setIsAutoLogging(true);
           
           const result = await autoLoginAction(userParam, companyParam);
-          console.log('📦 [SSO] Resposta do servidor recebida:', result);
-
+          
           if (result && result.success) {
-            console.log('🎉 [SSO] Sucesso! Verificando se o cookie foi aceito...');
-            
-            // Pequeno delay para garantir que o navegador processou o cookie
-            setTimeout(async () => {
-              const checkCookie = await checkSessionAction();
-              if (!checkCookie) {
-                console.error('🚫 [SSO] Cookie de sessão BLOQUEADO pelo navegador (provavelmente política de Iframe/Cookies de terceiros).');
-                setAutoLoginError('Seu navegador está bloqueando cookies de terceiros. Por favor, habilite-os para usar o sistema embedado.');
-                setIsAutoLogging(false);
-                loginAttemptInProgress.current = false;
-              } else {
-                console.log('✅ [SSO] Cookie confirmado. Redirecionando...');
-                window.location.replace('/dashboard');
-              }
-            }, 500);
+            console.log('✅ [SSO] Sucesso! Redirecionando...');
+            window.location.href = '/dashboard';
             return;
           }
 
           if (result && result.error) {
-            console.error('❌ [SSO] Erro retornado pela Action:', result.error);
+            console.error('❌ [SSO] Erro:', result.error);
             setAutoLoginError(result.error);
             setIsAutoLogging(false);
             loginAttemptInProgress.current = false;
           }
         } catch (err: any) {
-          console.error('💥 [SSO] Erro inesperado no fluxo:', err);
-          if (err.message !== 'NEXT_REDIRECT') {
-            setAutoLoginError('Falha técnica no login automático. Verifique o console.');
-            setIsAutoLogging(false);
-            loginAttemptInProgress.current = false;
-          }
+          console.error('💥 [SSO] Erro inesperado:', err);
+          setAutoLoginError('Falha técnica no login. Tente acessar manualmente.');
+          setIsAutoLogging(false);
+          loginAttemptInProgress.current = false;
         }
       };
 
       performAutoLogin();
     }
-  }, [searchParams, router]);
+  }, [searchParams]);
 
   if (isAutoLogging) {
     return (
@@ -85,8 +57,8 @@ function LoginContent() {
           <div className="loader" style={{ margin: '0 auto 1.5rem auto' }}></div>
           <h2>Autenticando...</h2>
           <p>Validando acesso via Uppchannel</p>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '1rem' }}>
-            Isso pode levar alguns segundos dependendo da conexão.
+          <p style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '1rem' }}>
+            Isso deve ser rápido. Por favor, aguarde...
           </p>
         </div>
       </div>
@@ -145,11 +117,6 @@ function LoginContent() {
               border: '1px solid #fecaca'
             }}>
               {state?.error || autoLoginError}
-              {autoLoginError?.includes('cookies') && (
-                <div style={{ marginTop: '0.5rem', fontWeight: 600 }}>
-                  Dica: Tente acessar fora do iframe ou habilite "Cookies de terceiros" nas configurações do Chrome.
-                </div>
-              )}
             </div>
           )}
 
