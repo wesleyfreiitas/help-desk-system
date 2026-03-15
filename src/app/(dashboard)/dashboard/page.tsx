@@ -18,11 +18,27 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ fr
   const toDate = params?.to ? new Date(params.to) : endOfDay(new Date());
   const fromDate = params?.from ? new Date(params.from) : startOfDay(subDays(toDate, 30));
 
-  // Filtragem baseada em Role
+  // Filtragem baseada em Role e Regras da Organização
   const isOrgUser = ['CLIENT', 'ORG_MANAGER', 'ORG_MEMBER'].includes(user.role);
-  const whereClause: any = isOrgUser
-    ? { clientId: user.clientId, deletedAt: null }
-    : { deletedAt: null };
+  
+  const orgSetting = await prisma.systemSetting.findUnique({ where: { key: 'organization_rules' } });
+  const orgRules = orgSetting ? JSON.parse(orgSetting.value) : { managersCanViewAll: true, membersCanViewOthers: true };
+
+  const whereClause: any = { deletedAt: null };
+
+  if (isOrgUser) {
+    whereClause.clientId = user.clientId;
+    
+    // Lógica de visibilidade restrita
+    let canViewAll = true;
+    if (user.role === 'ORG_MANAGER' && !orgRules.managersCanViewAll) canViewAll = false;
+    if (user.role === 'ORG_MEMBER' && !orgRules.membersCanViewOthers) canViewAll = false;
+    if (user.role === 'CLIENT') canViewAll = false;
+
+    if (!canViewAll) {
+      whereClause.requesterId = user.id;
+    }
+  }
     
   // Busca Analytics Completo
   const stats = await getDashboardStats(whereClause, { from: fromDate, to: toDate });

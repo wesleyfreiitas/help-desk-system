@@ -35,6 +35,26 @@ export async function updateSystemSetting(key: string, value: any) {
   return { success: true };
 }
 
+export async function updateOrgSettings(settings: { managersCanViewAll: boolean, membersCanViewOthers: boolean }) {
+  const session = await getSession();
+  if (!session || session.user.role !== 'ADMIN') {
+    throw new Error('Não autorizado');
+  }
+
+  const key = 'organization_rules';
+  const value = JSON.stringify(settings);
+
+  await prisma.systemSetting.upsert({
+    where: { key },
+    update: { value },
+    create: { key, value }
+  });
+
+  revalidatePath('/settings/organization');
+  revalidatePath('/tickets');
+  return { success: true };
+}
+
 export async function sendWhatsAppMessage(to: string, contactName: string) {
   const session = await getSession();
   if (!session) throw new Error('Não autenticado');

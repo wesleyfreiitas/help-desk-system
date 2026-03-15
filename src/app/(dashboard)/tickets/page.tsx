@@ -18,9 +18,26 @@ export default async function TicketsPage(props: { searchParams: Promise<{ query
   const categoryIdFilter = searchParams?.categoryId || '';
 
   const isOrgUser = ['CLIENT', 'ORG_MANAGER', 'ORG_MEMBER'].includes(user.role);
-  const whereClause: any = isOrgUser
-    ? { clientId: user.clientId, deletedAt: null }
-    : { deletedAt: null };
+  
+  // Buscar regras da organização
+  const orgSetting = await prisma.systemSetting.findUnique({ where: { key: 'organization_rules' } });
+  const orgRules = orgSetting ? JSON.parse(orgSetting.value) : { managersCanViewAll: true, membersCanViewOthers: true };
+
+  const whereClause: any = { deletedAt: null };
+
+  if (isOrgUser) {
+    whereClause.clientId = user.clientId;
+    
+    // Lógica de visibilidade restrita
+    let canViewAll = true;
+    if (user.role === 'ORG_MANAGER' && !orgRules.managersCanViewAll) canViewAll = false;
+    if (user.role === 'ORG_MEMBER' && !orgRules.membersCanViewOthers) canViewAll = false;
+    if (user.role === 'CLIENT') canViewAll = false; // Cliente padrão sempre vê apenas o dele
+
+    if (!canViewAll) {
+      whereClause.requesterId = user.id;
+    }
+  }
 
   // Filtro Padrão: Se não houver filtro de status, mostrar apenas os "A trabalhar"
   const isDefaultView = !statusFilter && !query && !priorityFilter && !assigneeIdFilter && !clientIdFilter && !categoryIdFilter;

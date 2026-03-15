@@ -11,6 +11,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
           <Link href="/settings/options" className="settings-tab">Opções de Ticket</Link>
           <Link href="/settings/sla" className="settings-tab">SLAs</Link>
           <Link href="/settings/canned-responses" className="settings-tab">Respostas Rápidas</Link>
+          <Link href="/settings/organization" className="settings-tab">Organização</Link>
           <Link href="/settings/integrations/whatsapp" className="settings-tab">WhatsApp</Link>
           <Link href="/settings/import" className="settings-tab">Importar Dados</Link>
         </nav>

@@ -1,0 +1,185 @@
+'use client';
+
+import React, { useState } from 'react';
+import { updateOrgSettings } from '@/app/actions/settings';
+import { Save, ShieldCheck, Users, Info } from 'lucide-react';
+
+interface Rules {
+  managersCanViewAll: boolean;
+  membersCanViewOthers: boolean;
+}
+
+export default function OrganizationSettingsClient({ initialRules }: { initialRules: Rules }) {
+  const [rules, setRules] = useState<Rules>(initialRules);
+  const [isSaving, setIsSaving] = useState(false);
+  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    setMessage(null);
+    try {
+      await updateOrgSettings(rules);
+      setMessage({ type: 'success', text: 'Configurações de organização salvas com sucesso!' });
+      setTimeout(() => setMessage(null), 3000);
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.message || 'Erro ao salvar configurações.' });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="organization-settings" style={{ maxWidth: '800px' }}>
+      <div style={{ marginBottom: '2rem' }}>
+        <h3 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Regras da Organização</h3>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}> Defina as permissões de visibilidade de chamados para os usuários das empresas clientes.</p>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        
+        {/* Managers Rule */}
+        <div style={{ 
+          background: 'white', 
+          border: '1px solid var(--border-color)', 
+          borderRadius: '12px', 
+          padding: '1.5rem',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '1.25rem',
+          transition: 'all 0.2s'
+        }} className="hover-shadow-sm">
+          <div style={{ 
+            background: '#eff6ff', 
+            color: '#2563eb', 
+            padding: '12px', 
+            borderRadius: '10px' 
+          }}>
+            <ShieldCheck size={24} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <h4 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.25rem' }}>Visibilidade para Gerentes</h4>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1rem' }}>
+              Permitir que usuários com papel de **Gerência (ORG_MANAGER)** visualizem chamados abertos por qualquer membro da mesma empresa.
+            </p>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
+              <div className={`toggle-switch ${rules.managersCanViewAll ? 'active' : ''}`} 
+                   onClick={() => setRules(prev => ({ ...prev, managersCanViewAll: !prev.managersCanViewAll }))}
+                   style={{ 
+                     width: '44px', 
+                     height: '24px', 
+                     borderRadius: '12px', 
+                     background: rules.managersCanViewAll ? 'var(--primary)' : '#cbd5e1',
+                     position: 'relative',
+                     transition: 'all 0.3s'
+                   }}>
+                <div style={{ 
+                  width: '18px', 
+                  height: '18px', 
+                  borderRadius: '50%', 
+                  background: 'white', 
+                  position: 'absolute', 
+                  top: '3px', 
+                  left: rules.managersCanViewAll ? '23px' : '3px',
+                  transition: 'all 0.3s'
+                }} />
+              </div>
+              <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>
+                {rules.managersCanViewAll ? 'Habilitado' : 'Desabilitado'}
+              </span>
+            </label>
+          </div>
+        </div>
+
+        {/* Members Rule */}
+        <div style={{ 
+          background: 'white', 
+          border: '1px solid var(--border-color)', 
+          borderRadius: '12px', 
+          padding: '1.5rem',
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: '1.25rem',
+          transition: 'all 0.2s'
+        }} className="hover-shadow-sm">
+          <div style={{ 
+            background: '#f8fafc', 
+            color: '#64748b', 
+            padding: '12px', 
+            borderRadius: '10px' 
+          }}>
+            <Users size={24} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <h4 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '0.25rem' }}>Visibilidade entre Membros</h4>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1rem' }}>
+              Permitir que **Membros da Organização (ORG_MEMBER)** visualizem chamados abertos por outros membros da mesma empresa.
+            </p>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
+              <div className={`toggle-switch ${rules.membersCanViewOthers ? 'active' : ''}`} 
+                   onClick={() => setRules(prev => ({ ...prev, membersCanViewOthers: !prev.membersCanViewOthers }))}
+                   style={{ 
+                     width: '44px', 
+                     height: '24px', 
+                     borderRadius: '12px', 
+                     background: rules.membersCanViewOthers ? 'var(--primary)' : '#cbd5e1',
+                     position: 'relative',
+                     transition: 'all 0.3s'
+                   }}>
+                <div style={{ 
+                  width: '18px', 
+                  height: '18px', 
+                  borderRadius: '50%', 
+                  background: 'white', 
+                  position: 'absolute', 
+                  top: '3px', 
+                  left: rules.membersCanViewOthers ? '23px' : '3px',
+                  transition: 'all 0.3s'
+                }} />
+              </div>
+              <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>
+                {rules.membersCanViewOthers ? 'Habilitado' : 'Desabilitado'}
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div style={{ 
+          background: '#f0f9ff', 
+          border: '1px solid #bae6fd', 
+          borderRadius: '8px', 
+          padding: '1rem', 
+          display: 'flex', 
+          gap: '0.75rem', 
+          alignItems: 'center' 
+        }}>
+          <Info size={18} style={{ color: '#0369a1', flexShrink: 0 }} />
+          <p style={{ fontSize: '0.82rem', color: '#0369a1', margin: 0 }}>
+            **Nota:** Usuários com o papel padrão de **Cliente** sempre visualizam apenas seus próprios chamados, a menos que as regras acima permitam uma visão ampliada. Administradores e Atendentes sempre visualizam todos os chamados.
+          </p>
+        </div>
+
+        <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <button 
+            onClick={handleSave} 
+            disabled={isSaving}
+            className="btn-primary" 
+            style={{ width: 'auto', padding: '0.75rem 2.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            <Save size={18} />
+            {isSaving ? 'Salvando...' : 'Salvar Regras'}
+          </button>
+
+          {message && (
+            <span style={{ 
+              fontSize: '0.9rem', 
+              color: message.type === 'success' ? '#166534' : '#991b1b',
+              fontWeight: 500
+            }}>
+              {message.text}
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
