@@ -1684,7 +1684,7 @@ ul {
   justify-content: space-between;
   align-items: flex-start;
   padding: 1rem 0;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--border-color);
 }
 .timeline-entry-left { display: flex; gap: 0.75rem; }
 .timeline-entry-icon {
@@ -2243,11 +2243,11 @@ ul {
    Email Composer - Caixa de Resposta
    ========================================= */
 .email-composer-wrapper {
-  background: white;
+  background: var(--surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-md);
   margin-top: 1.5rem;
 }
 
@@ -2255,7 +2255,7 @@ ul {
 /* Área de digitação */
 .email-composer-body {
   padding: 1.25rem 1.5rem;
-  background: white;
+  background: var(--surface);
   min-height: 180px;
   display: flex;
   flex-direction: column;
@@ -2297,7 +2297,7 @@ ul {
   gap: 2px;
   padding: 0.5rem 1rem;
   border-top: 1px solid var(--border-color);
-  background: #fafbfc;
+  background: var(--bg-color);
   flex-wrap: wrap;
 }
 
@@ -2339,7 +2339,7 @@ ul {
   justify-content: space-between;
   padding: 0.6rem 1rem;
   border-top: 1px solid var(--border-color);
-  background: #f8fafc;
+  background: var(--bg-color);
 }
 
 .email-composer-footer-left {
@@ -2434,7 +2434,7 @@ ul {
   display: grid;
   grid-template-columns: 240px 1fr;
   gap: 2rem;
-  background: white;
+  background: var(--surface);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
   min-height: 600px;
@@ -2442,7 +2442,7 @@ ul {
 }
 
 .options-sidebar {
-  background: #f8fafc;
+  background: var(--bg-color);
   border-right: 1px solid var(--border-color);
   padding: 1.5rem 1rem;
   display: flex;
@@ -2464,14 +2464,14 @@ ul {
 }
 
 .options-type-btn:hover {
-  background: #f1f5f9;
+  background: var(--primary-light);
   color: var(--text-main);
 }
 
 .options-type-btn.active {
-  background: white;
+  background: var(--surface);
   color: var(--primary);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: var(--shadow-sm);
 }
 
 .options-main {
@@ -2484,7 +2484,7 @@ ul {
 }
 
 .options-add-form {
-  background: #f8fafc;
+  background: var(--bg-color);
   padding: 1.25rem;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
@@ -2612,12 +2612,12 @@ ul {
   width: 100%;
   padding: 0.85rem 1.1rem;
   font-size: 0.95rem;
-  color: #1e293b;
-  background-color: #ffffff;
-  border: 1.5px solid #e2e8f0;
+  color: var(--text-main);
+  background-color: var(--surface);
+  border: 1.5px solid var(--border-color);
   border-radius: 12px;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-sm);
   appearance: none;
 }
 
@@ -2663,7 +2663,7 @@ textarea.form-control {
   display: flex;
   align-items: center;
   gap: 1rem;
-  background: #f8fafc;
+  background: var(--bg-color);
   border-left: 4px solid var(--primary);
   padding: 1rem;
   border-radius: 8px;
@@ -2673,23 +2673,23 @@ textarea.form-control {
 
 .sla-info-alert p {
   margin: 0;
-  color: #64748b;
+  color: var(--text-muted);
 }
 
 .sla-grid {
   border: 1px solid var(--border-color);
   border-radius: 12px;
   overflow: hidden;
-  background: white;
+  background: var(--surface);
 }
 
 .sla-grid-header {
   display: grid;
   grid-template-columns: 200px 1fr 1fr;
-  background: #f8fafc;
+  background: var(--bg-color);
   padding: 1rem;
   font-weight: 600;
-  color: #1e293b;
+  color: var(--text-main);
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -2707,7 +2707,7 @@ textarea.form-control {
 }
 
 .sla-grid-row:hover {
-  background: #f8fafc;
+  background: var(--bg-color);
 }
 
 .sla-col-priority {
@@ -2769,12 +2769,12 @@ textarea.form-control {
 }
 
 .canned-response-form-card {
-  background: white;
+  background: var(--surface);
   border: 1.5px solid var(--border-color);
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 2rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-md);
   animation: slideDown 0.3s ease;
 }
 
@@ -2791,7 +2791,7 @@ textarea.form-control {
 }
 
 .canned-response-card {
-  background: white;
+  background: var(--surface);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 1.25rem;
@@ -2843,8 +2843,8 @@ textarea.form-control {
   grid-column: 1 / -1;
   text-align: center;
   padding: 4rem 2rem;
-  color: #94a3b8;
-  background: #f8fafc;
+  color: var(--text-muted);
+  background: var(--bg-color);
   border: 2px dashed var(--border-color);
   border-radius: 16px;
 }
