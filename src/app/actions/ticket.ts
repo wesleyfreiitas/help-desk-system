@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { calculateSLA } from '@/lib/sla';
 import { redirect } from 'next/navigation';
 import { sendTicketEmail } from '@/lib/mail';
+import { assignTicket } from '@/lib/distribution';
 
 export async function addInteraction(ticketId: string, formData: FormData) {
   const session = await getSession();
@@ -273,8 +274,12 @@ export async function createTicket(formData: FormData) {
     await sendTicketEmail(ticketWithRequester, 'NEW');
   }
 
-  redirect(`/tickets/${ticket.id}`);
+  // Atribuição Automática (somente se status for ABERTO e não tiver atendente)
+  if (status === 'ABERTO' && !assigneeId) {
+    await assignTicket(ticket.id);
+  }
 
+  redirect(`/tickets/${ticket.id}`);
 }
 
 

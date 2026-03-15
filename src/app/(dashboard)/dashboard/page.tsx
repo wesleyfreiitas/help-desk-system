@@ -7,6 +7,7 @@ import { subDays, startOfDay, endOfDay } from 'date-fns';
 import { TimeSeriesChart, ProductRankingChart, SLARingChart, ProductDistributionPie, HeatmapChart, TimeTrendChart } from './DashboardCharts';
 
 import { DashboardDateFilter } from './DashboardDateFilter';
+import ClientPortalDashboard from './ClientPortalDashboard';
 
 export default async function DashboardPage(props: { searchParams?: Promise<{ from?: string; to?: string }> }) {
   const session = await getSession();
@@ -50,6 +51,10 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ fr
     include: { client: { include: { users: true } }, product: true, assignee: true, requester: true }
   });
 
+  if (user.role === 'CLIENT') {
+    return <ClientPortalDashboard stats={stats} recentTickets={recentTickets} />;
+  }
+
   return (
     <>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
@@ -59,7 +64,6 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ fr
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
           <DashboardDateFilter defaultFrom={fromDate} defaultTo={toDate} />
-          {user.role === 'ADMIN' && <span className="badge" style={{ background: '#f0f9ff', color: '#0369a1', border: '1px solid #bae6fd' }}>MODO ADMIN</span>}
         </div>
       </div>
 

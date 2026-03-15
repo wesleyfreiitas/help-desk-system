@@ -42,7 +42,7 @@ export default function Sidebar({ user }: { user: any }) {
                 href={item.href} 
                 className={`nav-item ${pathname === item.href || pathname.startsWith(item.href + '/') ? 'active' : ''}`}
               >
-                {item.label}
+                {item.label === 'Dashboard' && user.role === 'CLIENT' ? 'Portal do Cliente' : item.label}
               </Link>
             </li>
           ))}

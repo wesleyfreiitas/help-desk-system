@@ -22,12 +22,6 @@ export default function Header({ user }: { user: any }) {
       
       <div className="top-actions" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
          <NotificationBell />
-         
-         {user.role !== 'CLIENT' && (
-           <span className="badge" style={{ backgroundColor: '#e0f2fe', color: '#0369a1' }}>
-             Modo Staff
-           </span>
-         )}
       </div>
     </header>
   );
