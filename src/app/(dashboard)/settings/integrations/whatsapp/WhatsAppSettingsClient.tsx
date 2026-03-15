@@ -11,7 +11,9 @@ export default function WhatsAppSettingsClient({ initialConfig }: { initialConfi
     token: '',
     templateId: '',
     from: '',
-    attendantName: ''
+    attendantName: '',
+    attendantVarName: 'nome',
+    clientVarName: 'cliente'
   });
   const [isSaving, setIsSaving] = useState(false);
   const [status, setStatus] = useState<{ type: 'success' | 'error', message: string } | null>(null);
@@ -118,14 +120,36 @@ export default function WhatsAppSettingsClient({ initialConfig }: { initialConfi
             </div>
 
             <div className="form-group-v2">
-              <label>Nome do Atendente (Variável 'nome')</label>
+              <label>Nome do Atendente (Valor Fixo)</label>
               <input 
                 type="text" 
                 value={config.attendantName} 
                 onChange={e => setConfig({ ...config, attendantName: e.target.value })}
                 placeholder="Deixe em branco para usar o nome do usuário logado"
               />
-              <span className="helper-text">Valor enviado no campo <code>parameters.nome</code>.</span>
+              <span className="helper-text">Valor enviado como nome do atendente.</span>
+            </div>
+
+            <div className="form-group-v2">
+              <label>Variável do Atendente (Chave)</label>
+              <input 
+                type="text" 
+                value={config.attendantVarName || 'nome'} 
+                onChange={e => setConfig({ ...config, attendantVarName: e.target.value })}
+                placeholder="Ex: nome"
+              />
+              <span className="helper-text">Nome da chave no template (ex: {'{{nome}}'}).</span>
+            </div>
+
+            <div className="form-group-v2">
+              <label>Variável do Cliente (Chave)</label>
+              <input 
+                type="text" 
+                value={config.clientVarName || 'cliente'} 
+                onChange={e => setConfig({ ...config, clientVarName: e.target.value })}
+                placeholder="Ex: cliente"
+              />
+              <span className="helper-text">Nome da chave no template (ex: {'{{cliente}}'}).</span>
             </div>
           </div>
         </div>
@@ -141,8 +165,8 @@ export default function WhatsAppSettingsClient({ initialConfig }: { initialConfi
       <div className="integration-help">
         <div className="help-icon"><AlertTriangle size={20} /></div>
         <div className="help-text">
-          <strong>Atenção:</strong> Certifique-se de que o template ID cadastrado na UppChannel possui a variável <code>nome</code>. 
-          O número de telefone do cliente será enviado automaticamente removendo espaços e caracteres especiais.
+          <strong>Personalização de Variáveis:</strong> Você pode configurar os nomes das chaves acima para bater exatamente com o que está no seu template da UppChannel. 
+          <br />Exemplo: Se seu template usa <code>{'{{atendente}}'}</code> e <code>{'{{prazacliente}}'}</code>, configure as chaves correspondentes acima.
         </div>
       </div>
 

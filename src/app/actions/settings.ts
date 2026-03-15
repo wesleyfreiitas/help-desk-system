@@ -45,18 +45,28 @@ export async function sendWhatsAppMessage(to: string, contactName: string) {
     throw new Error('A integração com WhatsApp não está configurada ou está desativada.');
   }
 
-  const { apiUrl, token, templateId, from, attendantName } = config;
+  const { apiUrl, token, templateId, from, attendantName, attendantVarName, clientVarName } = config;
 
   if (!apiUrl || !token || !templateId || !from) {
     throw new Error('Configurações de WhatsApp incompletas.');
   }
 
+  // Preparar os parâmetros dinamicamente
+  const parameters: Record<string, string> = {};
+  
+  // Chave do atendente (default: 'nome')
+  const aVar = attendantVarName || 'nome';
+  parameters[aVar] = attendantName || session.user.name;
+
+  // Chave do cliente (default: 'cliente')
+  if (clientVarName) {
+    parameters[clientVarName] = contactName;
+  }
+
   // Preparar o payload conforme a cURL fornecida
   const payload = {
     body: {
-      parameters: {
-        nome: attendantName || session.user.name
-      },
+      parameters,
       templateId: templateId
     },
     from: from,
