@@ -62,7 +62,7 @@ export async function autoLoginAction(userId: string, companyId: string) {
     });
 
     if (!response.ok) {
-      throw new Error('Falha na autenticação externa com API Helena.');
+      throw new Error('Falha na autenticação externa com API Uppchannel.');
     }
 
     const data = await response.json();
@@ -72,7 +72,7 @@ export async function autoLoginAction(userId: string, companyId: string) {
        console.warn('CompanyId mismatch. External:', data.companyId, 'URL:', companyId);
     }
 
-    // Mapear perfil da Helena para o sistema local
+    // Mapear perfil da Uppchannel para o sistema local
     const mappedRole = data.profile === 'AGENT' ? 'ATTENDANT' : 'ADMIN';
 
     // Sincronizar usuário no banco local
@@ -81,7 +81,7 @@ export async function autoLoginAction(userId: string, companyId: string) {
     });
 
     if (!user) {
-      // Como o usuário foi validado na Helena, criamos ele localmente
+      // Como o usuário foi validado na Uppchannel, criamos ele localmente
       const randomPassword = crypto.randomBytes(32).toString('hex');
       const hashedPassword = await bcrypt.hash(randomPassword, 10);
       
@@ -95,7 +95,7 @@ export async function autoLoginAction(userId: string, companyId: string) {
         }
       });
     } else if (user.role !== mappedRole) {
-      // Opcional: Atualizar cargo se mudou na Helena
+      // Opcional: Atualizar cargo se mudou na Uppchannel
       user = await prisma.user.update({
         where: { id: user.id },
         data: { role: mappedRole }

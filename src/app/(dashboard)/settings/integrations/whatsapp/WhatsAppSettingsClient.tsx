@@ -38,7 +38,7 @@ export default function WhatsAppSettingsClient({ initialConfig }: { initialConfi
       <div className="settings-header">
         <div>
           <h2 className="settings-title">Integração WhatsApp</h2>
-          <p className="settings-subtitle">Configure a conexão com a API da Helena / UppChannel para envio automático de mensagens.</p>
+          <p className="settings-subtitle">Configure a conexão com a API da Uppchannel para envio automático de mensagens.</p>
         </div>
         <div className={`status-badge ${config.enabled ? 'active' : 'inactive'}`}>
           {config.enabled ? 'Ativo' : 'Inativo'}

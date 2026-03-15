@@ -24,7 +24,7 @@ export default function SSOSettingsClient({ initialConfig }: { initialConfig: SS
     <div className="sso-settings">
       <div className="settings-section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
         <div>
-          <h3 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Configurações de SSO (Helena API)</h3>
+          <h3 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Configurações de SSO (Uppchannel API)</h3>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Configure os parâmetros de integração para login automático via URL.</p>
         </div>
         <button 
@@ -49,7 +49,7 @@ export default function SSOSettingsClient({ initialConfig }: { initialConfig: SS
         }}>
           <div>
             <h4 style={{ fontWeight: 600, fontSize: '1rem', marginBottom: '0.25rem' }}>Ativar Integração</h4>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Habilite ou desabilite o login automático via API Helena.</p>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Habilite ou desabilite o login automático via API Uppchannel.</p>
           </div>
           <label className="switch">
             <input 
@@ -70,7 +70,7 @@ export default function SSOSettingsClient({ initialConfig }: { initialConfig: SS
             className="form-control" 
             value={config.apiUrl} 
             onChange={e => setConfig({...config, apiUrl: e.target.value})}
-            placeholder="https://api.helena.run/core/v1/agent/"
+            placeholder="https://api.uppchannel.com.br/core/v1/agent/"
             disabled={!config.enabled}
           />
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>

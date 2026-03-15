@@ -43,7 +43,7 @@ function LoginContent() {
         <div className="login-box" style={{ textAlign: 'center', padding: '3rem' }}>
           <div className="loader" style={{ margin: '0 auto 1.5rem auto' }}></div>
           <h2>Autenticando...</h2>
-          <p>Validando acesso via Helena API</p>
+          <p>Validando acesso via Uppchannel</p>
         </div>
       </div>
     );
