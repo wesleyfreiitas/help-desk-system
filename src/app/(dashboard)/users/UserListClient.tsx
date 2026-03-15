@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Trash2, Search, Edit } from 'lucide-react';
+import Combobox from '@/components/Combobox';
 
 export default function UserListClient({ initialUsers, currentUserId, clients }: { initialUsers: any[], currentUserId: string, clients: any[] }) {
   const [search, setSearch] = useState('');
@@ -230,10 +231,18 @@ export default function UserListClient({ initialUsers, currentUserId, clients }:
                   {['CLIENT', 'ORG_MANAGER', 'ORG_MEMBER'].includes(editForm.role) && (
                     <div className="form-group">
                       <label className="form-label">Empresa Vinculada</label>
-                      <select className="form-control" value={editForm.clientId} onChange={e => setEditForm({...editForm, clientId: e.target.value})} required>
-                         <option value="">-- Selecione a empresa --</option>
-                         {clients.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
-                      </select>
+                      <Combobox 
+                        name="clientId"
+                        placeholder="Pesquisar empresa..."
+                        required
+                        defaultValue={editForm.clientId}
+                        onChange={(val) => setEditForm(prev => ({ ...prev, clientId: val }))}
+                        items={clients.map((c: any) => ({
+                          id: c.id,
+                          label: c.name,
+                          subLabel: c.document
+                        }))}
+                      />
                     </div>
                   )}
                 </div>
