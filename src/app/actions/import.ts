@@ -249,10 +249,8 @@ export async function importTickets(payload: any[], targetClientId: string) {
       const rawType = row.type ? row.type.trim() : null; 
       const rawSource = row.source ? row.source.trim() : "Portal";
 
-          // 9. Inserir no Banco
-      await prisma.ticket.create({
-        data: {
-          protocol: finalProtocol,
+      // 9. Inserir no Banco (Usaremos Upsert para evitar que re-importar a mesma planilha trave com os IDs inseridos nos testes anteriores)
+      const ticketData = {
           title: row.title,
           description: row.description || 'Importado via CSV',
           status: finalStatus as any,
@@ -266,6 +264,16 @@ export async function importTickets(payload: any[], targetClientId: string) {
           ...(productId ? { product: { connect: { id: productId } } } : {}),
           ...(categoryId ? { category: { connect: { id: categoryId } } } : {}),
           ...(assignedToId ? { assignee: { connect: { id: assignedToId } } } : {})
+      };
+
+      await prisma.ticket.upsert({
+        where: {
+          protocol: finalProtocol
+        },
+        update: ticketData,
+        create: {
+          protocol: finalProtocol,
+          ...ticketData
         }
       });
 
