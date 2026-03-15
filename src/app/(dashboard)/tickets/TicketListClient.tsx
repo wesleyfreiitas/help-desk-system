@@ -171,11 +171,11 @@ export default function TicketListClient({ tickets, userId, users, options }: Pr
                     return;
                   }
                   
-                  // Verifica se todos os selecionados estão "ABERTO"
+                  // Verifica se há chamados já finalizados na seleção
                   const selectedTickets = tickets.filter(t => selectedIdsArray.includes(t.id));
-                  const hasNonOpen = selectedTickets.some(t => t.status !== 'ABERTO');
-                  if (hasNonOpen) {
-                    alert('Apenas chamados com status "ABERTO" podem ser mesclados.');
+                  const hasClosed = selectedTickets.some(t => ['FECHADO', 'RESOLVIDO', 'CANCELADO'].includes(t.status));
+                  if (hasClosed) {
+                    alert('Não é possível mesclar chamados que já foram encerrados (Fechado/Resolvido/Cancelado).');
                     return;
                   }
 
