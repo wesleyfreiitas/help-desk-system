@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from 'react';
 import { Paperclip, X } from 'lucide-react';
+import RichTextEditor from '@/components/RichTextEditor';
 
 export default function TicketDescriptionComposer() {
   const [files, setFiles] = useState<File[]>([]);
@@ -20,50 +21,14 @@ export default function TicketDescriptionComposer() {
 
   return (
     <div className="email-composer-wrapper" style={{ marginTop: 0 }}>
-      {/* Área de digitação */}
-      <div className="email-composer-body">
-        <textarea
-          name="description"
-          rows={8}
-          required
-          placeholder="Descreva o problema em detalhes..."
-          className="email-composer-textarea"
+      {/* Editor de Texto Rico */}
+      <div className="email-composer-body" style={{ border: 'none', padding: 0 }}>
+        <RichTextEditor 
+          name="description" 
+          placeholder="Descreva o problema em detalhes..." 
+          required 
+          minHeight="300px"
         />
-      </div>
-
-      {/* Lista de anexos pendentes */}
-      {files.length > 0 && (
-        <div className="composer-attachments-preview">
-          {files.map((file, idx) => (
-            <div key={idx} className="attachment-pill">
-              <Paperclip size={12} />
-              <span className="file-name">{file.name}</span>
-              <button type="button" onClick={() => removeFile(idx)} className="remove-file">
-                <X size={12} />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Barra de formatação (Visual apenas) */}
-      <div className="email-composer-toolbar">
-        <span className="ec-tool-btn ec-tool-bold">B</span>
-        <span className="ec-tool-btn ec-tool-italic">I</span>
-        <span className="ec-tool-btn ec-tool-underline">U</span>
-        <span className="ec-tool-divider" />
-        <span className="ec-tool-btn">H₁</span>
-        <span className="ec-tool-btn">H₂</span>
-        <span className="ec-tool-divider" />
-        <span className="ec-tool-btn">≡</span>
-        <span className="ec-tool-btn">⋮≡</span>
-        <span className="ec-tool-divider" />
-        <span className="ec-tool-btn">🔗</span>
-        <span className="ec-tool-btn">🖼</span>
-        <span className="ec-tool-btn">⊞</span>
-        <span className="ec-tool-divider" />
-        <span className="ec-tool-btn">{"{ }"}</span>
-        <span className="ec-tool-btn">S̶</span>
       </div>
 
       {/* Rodapé interno apenas para o clip */}
