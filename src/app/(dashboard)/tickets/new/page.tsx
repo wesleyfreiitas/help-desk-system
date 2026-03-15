@@ -5,7 +5,9 @@ import Link from 'next/link';
 import Combobox from '@/components/Combobox';
 import TicketDescriptionComposer from './TicketDescriptionComposer';
 
-export default async function NewTicketPage() {
+export default async function NewTicketPage(props: { searchParams: Promise<{ contactId?: string }> }) {
+  const { contactId } = await props.searchParams;
+
   const session = await getSession();
   if (!session) return null;
   const user = session.user;
@@ -69,6 +71,7 @@ export default async function NewTicketPage() {
                   name="contactId"
                   placeholder="Pesquisar contato por nome ou empresa..."
                   required
+                  defaultValue={contactId || ""}
                   items={contacts.map((c: any) => ({
                     id: c.id,
                     label: c.name,

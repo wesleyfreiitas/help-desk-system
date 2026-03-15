@@ -84,7 +84,9 @@ export default async function UserDetailsPage({ params }: { params: Promise<{ id
                             </div>
                         </div>
                         <div className="profile-header-actions">
-                            <button className="btn-outline-sm"><Plus size={14} /> Novo chamado</button>
+                            <Link href={`/tickets/new?contactId=${user.id}`} className="btn-outline-sm">
+                                <Plus size={14} /> Novo chamado
+                            </Link>
                             <button className="btn-outline-sm"><Phone size={14} /> WhatsApp</button>
                         </div>
                     </div>
