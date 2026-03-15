@@ -70,7 +70,7 @@ export default function SSOSettingsClient({ initialConfig }: { initialConfig: SS
             className="form-control" 
             value={config.apiUrl} 
             onChange={e => setConfig({...config, apiUrl: e.target.value})}
-            placeholder="https://api.uppchannel.com.br/core/v1/agent/"
+            placeholder="https://api.uppchannel.com.br/core/v1/agent"
             disabled={!config.enabled}
           />
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem', display: 'block' }}>

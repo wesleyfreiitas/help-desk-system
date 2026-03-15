@@ -53,7 +53,8 @@ export async function autoLoginAction(userId: string, companyId: string) {
       return { error: 'Login automático (SSO) está desativado nas configurações.' };
     }
 
-    const response = await fetch(`${ssoConfig.apiUrl}${userId}`, {
+    const baseUrl = ssoConfig.apiUrl.endsWith('/') ? ssoConfig.apiUrl : `${ssoConfig.apiUrl}/`;
+    const response = await fetch(`${baseUrl}${userId}`, {
       method: 'GET',
       headers: {
         'Authorization': ssoConfig.token,

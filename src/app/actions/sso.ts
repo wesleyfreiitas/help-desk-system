@@ -10,7 +10,7 @@ export type SSOConfig = {
 };
 
 const DEFAULT_SSO_CONFIG: SSOConfig = {
-  apiUrl: 'https://api.uppchannel.com.br/core/v1/agent/',
+  apiUrl: 'https://api.uppchannel.com.br/core/v1/agent',
   token: 'pn_uVjECWGEkT2A9p9CXKZbYAriqhVPsvzZgBGdNZGbE',
   enabled: true
 };
