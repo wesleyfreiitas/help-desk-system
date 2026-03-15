@@ -39,7 +39,7 @@ export default function OrganizationSettingsClient({ initialRules }: { initialRu
         
         {/* Managers Rule */}
         <div style={{ 
-          background: 'white', 
+          background: 'var(--bg-card)', 
           border: '1px solid var(--border-color)', 
           borderRadius: '12px', 
           padding: '1.5rem',
@@ -49,8 +49,8 @@ export default function OrganizationSettingsClient({ initialRules }: { initialRu
           transition: 'all 0.2s'
         }} className="hover-shadow-sm">
           <div style={{ 
-            background: '#eff6ff', 
-            color: '#2563eb', 
+            background: 'rgba(37, 99, 235, 0.1)', 
+            color: 'var(--primary)', 
             padding: '12px', 
             borderRadius: '10px' 
           }}>
@@ -68,7 +68,8 @@ export default function OrganizationSettingsClient({ initialRules }: { initialRu
                      width: '44px', 
                      height: '24px', 
                      borderRadius: '12px', 
-                     background: rules.managersCanViewAll ? 'var(--primary)' : '#cbd5e1',
+                     background: rules.managersCanViewAll ? 'var(--primary)' : 'var(--bg-elevated)',
+                     border: '1px solid var(--border-color)',
                      position: 'relative',
                      transition: 'all 0.3s'
                    }}>
@@ -76,10 +77,10 @@ export default function OrganizationSettingsClient({ initialRules }: { initialRu
                   width: '18px', 
                   height: '18px', 
                   borderRadius: '50%', 
-                  background: 'white', 
+                  background: 'var(--surface)', 
                   position: 'absolute', 
-                  top: '3px', 
-                  left: rules.managersCanViewAll ? '23px' : '3px',
+                  top: '2px', 
+                  left: rules.managersCanViewAll ? '22px' : '2px',
                   transition: 'all 0.3s'
                 }} />
               </div>
@@ -92,7 +93,7 @@ export default function OrganizationSettingsClient({ initialRules }: { initialRu
 
         {/* Members Rule */}
         <div style={{ 
-          background: 'white', 
+          background: 'var(--bg-card)', 
           border: '1px solid var(--border-color)', 
           borderRadius: '12px', 
           padding: '1.5rem',
@@ -102,8 +103,8 @@ export default function OrganizationSettingsClient({ initialRules }: { initialRu
           transition: 'all 0.2s'
         }} className="hover-shadow-sm">
           <div style={{ 
-            background: '#f8fafc', 
-            color: '#64748b', 
+            background: 'rgba(var(--text-muted-rgb), 0.1)', 
+            color: 'var(--text-muted)', 
             padding: '12px', 
             borderRadius: '10px' 
           }}>
@@ -121,7 +122,8 @@ export default function OrganizationSettingsClient({ initialRules }: { initialRu
                      width: '44px', 
                      height: '24px', 
                      borderRadius: '12px', 
-                     background: rules.membersCanViewOthers ? 'var(--primary)' : '#cbd5e1',
+                     background: rules.membersCanViewOthers ? 'var(--primary)' : 'var(--bg-elevated)',
+                     border: '1px solid var(--border-color)',
                      position: 'relative',
                      transition: 'all 0.3s'
                    }}>
@@ -129,10 +131,10 @@ export default function OrganizationSettingsClient({ initialRules }: { initialRu
                   width: '18px', 
                   height: '18px', 
                   borderRadius: '50%', 
-                  background: 'white', 
+                  background: 'var(--surface)', 
                   position: 'absolute', 
-                  top: '3px', 
-                  left: rules.membersCanViewOthers ? '23px' : '3px',
+                  top: '2px', 
+                  left: rules.membersCanViewOthers ? '22px' : '2px',
                   transition: 'all 0.3s'
                 }} />
               </div>
@@ -144,17 +146,17 @@ export default function OrganizationSettingsClient({ initialRules }: { initialRu
         </div>
 
         <div style={{ 
-          background: '#f0f9ff', 
-          border: '1px solid #bae6fd', 
+          background: 'rgba(2, 132, 199, 0.1)', 
+          border: '1px solid rgba(2, 132, 199, 0.2)', 
           borderRadius: '8px', 
           padding: '1rem', 
           display: 'flex', 
           gap: '0.75rem', 
           alignItems: 'center' 
         }}>
-          <Info size={18} style={{ color: '#0369a1', flexShrink: 0 }} />
-          <p style={{ fontSize: '0.82rem', color: '#0369a1', margin: 0 }}>
-            **Nota:** Usuários com o papel padrão de **Cliente** sempre visualizam apenas seus próprios chamados, a menos que as regras acima permitam uma visão ampliada. Administradores e Atendentes sempre visualizam todos os chamados.
+          <Info size={18} style={{ color: 'var(--primary)', flexShrink: 0 }} />
+          <p style={{ fontSize: '0.82rem', color: 'var(--text-main)', margin: 0 }}>
+            <strong>Nota:</strong> Usuários com o papel padrão de <strong>Cliente</strong> sempre visualizam apenas seus próprios chamados, a menos que as regras acima permitam uma visão ampliada. Administradores e Atendentes sempre visualizam todos os chamados.
           </p>
         </div>
 
@@ -172,7 +174,7 @@ export default function OrganizationSettingsClient({ initialRules }: { initialRu
           {message && (
             <span style={{ 
               fontSize: '0.9rem', 
-              color: message.type === 'success' ? '#166534' : '#991b1b',
+              color: message.type === 'success' ? '#22c55e' : '#ef4444',
               fontWeight: 500
             }}>
               {message.text}

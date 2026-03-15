@@ -197,11 +197,11 @@ export default function WhatsAppSettingsClient({ initialConfig }: { initialConfi
           font-weight: 600;
           text-transform: uppercase;
         }
-        .status-badge.active { background: #dcfce7; color: #166534; }
-        .status-badge.inactive { background: #f1f5f9; color: #64748b; }
+        .status-badge.active { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+        .status-badge.inactive { background: var(--bg-elevated); color: var(--text-muted); }
 
         .settings-form-card {
-          background: white;
+          background: var(--bg-card);
           border-radius: var(--radius-lg);
           border: 1px solid var(--border-color);
           box-shadow: var(--shadow-sm);
@@ -245,9 +245,10 @@ export default function WhatsAppSettingsClient({ initialConfig }: { initialConfi
 
         .settings-footer {
           padding: 1.25rem 2rem;
-          background: #f8fafc;
+          background: var(--bg-elevated);
           display: flex;
           justify-content: flex-end;
+          border-top: 1px solid var(--border-color);
         }
         .btn-save-settings {
           background: var(--primary);
@@ -282,27 +283,27 @@ export default function WhatsAppSettingsClient({ initialConfig }: { initialConfi
           font-size: 0.9rem;
           font-weight: 500;
         }
-        .status-banner.success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
-        .status-banner.error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        .status-banner.success { background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); }
+        .status-banner.error { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
 
         .integration-help {
           margin-top: 2rem;
           padding: 1.5rem;
-          background: #fffbeb;
-          border: 1px solid #fef3c7;
+          background: rgba(245, 158, 11, 0.05);
+          border: 1px solid rgba(245, 158, 11, 0.2);
           border-radius: var(--radius-lg);
           display: flex;
           gap: 1rem;
         }
-        .help-icon { color: #d97706; }
-        .help-text { font-size: 0.85rem; color: #92400e; line-height: 1.5; }
+        .help-icon { color: var(--warning); }
+        .help-text { font-size: 0.85rem; color: var(--text-main); opacity: 0.8; line-height: 1.5; }
 
         .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #cbd5e1; transition: .4s; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; }
-        input:checked + .slider { background-color: var(--primary); }
-        input:checked + .slider:before { transform: translateX(20px); }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--bg-elevated); border: 1px solid var(--border-color); transition: .4s; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 2px; bottom: 2px; background-color: var(--surface); transition: .4s; }
+        input:checked + .slider { background-color: var(--primary); border-color: var(--primary); }
+        input:checked + .slider:before { transform: translateX(20px); background-color: white; }
         .slider.round { border-radius: 34px; }
         .slider.round:before { border-radius: 50%; }
       `}</style>
