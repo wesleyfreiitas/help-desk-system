@@ -197,9 +197,15 @@ export async function importTickets(payload: any[], targetClientId: string) {
       let createdAt = parseDateStr(row.createdAt) || new Date();
       let resolvedAt = parseDateStr(row.resolvedAt);
 
-      // 7. Montar o protocolo
-      const protocolNumber = Math.floor(100000 + Math.random() * 900000).toString();
-      const finalProtocol = row.protocol && row.protocol.trim() !== '' ? row.protocol.trim() : `IMP-${protocolNumber}`;
+      // 7. Montar o protocolo de alta entropia (ou manter original íntegro)
+      let finalProtocol = '';
+      if (row.protocol && row.protocol.trim() !== '') {
+        finalProtocol = row.protocol.trim();
+      } else {
+        const timePart = Date.now().toString(36).toUpperCase();
+        const randPart = Math.floor(Math.random() * 100000).toString(36).toUpperCase();
+        finalProtocol = `IMP-${timePart}-${randPart}`;
+      }
 
       // 8. Normalização Avançada de Status, Prioridade e Tipo
       const normalizeStr = (s?: string) => (s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().trim();
