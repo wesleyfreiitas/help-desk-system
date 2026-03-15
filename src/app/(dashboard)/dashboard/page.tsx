@@ -6,6 +6,8 @@ import { getDashboardStats } from '@/lib/analytics';
 import { subDays, startOfDay, endOfDay } from 'date-fns';
 import { TimeSeriesChart, ProductRankingChart, SLARingChart, ProductDistributionPie, HeatmapChart, TimeTrendChart } from './DashboardCharts';
 
+import { DashboardDateFilter } from './DashboardDateFilter';
+
 export default async function DashboardPage(props: { searchParams?: Promise<{ from?: string; to?: string }> }) {
   const session = await getSession();
   if (!session) return null;
@@ -39,10 +41,8 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ fr
           <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Dashboard Suporte</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Acompanhamento do time de Suporte</p>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <div className="badge" style={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-color)', color: 'var(--text-main)', padding: '0.5rem 1rem' }}>
-            {fromDate.toLocaleDateString('pt-BR')} - {toDate.toLocaleDateString('pt-BR')}
-          </div>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <DashboardDateFilter defaultFrom={fromDate} defaultTo={toDate} />
           {user.role === 'ADMIN' && <span className="badge" style={{ background: '#f0f9ff', color: '#0369a1', border: '1px solid #bae6fd' }}>MODO ADMIN</span>}
         </div>
       </div>
