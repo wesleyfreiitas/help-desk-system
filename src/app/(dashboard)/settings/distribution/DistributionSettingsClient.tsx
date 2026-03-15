@@ -34,15 +34,17 @@ export default function DistributionSettingsClient({ initialConfig, staff }: { i
       <div className="card-custom main-card">
         {/* Toggle Ativar */}
         <div className="activation-section">
-          <label className="switch-container">
-            <input 
-              type="checkbox" 
-              checked={config.enabled} 
-              onChange={e => setConfig({ ...config, enabled: e.target.checked })}
-            />
-            <span className="slider"></span>
+          <div className="switch-container">
+            <label className="switch">
+              <input 
+                type="checkbox" 
+                checked={config.enabled} 
+                onChange={e => setConfig({ ...config, enabled: e.target.checked })}
+              />
+              <span className="slider"></span>
+            </label>
             <span className="label-text">Ativar Distribuição Automática</span>
-          </label>
+          </div>
         </div>
 
         {config.enabled && (
@@ -172,43 +174,6 @@ export default function DistributionSettingsClient({ initialConfig, staff }: { i
           gap: 1rem;
           cursor: pointer;
           user-select: none;
-        }
-
-        .switch-container input {
-          display: none;
-        }
-
-        .slider {
-          position: relative;
-          width: 44px;
-          height: 24px;
-          background-color: var(--bg-elevated);
-          border: 1px solid var(--border-color);
-          border-radius: 99px;
-          transition: var(--transition);
-        }
-
-        .slider:before {
-          content: "";
-          position: absolute;
-          height: 18px;
-          width: 18px;
-          left: 2px;
-          bottom: 2px;
-          background-color: var(--surface);
-          border-radius: 50%;
-          transition: var(--transition);
-          box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        input:checked + .slider {
-          background-color: var(--primary);
-          border-color: var(--primary);
-        }
-
-        input:checked + .slider:before {
-          transform: translateX(20px);
-          background-color: white;
         }
 
         .label-text {

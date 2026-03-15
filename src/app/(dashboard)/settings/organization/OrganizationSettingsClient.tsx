@@ -61,33 +61,19 @@ export default function OrganizationSettingsClient({ initialRules }: { initialRu
             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1rem' }}>
               Permitir que usuários com papel de **Gerência (ORG_MANAGER)** visualizem chamados abertos por qualquer membro da mesma empresa.
             </p>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
-              <div className={`toggle-switch ${rules.managersCanViewAll ? 'active' : ''}`} 
-                   onClick={() => setRules(prev => ({ ...prev, managersCanViewAll: !prev.managersCanViewAll }))}
-                   style={{ 
-                     width: '44px', 
-                     height: '24px', 
-                     borderRadius: '12px', 
-                     background: rules.managersCanViewAll ? 'var(--primary)' : 'var(--bg-elevated)',
-                     border: '1px solid var(--border-color)',
-                     position: 'relative',
-                     transition: 'all 0.3s'
-                   }}>
-                <div style={{ 
-                  width: '18px', 
-                  height: '18px', 
-                  borderRadius: '50%', 
-                  background: 'var(--surface)', 
-                  position: 'absolute', 
-                  top: '2px', 
-                  left: rules.managersCanViewAll ? '22px' : '2px',
-                  transition: 'all 0.3s'
-                }} />
-              </div>
-              <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <label className="switch">
+                <input 
+                  type="checkbox" 
+                  checked={rules.managersCanViewAll} 
+                  onChange={() => setRules(prev => ({ ...prev, managersCanViewAll: !prev.managersCanViewAll }))}
+                />
+                <span className="slider"></span>
+              </label>
+              <span style={{ fontSize: '0.9rem', fontWeight: 500, color: rules.managersCanViewAll ? 'var(--primary)' : 'var(--text-muted)' }}>
                 {rules.managersCanViewAll ? 'Habilitado' : 'Desabilitado'}
               </span>
-            </label>
+            </div>
           </div>
         </div>
 
@@ -115,33 +101,19 @@ export default function OrganizationSettingsClient({ initialRules }: { initialRu
             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1rem' }}>
               Permitir que **Membros da Organização (ORG_MEMBER)** visualizem chamados abertos por outros membros da mesma empresa.
             </p>
-            <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
-              <div className={`toggle-switch ${rules.membersCanViewOthers ? 'active' : ''}`} 
-                   onClick={() => setRules(prev => ({ ...prev, membersCanViewOthers: !prev.membersCanViewOthers }))}
-                   style={{ 
-                     width: '44px', 
-                     height: '24px', 
-                     borderRadius: '12px', 
-                     background: rules.membersCanViewOthers ? 'var(--primary)' : 'var(--bg-elevated)',
-                     border: '1px solid var(--border-color)',
-                     position: 'relative',
-                     transition: 'all 0.3s'
-                   }}>
-                <div style={{ 
-                  width: '18px', 
-                  height: '18px', 
-                  borderRadius: '50%', 
-                  background: 'var(--surface)', 
-                  position: 'absolute', 
-                  top: '2px', 
-                  left: rules.membersCanViewOthers ? '22px' : '2px',
-                  transition: 'all 0.3s'
-                }} />
-              </div>
-              <span style={{ fontSize: '0.9rem', fontWeight: 500 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              <label className="switch">
+                <input 
+                  type="checkbox" 
+                  checked={rules.membersCanViewOthers} 
+                  onChange={() => setRules(prev => ({ ...prev, membersCanViewOthers: !prev.membersCanViewOthers }))}
+                />
+                <span className="slider"></span>
+              </label>
+              <span style={{ fontSize: '0.9rem', fontWeight: 500, color: rules.membersCanViewOthers ? 'var(--primary)' : 'var(--text-muted)' }}>
                 {rules.membersCanViewOthers ? 'Habilitado' : 'Desabilitado'}
               </span>
-            </label>
+            </div>
           </div>
         </div>
 
