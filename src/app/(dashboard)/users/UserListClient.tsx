@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Trash2, Search, Edit } from 'lucide-react';
 import Combobox from '@/components/Combobox';
 
-export default function UserListClient({ initialUsers, currentUserId, clients }: { initialUsers: any[], currentUserId: string, clients: any[] }) {
+export default function UserListClient({ initialUsers, currentUserId, userRole, clients }: { initialUsers: any[], currentUserId: string, userRole: string, clients: any[] }) {
   const [search, setSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
@@ -71,7 +71,7 @@ export default function UserListClient({ initialUsers, currentUserId, clients }:
           />
         </div>
         
-        {selectedIds.size > 0 && (
+        {selectedIds.size > 0 && userRole === 'ADMIN' && (
           <button 
             onClick={handleBulkDelete} 
             disabled={isDeleting}
@@ -100,20 +100,20 @@ export default function UserListClient({ initialUsers, currentUserId, clients }:
       <table className="data-table">
         <thead>
           <tr>
-            <th style={{ width: '40px' }}>
+            {userRole === 'ADMIN' && <th style={{ width: '40px' }}>
               <input 
                 type="checkbox" 
                 checked={filteredUsers.length > 0 && selectedIds.size === filteredUsers.length}
                 onChange={toggleSelectAll}
                 style={{ cursor: 'pointer' }}
               />
-            </th>
+            </th>}
             <th>Nome</th>
             <th>E-mail</th>
             <th>Perfil / Função</th>
             <th>Empresa Vinculada</th>
             <th>Data de Cadastro</th>
-            <th style={{ width: '60px', textAlign: 'center' }}>Ações</th>
+            {userRole === 'ADMIN' && <th style={{ width: '60px', textAlign: 'center' }}>Ações</th>}
           </tr>
         </thead>
         <tbody>
@@ -126,14 +126,16 @@ export default function UserListClient({ initialUsers, currentUserId, clients }:
           ) : (
             filteredUsers.map((u) => (
               <tr key={u.id}>
-                <td>
-                  <input 
-                    type="checkbox" 
-                    checked={selectedIds.has(u.id)}
-                    onChange={() => toggleSelect(u.id)}
-                    style={{ cursor: 'pointer' }}
-                  />
-                </td>
+                {userRole === 'ADMIN' && (
+                  <td>
+                    <input 
+                      type="checkbox" 
+                      checked={selectedIds.has(u.id)}
+                      onChange={() => toggleSelect(u.id)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  </td>
+                )}
                 <td style={{ fontWeight: 500 }}>
                   <Link href={`/users/${u.id}`} style={{ color: 'var(--text-main)', textDecoration: 'none' }}>
                     {u.name}
@@ -162,25 +164,27 @@ export default function UserListClient({ initialUsers, currentUserId, clients }:
                 </td>
                 <td>{u.client ? u.client.name : 'N/A (Staff)'}</td>
                 <td style={{ color: 'var(--text-muted)' }}>{new Date(u.createdAt).toLocaleDateString('pt-BR')}</td>
-                <td style={{ textAlign: 'center' }}>
-                  <button 
-                    onClick={() => {
-                      setEditingUser(u);
-                      setEditForm({
-                        name: u.name,
-                        email: u.email,
-                        phone: u.phone || '',
-                        role: u.role,
-                        clientId: u.clientId || ''
-                      });
-                    }}
-                    className="btn-outline-sm" 
-                    style={{ padding: '0.4rem', color: 'var(--text-muted)' }}
-                    title="Editar Usuário"
-                  >
-                    <Edit size={16} />
-                  </button>
-                </td>
+                {userRole === 'ADMIN' && (
+                  <td style={{ textAlign: 'center' }}>
+                    <button 
+                      onClick={() => {
+                        setEditingUser(u);
+                        setEditForm({
+                          name: u.name,
+                          email: u.email,
+                          phone: u.phone || '',
+                          role: u.role,
+                          clientId: u.clientId || ''
+                        });
+                      }}
+                      className="btn-outline-sm" 
+                      style={{ padding: '0.4rem', color: 'var(--text-muted)' }}
+                      title="Editar Usuário"
+                    >
+                      <Edit size={16} />
+                    </button>
+                  </td>
+                )}
               </tr>
             ))
           )}
