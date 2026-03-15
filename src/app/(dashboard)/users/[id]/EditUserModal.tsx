@@ -122,12 +122,11 @@ export default function EditUserModal({ user, clients, currentRole }: { user: an
                 </div>
               </div>
               
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
+              <div className="modal-footer">
                 <button 
                   type="button" 
                   onClick={() => setIsOpen(false)}
                   className="btn-outline"
-                  style={{ padding: '0.5rem 1rem' }}
                 >
                   Cancelar
                 </button>
@@ -135,7 +134,7 @@ export default function EditUserModal({ user, clients, currentRole }: { user: an
                   type="submit" 
                   className="btn-primary"
                   disabled={isSaving}
-                  style={{ padding: '0.5rem 1rem', width: 'auto' }}
+                  style={{ width: 'auto' }}
                 >
                   {isSaving ? 'Salvando...' : 'Salvar Alterações'}
                 </button>
