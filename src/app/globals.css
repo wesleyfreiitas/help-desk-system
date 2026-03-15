@@ -100,7 +100,9 @@ ul {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #e0f2fe 0%, #f1f5f9 100%);
+  background: var(--bg-color); /* Fallback */
+  background: radial-gradient(circle at top right, var(--primary-light), transparent), 
+              radial-gradient(circle at bottom left, var(--bg-color), transparent);
   padding: 1rem;
 }
 
@@ -111,7 +113,7 @@ ul {
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   padding: 2.5rem 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  border: 1px solid var(--border-color);
 }
 
 .login-header {
@@ -155,6 +157,25 @@ ul {
   color: var(--text-main);
   transition: var(--transition);
   outline: none;
+}
+
+.form-group select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  font-family: inherit;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background-color: var(--surface);
+  color: var(--text-main);
+  transition: var(--transition);
+  outline: none;
+  cursor: pointer;
+}
+
+.form-group select option {
+  background-color: var(--surface);
+  color: var(--text-main);
 }
 
 .form-group input:focus {
@@ -594,7 +615,7 @@ ul {
 }
 
 .btn-outline {
-  background: transparent;
+  background: var(--surface);
   border: 1px solid var(--border-color);
   color: var(--text-main);
   padding: 0.5rem 1rem;
@@ -725,7 +746,7 @@ ul {
 }
 
 .data-table th {
-  background-color: #f8fafc;
+  background-color: var(--bg-color);
   font-weight: 600;
   color: var(--text-muted);
   border-bottom: 1px solid var(--border-color);
@@ -1312,7 +1333,8 @@ ul {
 }
 
 .modal-content {
-  background: white;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
   box-shadow: var(--shadow-xl);
   display: flex;
@@ -1399,12 +1421,7 @@ ul {
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .modal-content {
-    background: white;
-    border: 1px solid #333;
-  }
-}
+/* Removed redundant @media query */
 
 /* MultiSelect Dropdown Premium */
 .ms-dropdown-container {
@@ -1416,9 +1433,9 @@ ul {
   width: 100%;
   padding: 0.85rem 1.1rem;
   border-radius: 12px;
-  border: 1.5px solid #e2e8f0;
-  background: white;
-  color: #1e293b;
+  border: 1.5px solid var(--border-color);
+  background: var(--surface);
+  color: var(--text-main);
   text-align: left;
   display: flex;
   justify-content: space-between;
@@ -1444,10 +1461,10 @@ ul {
   top: calc(100% + 8px);
   left: 0;
   right: 0;
-  background: white;
-  border: 1px solid #e2e8f0;
+  background: var(--surface);
+  border: 1px solid var(--border-color);
   border-radius: 12px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-lg);
   z-index: 2100;
   max-height: 250px;
   overflow-y: auto;
@@ -1464,12 +1481,12 @@ ul {
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.9rem;
-  color: #475569;
+  color: var(--text-main);
 }
 
 .ms-dropdown-item:hover {
-  background: #f1f5f9;
-  color: #1e293b;
+  background: var(--primary-light);
+  color: var(--primary);
 }
 
 .ms-dropdown-item.selected {
@@ -2086,7 +2103,8 @@ ul {
 }
 
 .nt-field:hover {
-  background: #fafbfc;
+  background: var(--primary-light);
+  opacity: 0.9;
 }
 
 .nt-field:last-child {
@@ -2168,7 +2186,7 @@ ul {
   padding: 0.6rem 0.85rem;
   font-size: 0.88rem;
   color: var(--text-muted);
-  background: #f8fafc;
+  background: var(--bg-color);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   font-style: italic;
