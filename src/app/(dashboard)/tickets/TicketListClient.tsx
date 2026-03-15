@@ -367,7 +367,7 @@ export default function TicketListClient({ tickets, userId, users, options }: Pr
                       <Link href={`/tickets/${ticket.id}`} className="ticket-title">
                         {ticket.title}
                       </Link>
-                      <span className="ticket-id">#{ticket.id.slice(0, 6).toUpperCase()}</span>
+                      <span className="ticket-id">#{ticket.protocol || ticket.id.slice(0, 6).toUpperCase()}</span>
                     </div>
 
                     {hoveredTicketId === ticket.id && (
