@@ -38,15 +38,26 @@ export default function SSOSettingsClient({ initialConfig }: { initialConfig: SS
         </button>
       </div>
 
-      <div className="card" style={{ padding: '1.5rem', background: 'var(--bg-card)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-        <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem', fontWeight: 500 }}>
+      <div className="card" style={{ padding: '2rem', background: 'var(--bg-card)', borderRadius: '12px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
+        <div style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'space-between', 
+          paddingBottom: '2rem', 
+          marginBottom: '2rem', 
+          borderBottom: '1px solid var(--border-color)' 
+        }}>
+          <div>
+            <h4 style={{ fontWeight: 600, fontSize: '1rem', marginBottom: '0.25rem' }}>Ativar Integração</h4>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Habilite ou desabilite o login automático via API Helena.</p>
+          </div>
+          <label className="switch">
             <input 
               type="checkbox" 
               checked={config.enabled} 
               onChange={e => setConfig({...config, enabled: e.target.checked})}
             />
-            Ativar Login Automático (Single Sign-On)
+            <span className="slider"></span>
           </label>
         </div>
 
