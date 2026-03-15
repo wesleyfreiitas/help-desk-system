@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Combobox from '@/components/Combobox';
 
 export default function ClientSelector({ clients }: { clients: any[] }) {
   const [role, setRole] = useState('ORG_MEMBER');
@@ -26,18 +27,17 @@ export default function ClientSelector({ clients }: { clients: any[] }) {
 
       {['ORG_MEMBER', 'ORG_MANAGER', 'CLIENT'].includes(role) && (
         <div className="form-group" style={{ marginBottom: 0 }}>
-           <label htmlFor="clientId">Empresa (Apenas para Membros/Gerentes)</label>
-           <select 
-             id="clientId" 
-             name="clientId" 
-             required 
-             style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none' }}
-           >
-             <option value="">-- Selecione a Empresa --</option>
-             {clients.map((client: any) => (
-               <option key={client.id} value={client.id}>{client.name}</option>
-             ))}
-           </select>
+           <label>Empresa (Apenas para Membros/Gerentes)</label>
+           <Combobox 
+             name="clientId"
+             placeholder="Pesquisar empresa por nome ou documento..."
+             required
+             items={clients.map((client: any) => ({
+               id: client.id,
+               label: client.name,
+               subLabel: client.document
+             }))}
+           />
         </div>
       )}
     </>
