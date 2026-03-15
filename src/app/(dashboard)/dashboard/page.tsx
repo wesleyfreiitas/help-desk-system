@@ -51,7 +51,7 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ fr
     include: { client: { include: { users: true } }, product: true, assignee: true, requester: true }
   });
 
-  if (user.role === 'CLIENT') {
+  if (['CLIENT', 'ORG_MANAGER', 'ORG_MEMBER'].includes(user.role)) {
     return <ClientPortalDashboard stats={stats} recentTickets={recentTickets} />;
   }
 

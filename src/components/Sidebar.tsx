@@ -12,8 +12,8 @@ export default function Sidebar({ user }: { user: any }) {
   };
 
   const navItems = [
-    { label: 'Dashboard', href: '/dashboard', roles: ['ADMIN', 'ATTENDANT', 'CLIENT'] },
-    { label: 'Chamados', href: '/tickets', roles: ['ADMIN', 'ATTENDANT', 'CLIENT'] },
+    { label: 'Dashboard', href: '/dashboard', roles: ['ADMIN', 'ATTENDANT', 'CLIENT', 'ORG_MANAGER', 'ORG_MEMBER'] },
+    { label: 'Chamados', href: '/tickets', roles: ['ADMIN', 'ATTENDANT', 'CLIENT', 'ORG_MANAGER', 'ORG_MEMBER'] },
     { label: 'Empresas', href: '/companies', roles: ['ADMIN', 'ATTENDANT'] },
     { label: 'Produtos', href: '/products', roles: ['ADMIN', 'ATTENDANT'] },
     { label: 'Categorias', href: '/categories', roles: ['ADMIN', 'ATTENDANT'] },
@@ -42,7 +42,7 @@ export default function Sidebar({ user }: { user: any }) {
                 href={item.href} 
                 className={`nav-item ${pathname === item.href || pathname.startsWith(item.href + '/') ? 'active' : ''}`}
               >
-                {item.label === 'Dashboard' && user.role === 'CLIENT' ? 'Portal do Cliente' : item.label}
+                {item.label === 'Dashboard' && ['CLIENT', 'ORG_MANAGER', 'ORG_MEMBER'].includes(user.role) ? 'Portal do Cliente' : item.label}
               </Link>
             </li>
           ))}

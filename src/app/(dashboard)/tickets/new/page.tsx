@@ -12,7 +12,7 @@ export default async function NewTicketPage(props: { searchParams: Promise<{ con
   if (!session) return null;
   const user = session.user;
 
-  const isInternalUser = user.role !== 'CLIENT';
+  const isInternalUser = !['CLIENT', 'ORG_MANAGER', 'ORG_MEMBER'].includes(user.role);
 
   // Contatos: usuários com role CLIENT (possuem clientId)
   const contacts = isInternalUser
