@@ -77,8 +77,8 @@ export default function CannedResponsesManager({ initialResponses }: CannedRespo
 
       {isEditing && (
         <form onSubmit={handleSave} className="canned-response-form-container">
-          <div className="nt-field" style={{ border: '1px solid var(--border-color)', borderBottom: 'none', borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0', background: 'white' }}>
-            <label className="nt-label">Título da Resposta</label>
+          <div className="nt-field" style={{ border: '1px solid var(--border-color)', borderBottom: 'none', borderRadius: 'var(--radius-lg) var(--radius-lg) 0 0', background: 'var(--bg-card)' }}>
+            <label className="nt-label" style={{ color: 'var(--primary)', opacity: 0.8 }}>Título da Resposta</label>
             <input 
               type="text" 
               className="nt-input" 
@@ -91,8 +91,8 @@ export default function CannedResponsesManager({ initialResponses }: CannedRespo
 
           <div className="email-composer-wrapper" style={{ marginTop: 0, borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
             {/* Título da seção de conteúdo similar ao label NT */}
-            <div style={{ padding: '0.85rem 1.5rem 0', background: 'white' }}>
-               <label className="nt-label">Conteúdo da Resposta</label>
+            <div style={{ padding: '0.85rem 1.5rem 0', background: 'var(--bg-card)' }}>
+               <label className="nt-label" style={{ color: 'var(--primary)', opacity: 0.8 }}>Conteúdo da Resposta</label>
             </div>
             
             <div className="email-composer-body">

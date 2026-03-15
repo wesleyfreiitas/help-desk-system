@@ -172,18 +172,18 @@ export default function ImportClient({ organizationId }: { organizationId: strin
       {/* Progress Steps */}
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '2rem', gap: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: step >= 1 ? 1 : 0.5, fontWeight: step === 1 ? 600 : 400 }}>
-          <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: step >= 1 ? 'var(--primary-color)' : '#e2e8f0', color: step >= 1 ? '#fff' : 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>1</div>
-          <span>Upload</span>
+          <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: step >= 1 ? 'var(--primary)' : 'var(--bg-elevated)', border: '1px solid var(--border-color)', color: step >= 1 ? '#fff' : 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>1</div>
+          <span style={{ color: 'var(--text-main)' }}>Upload</span>
         </div>
-        <div style={{ height: '2px', flex: 1, background: step >= 2 ? 'var(--primary-color)' : '#e2e8f0' }} />
+        <div style={{ height: '2px', flex: 1, background: step >= 2 ? 'var(--primary)' : 'var(--border-color)' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: step >= 2 ? 1 : 0.5, fontWeight: step === 2 ? 600 : 400 }}>
-          <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: step >= 2 ? 'var(--primary-color)' : '#e2e8f0', color: step >= 2 ? '#fff' : 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>2</div>
-          <span>Validar & Mapear</span>
+          <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: step >= 2 ? 'var(--primary)' : 'var(--bg-elevated)', border: '1px solid var(--border-color)', color: step >= 2 ? '#fff' : 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>2</div>
+          <span style={{ color: 'var(--text-main)' }}>Validar & Mapear</span>
         </div>
-        <div style={{ height: '2px', flex: 1, background: step >= 3 ? 'var(--primary-color)' : '#e2e8f0' }} />
+        <div style={{ height: '2px', flex: 1, background: step >= 3 ? 'var(--primary)' : 'var(--border-color)' }} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: step >= 3 ? 1 : 0.5, fontWeight: step === 3 ? 600 : 400 }}>
-          <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: step >= 3 ? 'var(--primary-color)' : '#e2e8f0', color: step >= 3 ? '#fff' : 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>3</div>
-          <span>Processar</span>
+          <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: step >= 3 ? 'var(--primary)' : 'var(--bg-elevated)', border: '1px solid var(--border-color)', color: step >= 3 ? '#fff' : 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px' }}>3</div>
+          <span style={{ color: 'var(--text-main)' }}>Processar</span>
         </div>
       </div>
 
@@ -217,10 +217,18 @@ export default function ImportClient({ organizationId }: { organizationId: strin
           />
         </div>
         
-        <div style={{ padding: '1rem', background: '#f8fafc', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-          <AlertTriangle size={20} color="#eab308" style={{ flexShrink: 0, marginTop: '2px' }} />
-          <div style={{ fontSize: '0.9rem', color: '#475569' }}>
-            <span style={{ fontWeight: 600, color: '#334155' }}>Dica importante:</span> Se os seus chamados possuem <strong style={{ color: '#0f172a' }}>emojis ou caracteres complexos</strong>, certifique-se de salvar sua planilha no Excel através do formato <strong>"CSV UTF-8 (delimitado por vírgulas) (*.csv)"</strong>.
+        <div style={{ 
+          padding: '1rem', 
+          background: 'rgba(2, 132, 199, 0.1)', 
+          borderRadius: '8px', 
+          border: '1px solid rgba(2, 132, 199, 0.2)', 
+          display: 'flex', 
+          gap: '1rem', 
+          alignItems: 'flex-start' 
+        }}>
+          <AlertTriangle size={20} style={{ color: 'var(--primary)', flexShrink: 0, marginTop: '2px' }} />
+          <div style={{ fontSize: '0.9rem', color: 'var(--text-main)', opacity: 0.9 }}>
+            <span style={{ fontWeight: 600, color: 'var(--primary)' }}>Dica importante:</span> Se os seus chamados possuem <strong style={{ color: 'var(--text-main)' }}>emojis ou caracteres complexos</strong>, certifique-se de salvar sua planilha no Excel através do formato <strong>"CSV UTF-8 (delimitado por vírgulas) (*.csv)"</strong>.
           </div>
         </div>
       </div>
@@ -248,7 +256,7 @@ export default function ImportClient({ organizationId }: { organizationId: strin
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
             {systemFields.map(field => (
-              <div key={field.key} style={{ padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '8px', background: '#fff' }}>
+              <div key={field.key} style={{ padding: '1rem', border: '1px solid var(--border-color)', borderRadius: '8px', background: 'var(--bg-card)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                   <label style={{ fontWeight: 500, fontSize: '0.9rem' }}>
                     {field.label} {field.required && <span style={{ color: '#ef4444' }}>*</span>}
@@ -298,22 +306,22 @@ export default function ImportClient({ organizationId }: { organizationId: strin
               <h4 style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '0.5rem' }}>Importação Finalizada!</h4>
               
               <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', margin: '2rem 0' }}>
-                <div style={{ padding: '1rem 2rem', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px' }}>
-                  <div style={{ fontSize: '2rem', fontWeight: 700, color: '#15803d' }}>{results?.success}</div>
-                  <div style={{ color: '#166534', fontWeight: 500 }}>Registros Importados</div>
+                <div style={{ padding: '1rem 2rem', background: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(34, 197, 94, 0.2)', borderRadius: '8px' }}>
+                  <div style={{ fontSize: '2rem', fontWeight: 700, color: '#22c55e' }}>{results?.success}</div>
+                  <div style={{ color: '#22c55e', fontWeight: 500 }}>Registros Importados</div>
                 </div>
                 {results?.errors && results.errors > 0 ? (
-                  <div style={{ padding: '1rem 2rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px' }}>
-                    <div style={{ fontSize: '2rem', fontWeight: 700, color: '#b91c1c' }}>{results?.errors}</div>
-                    <div style={{ color: '#991b1b', fontWeight: 500 }}>Erros Encontrados</div>
+                  <div style={{ padding: '1rem 2rem', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px' }}>
+                    <div style={{ fontSize: '2rem', fontWeight: 700, color: '#ef4444' }}>{results?.errors}</div>
+                    <div style={{ color: '#ef4444', fontWeight: 500 }}>Erros Encontrados</div>
                   </div>
                 ) : null}
               </div>
 
               {results?.log && results.log.length > 0 && (
-                <div style={{ marginTop: '1rem', marginBottom: '2rem', textAlign: 'left', background: '#fff1f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '1rem' }}>
-                  <h4 style={{ color: '#9f1239', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.95rem' }}>Detalhes do Erro:</h4>
-                  <ul style={{ margin: 0, paddingLeft: '1.2rem', color: '#be123c', fontSize: '0.85rem', lineHeight: 1.5 }}>
+                <div style={{ marginTop: '1rem', marginBottom: '2rem', textAlign: 'left', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', padding: '1rem' }}>
+                  <h4 style={{ color: '#ef4444', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.95rem' }}>Detalhes do Erro:</h4>
+                  <ul style={{ margin: 0, paddingLeft: '1.2rem', color: 'var(--text-main)', opacity: 0.8, fontSize: '0.85rem', lineHeight: 1.5 }}>
                     {results.log.map((logItem: string, idx: number) => (
                       <li key={idx} style={{ marginBottom: '0.25rem' }}>{logItem}</li>
                     ))}

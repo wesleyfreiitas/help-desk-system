@@ -128,8 +128,8 @@ export default function EmailSettingsClient({ initialConfig }: { initialConfig: 
           </div>
 
           <div style={{ 
-            background: '#f8fafc', 
-            border: '1px solid #e2e8f0', 
+            background: 'rgba(2, 132, 199, 0.1)', 
+            border: '1px solid rgba(2, 132, 199, 0.2)', 
             borderRadius: '12px', 
             padding: '1.5rem',
             marginTop: '1rem'
@@ -175,7 +175,7 @@ export default function EmailSettingsClient({ initialConfig }: { initialConfig: 
             alignItems: 'center', 
             gap: '0.5rem', 
             fontSize: '0.9rem', 
-            color: message.type === 'success' ? '#166534' : '#991b1b',
+            color: message.type === 'success' ? '#22c55e' : '#ef4444',
             fontWeight: 500
           }}>
             {message.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}

@@ -182,7 +182,8 @@ export default function DistributionSettingsClient({ initialConfig, staff }: { i
           position: relative;
           width: 44px;
           height: 24px;
-          background-color: #cbd5e1;
+          background-color: var(--bg-elevated);
+          border: 1px solid var(--border-color);
           border-radius: 99px;
           transition: var(--transition);
         }
@@ -192,9 +193,9 @@ export default function DistributionSettingsClient({ initialConfig, staff }: { i
           position: absolute;
           height: 18px;
           width: 18px;
-          left: 3px;
-          bottom: 3px;
-          background-color: white;
+          left: 2px;
+          bottom: 2px;
+          background-color: var(--surface);
           border-radius: 50%;
           transition: var(--transition);
           box-shadow: 0 1px 3px rgba(0,0,0,0.1);
@@ -202,10 +203,12 @@ export default function DistributionSettingsClient({ initialConfig, staff }: { i
 
         input:checked + .slider {
           background-color: var(--primary);
+          border-color: var(--primary);
         }
 
         input:checked + .slider:before {
           transform: translateX(20px);
+          background-color: white;
         }
 
         .label-text {
@@ -403,7 +406,7 @@ export default function DistributionSettingsClient({ initialConfig, staff }: { i
           align-items: center;
           justify-content: center;
           transition: var(--transition);
-          background: white;
+          background: var(--bg-elevated);
         }
 
         .custom-check.checked {
@@ -440,8 +443,8 @@ export default function DistributionSettingsClient({ initialConfig, staff }: { i
         }
 
         .info-box {
-          background-color: #eff6ff;
-          border: 1px solid #bfdbfe;
+          background-color: rgba(2, 132, 199, 0.1);
+          border: 1px solid rgba(2, 132, 199, 0.2);
           border-radius: var(--radius-lg);
           padding: 1.25rem;
           display: flex;
@@ -456,13 +459,14 @@ export default function DistributionSettingsClient({ initialConfig, staff }: { i
         .info-text h5 {
           font-size: 0.95rem;
           font-weight: 700;
-          color: #1e3a8a;
+          color: var(--text-main);
           margin-bottom: 0.25rem;
         }
 
         .info-text p {
           font-size: 0.85rem;
-          color: #1e40af;
+          color: var(--text-main);
+          opacity: 0.8;
           line-height: 1.5;
         }
 
