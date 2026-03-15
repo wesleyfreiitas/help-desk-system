@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
-import { Clock, CheckCircle2, AlertCircle, Inbox, MessageSquare, TrendingUp, Info } from 'lucide-react';
+import { Clock, CheckCircle2, AlertCircle, Inbox, MessageSquare, TrendingUp, Info, PlayCircle } from 'lucide-react';
 import Link from 'next/link';
 import { getDashboardStats } from '@/lib/analytics';
 import { subDays, startOfDay, endOfDay } from 'date-fns';
@@ -83,8 +83,8 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ fr
         </div>
       </div>
 
-      <div className="dashboard-grid" style={{ marginTop: '1.5rem' }}>
-        <div className="stat-card" style={{ borderLeft: '4px solid #e0e7ff' }}>
+      <div className="dashboard-grid dashboard-grid-4" style={{ marginTop: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
+        <div className="stat-card" style={{ borderLeft: '4px solid #6366f1' }}>
            <div style={{display:'flex', justifyContent:'space-between', marginBottom: '0.5rem'}}>
              <span className="stat-title">Tickets Criados</span>
              <Inbox size={20} color="#6366f1" />
@@ -92,17 +92,25 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ fr
            <span className="stat-value">{stats.metrics.createdCount}</span>
         </div>
 
-        <div className="stat-card" style={{ borderLeft: '4px solid #fef3c7' }}>
+        <div className="stat-card" style={{ borderLeft: '4px solid #0ea5e9' }}>
            <div style={{display:'flex', justifyContent:'space-between', marginBottom: '0.5rem'}}>
-             <span className="stat-title">Tickets Pendentes</span>
+             <span className="stat-title" title="Abertos e Em Andamento">Tickets Abertos <Info size={12} style={{verticalAlign:'middle'}}/></span>
+             <PlayCircle size={20} color="#0ea5e9" />
+           </div>
+           <span className="stat-value">{stats.metrics.openCount}</span>
+        </div>
+
+        <div className="stat-card" style={{ borderLeft: '4px solid #f59e0b' }}>
+           <div style={{display:'flex', justifyContent:'space-between', marginBottom: '0.5rem'}}>
+             <span className="stat-title" title="Pendentes, Aguardando Cliente ou Terceiro">Tickets Pendentes <Info size={12} style={{verticalAlign:'middle'}}/></span>
              <AlertCircle size={20} color="#f59e0b" />
            </div>
            <span className="stat-value">{stats.metrics.pendingCount}</span>
         </div>
 
-        <div className="stat-card" style={{ borderLeft: '4px solid #d1fae5' }}>
+        <div className="stat-card" style={{ borderLeft: '4px solid #10b981' }}>
            <div style={{display:'flex', justifyContent:'space-between', marginBottom: '0.5rem'}}>
-             <span className="stat-title">Tickets Fechados</span>
+             <span className="stat-title" title="Resolvidos e Fechados">Tickets Fechados <Info size={12} style={{verticalAlign:'middle'}}/></span>
              <CheckCircle2 size={20} color="#10b981" />
            </div>
            <span className="stat-value">{stats.metrics.closedCount}</span>

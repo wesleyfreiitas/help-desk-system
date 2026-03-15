@@ -30,7 +30,10 @@ export async function getDashboardStats(whereClause: any, dateRange: { from: Dat
 
   const createdCount = ticketsPeriod.length;
   const closedCount = ticketsPeriod.filter(t => ['RESOLVIDO', 'FECHADO'].includes(t.status || '')).length;
-  const pendingCount = ticketsPeriod.filter(t => !['RESOLVIDO', 'FECHADO', 'CANCELADO'].includes(t.status || '')).length;
+  // Abertos (Na mão da operação - ABERTO, EM_ANDAMENTO)
+  const openCount = ticketsPeriod.filter(t => ['ABERTO', 'EM_ANDAMENTO'].includes(t.status || '')).length;
+  // Pendentes (Congelados ou esperando ação - PENDENTE, AGUARDANDO_CLIENTE, AGUARDANDO_TERCEIRO)
+  const pendingCount = ticketsPeriod.filter(t => ['PENDENTE', 'AGUARDANDO_CLIENTE', 'AGUARDANDO_TERCEIRO'].includes(t.status || '')).length;
 
   // Cálculos de Tempo (MTTR e Primeira Resposta) em Horas
   let totalResolutionTime = 0;
@@ -220,7 +223,7 @@ export async function getDashboardStats(whereClause: any, dateRange: { from: Dat
   const reopenedTotal = ticketsPeriod.reduce((acc, t) => acc + (t.reopenedCount || 0), 0);
 
   return {
-    metrics: { mttr, mfrr, slaCompliance, createdCount, pendingCount, closedCount, reopenedTotal },
+    metrics: { mttr, mfrr, slaCompliance, createdCount, openCount, pendingCount, closedCount, reopenedTotal },
     backlog: { initial: initialBacklog, opened: createdCount, closed: closedCount, final: finalBalance },
     rankings: { clients: rankedClients, categories: rankedCategories, products: rankedProducts, inactiveB2B: rankedInactiveB2B },
     timeSeries,
