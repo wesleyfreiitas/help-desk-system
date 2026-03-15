@@ -21,7 +21,8 @@ export async function createClient(formData: FormData) {
       document,
       email: email || null,
       phone: phone || null,
-      website: website || null
+      website: website || null,
+      active: formData.get('active') === 'on'
     }
   });
 
@@ -254,7 +255,7 @@ export async function updateProduct(productId: string, data: { name: string }) {
   });
 }
 
-export async function updateClient(clientId: string, data: { name: string, document: string, email?: string | null, phone?: string | null, website?: string | null }) {
+export async function updateClient(clientId: string, data: { name: string, document: string, email?: string | null, phone?: string | null, website?: string | null, active?: boolean }) {
   const session = await getSession();
   if (!session || session.user.role === 'CLIENT') throw new Error('Unauthorized');
 
@@ -265,7 +266,8 @@ export async function updateClient(clientId: string, data: { name: string, docum
       document: data.document,
       email: data.email || null,
       phone: data.phone || null,
-      website: data.website || null
+      website: data.website || null,
+      active: data.active !== undefined ? data.active : undefined
     }
   });
 

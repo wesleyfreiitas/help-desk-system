@@ -14,7 +14,8 @@ export default function EditClientModal({ client }: { client: any }) {
     document: client.document,
     email: client.email || '',
     phone: client.phone || '',
-    website: client.website || ''
+    website: client.website || '',
+    active: client.active ?? true
   });
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
@@ -51,7 +52,8 @@ export default function EditClientModal({ client }: { client: any }) {
         document: formData.document.trim(),
         email: formData.email.trim() || null,
         phone: formData.phone.trim() || null,
-        website: formData.website.trim() || null
+        website: formData.website.trim() || null,
+        active: formData.active
       });
       
       // Update custom fields if any
@@ -147,6 +149,17 @@ export default function EditClientModal({ client }: { client: any }) {
                       onChange={(e) => setFormData(prev => ({ ...prev, website: e.target.value }))}
                       className="form-control"
                     />
+                  </div>
+
+                  <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0' }}>
+                    <input 
+                      type="checkbox" 
+                      id="edit-active" 
+                      checked={formData.active} 
+                      onChange={(e) => setFormData(prev => ({ ...prev, active: e.target.checked }))}
+                      style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--primary)' }} 
+                    />
+                    <label htmlFor="edit-active" style={{ fontSize: '0.92rem', fontWeight: 600, color: 'var(--text-main)', cursor: 'pointer' }}>Empresa Ativa</label>
                   </div>
 
                   {allFields.length > 0 && (

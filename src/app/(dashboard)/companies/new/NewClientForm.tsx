@@ -67,6 +67,18 @@ export default function NewClientForm({ customFields }: { customFields: any[] })
         </div>
       </div>
 
+      <div className="form-group" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0' }}>
+        <input 
+          type="checkbox" 
+          id="active" 
+          name="active" 
+          defaultChecked 
+          style={{ width: '18px', height: '18px', cursor: 'pointer', accentColor: 'var(--primary)' }} 
+        />
+        <label htmlFor="active" style={{ fontSize: '0.92rem', fontWeight: 600, color: 'var(--text-main)', cursor: 'pointer' }}>Empresa Ativa</label>
+        <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', margin: 0 }}>Define se a empresa está ativa para novos chamados e usuários.</p>
+      </div>
+
       {customFields.length > 0 && (
         <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem', marginTop: '0.5rem' }}>
           <h4 style={{ fontSize: '1rem', marginBottom: '1.25rem', color: 'var(--text-muted)', fontWeight: 600 }}>Campos Personalizados</h4>

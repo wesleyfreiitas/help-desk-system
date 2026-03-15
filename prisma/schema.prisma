@@ -35,6 +35,7 @@ model Client {
   email     String?
   phone     String?
   website   String?
+  active    Boolean  @default(true)
   users     User[]
   tickets   Ticket[]
   customFields CustomFieldValue[]

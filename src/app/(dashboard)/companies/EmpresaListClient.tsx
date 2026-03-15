@@ -103,6 +103,7 @@ export default function ClientListClient({ initialClients }: { initialClients: a
             <th>Razão Social / Nome</th>
             <th>CNPJ / Documento</th>
             <th>Contato</th>
+            <th style={{ textAlign: 'center' }}>Status</th>
             <th>Usuários</th>
             <th>Chamados</th>
             <th style={{ width: '60px', textAlign: 'center' }}>Ações</th>
@@ -133,6 +134,24 @@ export default function ClientListClient({ initialClients }: { initialClients: a
                 </td>
                 <td>{client.document}</td>
                 <td style={{ color: 'var(--text-muted)' }}>{client.email || 'N/A'}<br />{client.phone}</td>
+                <td style={{ textAlign: 'center' }}>
+                  <span style={{ 
+                    padding: '0.25rem 0.6rem', 
+                    borderRadius: '20px', 
+                    fontSize: '0.75rem', 
+                    fontWeight: 650,
+                    textTransform: 'uppercase',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    backgroundColor: client.active ? '#dcfce7' : '#fee2e2',
+                    color: client.active ? '#166534' : '#991b1b',
+                    border: `1px solid ${client.active ? '#bbf7d0' : '#fecaca'}`
+                  }}>
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: client.active ? '#22c55e' : '#ef4444' }} />
+                    {client.active ? 'Ativo' : 'Inativo'}
+                  </span>
+                </td>
                 <td>{client._count.users}</td>
                 <td>{client._count.tickets}</td>
                 <td style={{ textAlign: 'center' }}>
