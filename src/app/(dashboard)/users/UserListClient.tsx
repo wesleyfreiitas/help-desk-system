@@ -74,8 +74,21 @@ export default function UserListClient({ initialUsers, currentUserId, clients }:
           <button 
             onClick={handleBulkDelete} 
             disabled={isDeleting}
-            className="btn-primary" 
-            style={{ width: 'auto', background: '#fee2e2', color: '#991b1b', border: '1px solid #fca5a5' }}
+            style={{ 
+              width: 'auto', 
+              background: '#ef4444', 
+              color: 'white', 
+              border: '1px solid #dc2626', 
+              padding: '0.5rem 1rem', 
+              borderRadius: '6px', 
+              cursor: 'pointer', 
+              display: 'flex', 
+              alignItems: 'center', 
+              fontSize: '0.875rem', 
+              fontWeight: 500,
+              transition: 'background 0.2s',
+              boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
+            }}
           >
             <Trash2 size={16} style={{ marginRight: '0.5rem' }} />
             Excluir ({selectedIds.size})
