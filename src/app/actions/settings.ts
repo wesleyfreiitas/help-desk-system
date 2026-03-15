@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation';
 
 export async function getSystemSetting(key: string) {
   try {
@@ -83,4 +84,53 @@ export async function sendWhatsAppMessage(to: string, contactName: string) {
     console.error('WhatsApp API Error:', error);
     throw new Error(error.message || 'Falha ao enviar mensagem de WhatsApp');
   }
+}
+
+// Opções de Ticket (Status, Prioridade, etc)
+export async function upsertTicketOption(formData: FormData) {
+  const session = await getSession();
+  if (!session || session.user.role !== 'ADMIN') throw new Error('Unauthorized');
+
+  const id = formData.get('id') as string;
+  const type = formData.get('type') as string;
+  const label = formData.get('label') as string;
+  const value = formData.get('value') as string;
+  const color = formData.get('color') as string;
+  const order = parseInt(formData.get('order') as string || '0');
+
+  if (id) {
+    await prisma.ticketOption.update({
+      where: { id },
+      data: { 
+        type, 
+        label, 
+        value, 
+        color: color || null, 
+        order 
+      }
+    });
+  } else {
+    await prisma.ticketOption.create({
+      data: { 
+        type, 
+        label, 
+        value, 
+        color: color || null, 
+        order 
+      }
+    });
+  }
+
+  revalidatePath('/settings/options');
+}
+
+export async function deleteTicketOption(id: string) {
+  const session = await getSession();
+  if (!session || session.user.role !== 'ADMIN') throw new Error('Unauthorized');
+
+  await prisma.ticketOption.delete({
+    where: { id }
+  });
+
+  revalidatePath('/settings/options');
 }
