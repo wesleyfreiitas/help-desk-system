@@ -92,8 +92,6 @@ export default async function UserDetailsPage({ params }: { params: Promise<{ id
                     {/* Tabs */}
                     <div className="detail-tabs">
                         <button className="detail-tab active">TIMELINE</button>
-                        <button className="detail-tab">CHAMADOS</button>
-                        <button className="detail-tab">NOTAS</button>
                     </div>
 
                     {/* Timeline Content */}
