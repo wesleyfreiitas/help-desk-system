@@ -12,7 +12,6 @@ function LoginContent() {
   const [isAutoLogging, setIsAutoLogging] = useState(false);
   const [autoLoginError, setAutoLoginError] = useState<string | null>(null);
   
-  // Ref para evitar loops e múltiplas chamadas simultâneas
   const loginAttemptInProgress = useRef(false);
 
   useEffect(() => {
@@ -20,46 +19,58 @@ function LoginContent() {
     const companyParam = searchParams.get('company');
 
     if (userParam && companyParam && !loginAttemptInProgress.current) {
+      console.log('✅ [SSO] Parâmetros detectados:', { user: userParam, company: companyParam });
+      
       const performAutoLogin = async () => {
-        // Verifica se já não estamos logados antes de tentar
-        const alreadyLogged = await checkSessionAction();
-        if (alreadyLogged) {
-          console.log('User already authenticated. Redirecting to dashboard...');
-          router.push('/dashboard');
-          return;
-        }
-
-        console.log('Starting auto-login process for:', userParam);
-        loginAttemptInProgress.current = true;
-        setIsAutoLogging(true);
-        
         try {
-          console.log('Calling autoLoginAction...');
-          const result = await autoLoginAction(userParam, companyParam);
+          console.log('🔎 [SSO] Verificando sessão existente...');
+          const alreadyLogged = await checkSessionAction();
           
+          if (alreadyLogged) {
+            console.log('✨ [SSO] Usuário já autenticado. Pulando para o Dashboard.');
+            router.replace('/dashboard');
+            return;
+          }
+
+          console.log('🚀 [SSO] Iniciando chamada de auto-login no servidor...');
+          loginAttemptInProgress.current = true;
+          setIsAutoLogging(true);
+          
+          const result = await autoLoginAction(userParam, companyParam);
+          console.log('📦 [SSO] Resposta do servidor recebida:', result);
+
           if (result && result.success) {
-            console.log('Auto-login successful, forcing redirect to dashboard...');
-            // window.location.href é mais garantido em iframes do que o roteador do Next
-            window.location.href = '/dashboard';
+            console.log('🎉 [SSO] Sucesso! Verificando se o cookie foi aceito...');
+            
+            // Pequeno delay para garantir que o navegador processou o cookie
+            setTimeout(async () => {
+              const checkCookie = await checkSessionAction();
+              if (!checkCookie) {
+                console.error('🚫 [SSO] Cookie de sessão BLOQUEADO pelo navegador (provavelmente política de Iframe/Cookies de terceiros).');
+                setAutoLoginError('Seu navegador está bloqueando cookies de terceiros. Por favor, habilite-os para usar o sistema embedado.');
+                setIsAutoLogging(false);
+                loginAttemptInProgress.current = false;
+              } else {
+                console.log('✅ [SSO] Cookie confirmado. Redirecionando...');
+                window.location.replace('/dashboard');
+              }
+            }, 500);
             return;
           }
 
           if (result && result.error) {
-            console.error('Auto-login failed with error:', result.error);
+            console.error('❌ [SSO] Erro retornado pela Action:', result.error);
             setAutoLoginError(result.error);
             setIsAutoLogging(false);
             loginAttemptInProgress.current = false;
           }
         } catch (err: any) {
-          console.error('Unexpected error during auto-login:', err);
-          // Se for o erro de redirecionamento do Next, ignoramos
-          if (err.message === 'NEXT_REDIRECT') {
-            console.log('Next.js redirecting...');
-            return;
+          console.error('💥 [SSO] Erro inesperado no fluxo:', err);
+          if (err.message !== 'NEXT_REDIRECT') {
+            setAutoLoginError('Falha técnica no login automático. Verifique o console.');
+            setIsAutoLogging(false);
+            loginAttemptInProgress.current = false;
           }
-          setAutoLoginError('Erro técnico na autenticação. Verifique o console.');
-          setIsAutoLogging(false);
-          loginAttemptInProgress.current = false;
         }
       };
 
@@ -74,9 +85,9 @@ function LoginContent() {
           <div className="loader" style={{ margin: '0 auto 1.5rem auto' }}></div>
           <h2>Autenticando...</h2>
           <p>Validando acesso via Uppchannel</p>
-          {autoLoginError && (
-             <div className="error-message" style={{ marginTop: '1rem' }}>{autoLoginError}</div>
-          )}
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '1rem' }}>
+            Isso pode levar alguns segundos dependendo da conexão.
+          </p>
         </div>
       </div>
     );
@@ -85,7 +96,7 @@ function LoginContent() {
   return (
     <div className="login-container">
       <div className="login-box">
-        <div className="login-header">
+        <div className="login-header" style={{ textAlign: 'center' }}>
           <img 
             src="https://suporte.absolutatelecom.com.br/arquivos/files/logo_u_black.png" 
             alt="Upp Logo" 
@@ -124,7 +135,22 @@ function LoginContent() {
           </div>
 
           {(state?.error || autoLoginError) && (
-            <div className="error-message">{state?.error || autoLoginError}</div>
+            <div className="error-message" style={{ 
+              background: '#fee2e2', 
+              color: '#991b1b', 
+              padding: '0.75rem', 
+              borderRadius: '6px', 
+              marginBottom: '1rem',
+              fontSize: '0.85rem',
+              border: '1px solid #fecaca'
+            }}>
+              {state?.error || autoLoginError}
+              {autoLoginError?.includes('cookies') && (
+                <div style={{ marginTop: '0.5rem', fontWeight: 600 }}>
+                  Dica: Tente acessar fora do iframe ou habilite "Cookies de terceiros" nas configurações do Chrome.
+                </div>
+              )}
+            </div>
           )}
 
           <button type="submit" className="btn-primary" disabled={isPending}>
