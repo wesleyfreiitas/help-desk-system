@@ -104,7 +104,7 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
             <div className="ticket-conv-title-row">
               <Mail size={18} style={{ color: 'var(--primary)' }} />
               <h1 className="ticket-conv-title">
-                <span style={{ color: 'var(--text-light)', marginRight: '8px' }}>#{ticket.protocol || ticket.id.slice(0,6).toUpperCase()}</span>
+                <span style={{ color: 'var(--text-light)', marginRight: '8px' }}>{ticket.protocol || ticket.id.slice(0,6).toUpperCase()}</span>
                 {ticket.title}
               </h1>
             </div>

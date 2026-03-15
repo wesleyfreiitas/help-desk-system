@@ -199,6 +199,7 @@ export async function createTicket(formData: FormData) {
      }
   }
   const protocolNumber = nextId + 1;
+  const finalProtocolString = `${protocolNumber}`;
 
   // Processar anexos do ticket inicial
   const files = formData.getAll('attachments') as File[];
@@ -206,7 +207,7 @@ export async function createTicket(formData: FormData) {
 
   const ticket = await prisma.ticket.create({
     data: {
-      protocol: `TKT-${protocolNumber}`,
+      protocol: finalProtocolString,
       title: title.trim(),
       description,
       priority: priority as 'ALTA' | 'MEDIA' | 'BAIXA',

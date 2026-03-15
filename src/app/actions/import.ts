@@ -196,17 +196,18 @@ export async function importTickets(payload: any[], targetClientId: string) {
       let createdAt = parseDateStr(row.createdAt) || new Date();
       let resolvedAt = parseDateStr(row.resolvedAt);
 
-      // 7. Montar o protocolo sequencial robusto
+      // 7. Montar o protocolo sequencial robusto (Apenas Numeros)
+      let finalProtocol = '';
       if (row.protocol && row.protocol.trim() !== '') {
-        // Se a planilha já trouxe, garantir formatação (ex: 19093 virar TKT-19093 para seguir padrao e evitar colisoes numericas puras)
+        // Obter apenas o numero e salvar
         let rawProt = row.protocol.trim();
-        if (/^\d+$/.test(rawProt)) {
-           rawProt = `TKT-${rawProt}`;
+        const matched = rawProt.match(/\d+/);
+        if (matched) {
+          finalProtocol = matched[0];
+        } else {
+          finalProtocol = rawProt;
         }
-        finalProtocol = rawProt;
       } else {
-        // Buscamos qual foi o último/maior ID salvo para iterar sobre ele
-        // IMPORTANTE: TKT-9 seria maior que TKT-10 em string. Entao buscamos sem limite e pegamos o max no js
         const allTickets = await prisma.ticket.findMany({ select: { protocol: true } });
         let maxNumber = 1000;
         allTickets.forEach(t => {
@@ -219,7 +220,7 @@ export async function importTickets(payload: any[], targetClientId: string) {
            }
         });
         const nextProtocolNumber = maxNumber + 1 + successCount; 
-        finalProtocol = `TKT-${nextProtocolNumber}`;
+        finalProtocol = `${nextProtocolNumber}`;
       }
 
       // 8. Normalização Avançada de Status, Prioridade e Tipo
