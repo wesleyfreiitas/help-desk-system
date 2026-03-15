@@ -255,6 +255,42 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ fr
         </div>
       </div>
 
+      {/* Top 10 Empresas Sem Chamados por Produto (Ociosidade B2B) */}
+      <div className="table-wrapper" style={{ marginTop: '1.5rem' }}>
+        <div className="table-header-filters">
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Top 10 Empresas Sem Chamados por Produto <Info size={14} /></h3>
+        </div>
+        {stats.rankings.inactiveB2B && stats.rankings.inactiveB2B.length > 0 ? (
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th style={{ width: '60px', textAlign: 'center' }}>Posição</th>
+                <th>Cliente (Empresa)</th>
+                <th>Produto sem Engajamento</th>
+                <th style={{ width: '120px', textAlign: 'center' }}>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stats.rankings.inactiveB2B.map((item: any, idx: number) => (
+                <tr key={`${item.clientName}-${item.productName}-${idx}`}>
+                  <td style={{ textAlign: 'center', fontWeight: 'bold', color: 'var(--text-muted)' }}>{idx + 1}º</td>
+                  <td style={{ fontWeight: 600 }}>{item.clientName}</td>
+                  <td>{item.productName}</td>
+                  <td style={{ textAlign: 'center' }}>
+                    <span className="badge" style={{ backgroundColor: '#fee2e2', color: '#991b1b' }}>0 Chamados</span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+            <p>Nenhuma combinação ociosa encontrada. Ótimo engajamento!</p>
+          </div>
+        )}
+      </div>
+
+
       {/* Chamados Recentes (Tabela Original) */}
       <div className="table-wrapper" style={{ marginTop: '1.5rem' }}>
          <div className="table-header-filters">

@@ -130,7 +130,36 @@ export async function getDashboardStats(whereClause: any, dateRange: { from: Dat
     count: p._count.id
   }));
 
+  // 3.5 Top 10 Empresas sem chamados por Produto (Ociosidade B2B)
+  // Obter todos os clientes ativos e produtos ativos independetemente se têm ticket ou não
+  const allActiveClients = await prisma.client.findMany({ where: { deletedAt: null }, select: { id: true, name: true } });
+  const allActiveProducts = await prisma.product.findMany({ where: { deletedAt: null }, select: { id: true, name: true } });
 
+  // Agrupar quantos tickets cada cliente abriu para cada produto neste período
+  const ticketCountsByClientAndProduct = await prisma.ticket.groupBy({
+    by: ['clientId', 'productId'],
+    where: baseWhere,
+    _count: { id: true }
+  });
+
+  const inactiveB2B: { clientName: string; productName: string }[] = [];
+
+  // Cross Join na memória para encontrar as combinações zeradas
+  for (const client of allActiveClients) {
+    for (const product of allActiveProducts) {
+      // Verifica se essa empresa abriu chamado para este produto
+      const hasTickets = ticketCountsByClientAndProduct.find(
+        (t) => t.clientId === client.id && t.productId === product.id
+      );
+
+      if (!hasTickets || hasTickets._count.id === 0) {
+        inactiveB2B.push({ clientName: client.name, productName: product.name });
+      }
+    }
+  }
+
+  // Ordenar alfabeticamente e pegar o Top 10
+  const rankedInactiveB2B = inactiveB2B.sort((a, b) => a.clientName.localeCompare(b.clientName)).slice(0, 10);
   // 4. Series Temporais (Graficos de Linha)
   const days = eachDayOfInterval({ start: dateRange.from, end: dateRange.to });
   const timeSeries = days.map(day => {
@@ -180,7 +209,7 @@ export async function getDashboardStats(whereClause: any, dateRange: { from: Dat
   return {
     metrics: { mttr, mfrr, slaCompliance, createdCount, pendingCount, closedCount, reopenedTotal },
     backlog: { initial: initialBacklog, opened: createdCount, closed: closedCount, final: finalBalance },
-    rankings: { clients: rankedClients, categories: rankedCategories, products: rankedProducts },
+    rankings: { clients: rankedClients, categories: rankedCategories, products: rankedProducts, inactiveB2B: rankedInactiveB2B },
     timeSeries,
     distribution: { heatmap: flatHeatmap }
   };
