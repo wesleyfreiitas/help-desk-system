@@ -72,6 +72,9 @@ export async function autoLoginAction(userId: string, companyId: string) {
        console.warn('CompanyId mismatch. External:', data.companyId, 'URL:', companyId);
     }
 
+    // Mapear perfil da Helena para o sistema local
+    const mappedRole = data.profile === 'AGENT' ? 'ATTENDANT' : 'ADMIN';
+
     // Sincronizar usuário no banco local
     let user = await prisma.user.findUnique({
       where: { email: data.email }
@@ -79,7 +82,6 @@ export async function autoLoginAction(userId: string, companyId: string) {
 
     if (!user) {
       // Como o usuário foi validado na Helena, criamos ele localmente
-      // Definimos uma senha aleatória que nunca será usada (já que o login é SSO)
       const randomPassword = crypto.randomBytes(32).toString('hex');
       const hashedPassword = await bcrypt.hash(randomPassword, 10);
       
@@ -88,9 +90,15 @@ export async function autoLoginAction(userId: string, companyId: string) {
           name: data.name,
           email: data.email,
           password: hashedPassword,
-          role: 'ATTENDANT', // Valor padrão para agents da Helena
+          role: mappedRole,
           phone: data.phoneNumber || data.phoneNumberFormatted || null
         }
+      });
+    } else if (user.role !== mappedRole) {
+      // Opcional: Atualizar cargo se mudou na Helena
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { role: mappedRole }
       });
     }
 
