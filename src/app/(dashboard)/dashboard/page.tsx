@@ -274,7 +274,26 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ fr
               {stats.rankings.inactiveB2B.map((item: any, idx: number) => (
                 <tr key={`${item.clientName}-${item.productName}-${idx}`}>
                   <td style={{ textAlign: 'center', fontWeight: 'bold', color: 'var(--text-muted)' }}>{idx + 1}º</td>
-                  <td style={{ fontWeight: 600 }}>{item.clientName}</td>
+                  <td style={{ fontWeight: 600 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      {item.clientName}
+                      {item.openTicketsTotal > 0 && (
+                        <span 
+                          title={`Esta empresa possui ${item.openTicketsTotal} chamado(s) em aberto em outros produtos.`}
+                          style={{
+                            background: '#e0f2fe',
+                            color: '#0284c7',
+                            fontSize: '0.7rem',
+                            padding: '2px 6px',
+                            borderRadius: '12px',
+                            cursor: 'help'
+                          }}
+                        >
+                          {item.openTicketsTotal} aberto(s)
+                        </span>
+                      )}
+                    </div>
+                  </td>
                   <td>{item.productName}</td>
                   <td style={{ textAlign: 'center' }}>
                     <span className="badge" style={{ backgroundColor: '#fee2e2', color: '#991b1b' }}>0 Chamados</span>

@@ -142,10 +142,19 @@ export async function getDashboardStats(whereClause: any, dateRange: { from: Dat
     _count: { id: true }
   });
 
-  const inactiveB2B: { clientName: string; productName: string }[] = [];
+  const inactiveB2B: { clientName: string; productName: string; openTicketsTotal: number }[] = [];
+
+  // Buscar todos os chamados abertos de cada cliente para o tooltip
+  const openTicketsByClient = await prisma.ticket.groupBy({
+    by: ['clientId'],
+    where: { status: { in: ['ABERTO', 'EM_ANDAMENTO', 'PENDENTE', 'AGUARDANDO_CLIENTE', 'AGUARDANDO_TERCEIRO'] } },
+    _count: { id: true }
+  });
 
   // Cross Join na memória para encontrar as combinações zeradas
   for (const client of allActiveClients) {
+    const openCount = openTicketsByClient.find(o => o.clientId === client.id)?._count.id || 0;
+
     for (const product of allActiveProducts) {
       // Verifica se essa empresa abriu chamado para este produto
       const hasTickets = ticketCountsByClientAndProduct.find(
@@ -153,7 +162,11 @@ export async function getDashboardStats(whereClause: any, dateRange: { from: Dat
       );
 
       if (!hasTickets || hasTickets._count.id === 0) {
-        inactiveB2B.push({ clientName: client.name, productName: product.name });
+        inactiveB2B.push({ 
+          clientName: client.name, 
+          productName: product.name,
+          openTicketsTotal: openCount
+        });
       }
     }
   }
