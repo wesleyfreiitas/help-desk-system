@@ -250,7 +250,7 @@ export async function importTickets(payload: any[], targetClientId: string) {
       const rawType = row.type ? row.type.trim() : null; 
       const rawSource = row.source ? row.source.trim() : "Portal";
 
-      // 9. Inserir no Banco (Usaremos Upsert para evitar que re-importar a mesma planilha trave com os IDs inseridos nos testes anteriores)
+      // 9. Inserir no Banco (Smart Migration Upsert)
       const ticketData = {
           title: row.title,
           description: row.description || 'Importado via CSV',
@@ -258,8 +258,6 @@ export async function importTickets(payload: any[], targetClientId: string) {
           priority: finalPriority as any,
           type: rawType,
           source: rawSource,
-          createdAt,
-          ...(resolvedAt ? { resolvedAt } : {}),
           client: { connect: { id: clientIdToUse } },
           ...(requesterId ? { requester: { connect: { id: requesterId } } } : {}),
           ...(productId ? { product: { connect: { id: productId } } } : {}),
@@ -267,16 +265,29 @@ export async function importTickets(payload: any[], targetClientId: string) {
           ...(assignedToId ? { assignee: { connect: { id: assignedToId } } } : {})
       };
 
-      await prisma.ticket.upsert({
-        where: {
-          protocol: finalProtocol
-        },
-        update: ticketData,
-        create: {
-          protocol: finalProtocol,
-          ...ticketData
-        }
-      });
+      let existingTicket = await prisma.ticket.findUnique({ where: { protocol: finalProtocol } });
+      if (!existingTicket) {
+         existingTicket = await prisma.ticket.findUnique({ where: { protocol: `TKT-${finalProtocol}` } });
+      }
+
+      if (existingTicket) {
+         await prisma.ticket.update({
+            where: { id: existingTicket.id },
+            data: {
+               protocol: finalProtocol, // Força a remoção do TKT- do banco
+               ...ticketData
+            }
+         });
+      } else {
+         await prisma.ticket.create({
+            data: {
+               protocol: finalProtocol,
+               createdAt,
+               ...(resolvedAt ? { resolvedAt } : {}),
+               ...ticketData
+            }
+         });
+      }
 
       successCount++;
     } catch (error: any) {
