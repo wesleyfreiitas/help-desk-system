@@ -1,11 +1,53 @@
 'use client';
 
-import { useActionState } from 'react';
-import { authenticate } from '@/app/actions/auth';
+import { useActionState, useEffect, useState, Suspense } from 'react';
+import { authenticate, autoLoginAction } from '@/app/actions/auth';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 
-export default function LoginPage() {
+function LoginContent() {
   const [state, formAction, isPending] = useActionState(authenticate, undefined);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [isAutoLogging, setIsAutoLogging] = useState(false);
+  const [autoLoginError, setAutoLoginError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const userParam = searchParams.get('user');
+    const companyParam = searchParams.get('company');
+
+    if (userParam && companyParam) {
+      const performAutoLogin = async () => {
+        setIsAutoLogging(true);
+        try {
+          const result = await autoLoginAction(userParam, companyParam);
+          if (result.success) {
+            router.push('/dashboard');
+          } else if (result.error) {
+            setAutoLoginError(result.error);
+          }
+        } catch (err) {
+          setAutoLoginError('Erro ao tentar realizar login automático.');
+        } finally {
+          setIsAutoLogging(false);
+        }
+      };
+
+      performAutoLogin();
+    }
+  }, [searchParams, router]);
+
+  if (isAutoLogging) {
+    return (
+      <div className="login-container">
+        <div className="login-box" style={{ textAlign: 'center', padding: '3rem' }}>
+          <div className="loader" style={{ margin: '0 auto 1.5rem auto' }}></div>
+          <h2>Autenticando...</h2>
+          <p>Validando acesso via Helena API</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="login-container">
@@ -48,7 +90,9 @@ export default function LoginPage() {
             />
           </div>
 
-          {state?.error && <div className="error-message">{state.error}</div>}
+          {(state?.error || autoLoginError) && (
+            <div className="error-message">{state?.error || autoLoginError}</div>
+          )}
 
           <button type="submit" className="btn-primary" disabled={isPending}>
             {isPending ? 'Entrando...' : 'Entrar'}
@@ -56,5 +100,13 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div>Carregando...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }

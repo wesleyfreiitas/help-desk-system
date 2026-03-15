@@ -40,6 +40,68 @@ export async function authenticate(prevState: any, formData: FormData) {
   redirect('/dashboard');
 }
 
+export async function autoLoginAction(userId: string, companyId: string) {
+  if (!userId || !companyId) {
+    return { error: 'Parâmetros de usuário ou empresa ausentes.' };
+  }
+
+  try {
+    const response = await fetch(`https://api.helena.run/core/v1/agent/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': 'pn_uVjECWGEkT2A9p9CXKZbYAriqhVPsvzZgBGdNZGbE',
+        'accept': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Falha na autenticação externa com API Helena.');
+    }
+
+    const data = await response.json();
+
+    // Validar se o companyId bate (opcional mas recomendado)
+    if (data.companyId !== companyId) {
+       console.warn('CompanyId mismatch. External:', data.companyId, 'URL:', companyId);
+    }
+
+    // Sincronizar usuário no banco local
+    let user = await prisma.user.findUnique({
+      where: { email: data.email }
+    });
+
+    if (!user) {
+      // Como o usuário foi validado na Helena, criamos ele localmente
+      // Definimos uma senha aleatória que nunca será usada (já que o login é SSO)
+      const randomPassword = crypto.randomBytes(32).toString('hex');
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+      
+      user = await prisma.user.create({
+        data: {
+          name: data.name,
+          email: data.email,
+          password: hashedPassword,
+          role: 'ATTENDANT', // Valor padrão para agents da Helena
+          phone: data.phoneNumber || data.phoneNumberFormatted || null
+        }
+      });
+    }
+
+    await setSession({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      clientId: user.clientId,
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('Auto login error:', error);
+    return { error: error.message || 'Erro inesperado no auto-login.' };
+  }
+}
+
 export async function logoutAction() {
   const { logout } = await import('@/lib/auth');
   await logout();
