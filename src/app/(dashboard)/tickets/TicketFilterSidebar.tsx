@@ -100,11 +100,14 @@ export default function TicketFilterSidebar({ clients, users, options, categorie
         <label className="filter-label">Status</label>
         <Combobox 
           name="status"
-          placeholder="Qualquer status"
+          placeholder="Ativos (Padrão)"
           defaultValue={status}
           allowClear
           onChange={(val) => handleFilterChange('status', val)}
-          items={options.filter(o => o.type === 'STATUS').map(o => ({ id: o.value, label: o.label }))}
+          items={[
+            { id: 'ALL', label: '— Ver Todos —' },
+            ...options.filter(o => o.type === 'STATUS').map(o => ({ id: o.value, label: o.label }))
+          ]}
         />
       </div>
 

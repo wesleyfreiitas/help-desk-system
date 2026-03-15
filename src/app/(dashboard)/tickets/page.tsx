@@ -22,12 +22,22 @@ export default async function TicketsPage(props: { searchParams: Promise<{ query
     ? { clientId: user.clientId, deletedAt: null }
     : { deletedAt: null };
 
-  if (query) {
-    whereClause.title = { contains: query };
+  // Filtro Padrão: Se não houver filtro de status, mostrar apenas os "A trabalhar"
+  const isDefaultView = !statusFilter && !query && !priorityFilter && !assigneeIdFilter && !clientIdFilter && !categoryIdFilter;
+  
+  if (statusFilter) {
+    if (statusFilter === 'ALL') {
+      // Mostrar todos, não adiciona filtro de status
+    } else {
+      whereClause.status = statusFilter;
+    }
+  } else if (isDefaultView || !statusFilter) {
+    // Por padrão (ou se status não for ALL), remove os concluídos
+    whereClause.status = { notIn: ['RESOLVIDO', 'FECHADO', 'CANCELADO'] };
   }
 
-  if (statusFilter) {
-    whereClause.status = statusFilter;
+  if (query) {
+    whereClause.title = { contains: query };
   }
 
   if (priorityFilter) {
@@ -45,6 +55,10 @@ export default async function TicketsPage(props: { searchParams: Promise<{ query
   if (categoryIdFilter) {
     whereClause.categoryId = categoryIdFilter;
   }
+
+  // Título dinâmico
+  const pageTitle = statusFilter === 'ALL' ? "Todos os Chamados" : 
+                    (statusFilter ? `Chamados: ${statusFilter}` : "Chamados a Trabalhar");
 
   const [tickets, clients, users, allOptions, categories] = await Promise.all([
     prisma.ticket.findMany({
@@ -64,7 +78,7 @@ export default async function TicketsPage(props: { searchParams: Promise<{ query
       {/* Lado Esquerdo - Lista */}
       <div className="table-wrapper" style={{ margin: 0, padding: 0, boxShadow: 'none', background: 'transparent' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', background: 'var(--surface)', padding: '1rem 1.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)' }}>
-          <h2 style={{ fontSize: '1.2rem', fontWeight: 600 }}>Todos os Chamados</h2>
+          <h2 style={{ fontSize: '1.2rem', fontWeight: 600 }}>{pageTitle}</h2>
           <Link href="/tickets/new" className="btn-primary" style={{ width: 'auto' }}>
             + Novo Chamado
           </Link>
