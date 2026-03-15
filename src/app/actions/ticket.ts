@@ -5,6 +5,7 @@ import { getSession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { calculateSLA } from '@/lib/sla';
 import { redirect } from 'next/navigation';
+import { sendTicketEmail } from '@/lib/mail';
 
 export async function addInteraction(ticketId: string, formData: FormData) {
   const session = await getSession();
@@ -129,6 +130,20 @@ export async function changeTicketStatus(ticketId: string, formData: FormData) {
   });
 
   revalidatePath(`/tickets/${ticketId}`);
+
+  // Notificações por e-mail
+  const fullTicket = await prisma.ticket.findUnique({
+    where: { id: ticketId },
+    include: { requester: true }
+  });
+
+  if (fullTicket) {
+    if (['ABERTO', 'EM_ANDAMENTO'].includes(status) && ['RESOLVIDO', 'FECHADO'].includes(ticket.status)) {
+      await sendTicketEmail(fullTicket, 'REOPENED');
+    } else if (status === 'RESOLVIDO') {
+      await sendTicketEmail(fullTicket, 'RESOLVED');
+    }
+  }
 }
 
 export async function createTicket(formData: FormData) {
@@ -248,6 +263,16 @@ export async function createTicket(formData: FormData) {
   }
 
 
+  // Buscar informações do solicitante para o e-mail
+  const ticketWithRequester = await prisma.ticket.findUnique({
+    where: { id: ticket.id },
+    include: { requester: true }
+  });
+
+  if (ticketWithRequester) {
+    await sendTicketEmail(ticketWithRequester, 'NEW');
+  }
+
   redirect(`/tickets/${ticket.id}`);
 
 }
@@ -313,8 +338,18 @@ export async function updateTicketField(ticketId: string, field: string, value: 
       product: true,
       category: true,
       assignee: true,
+      requester: true,
     }
   });
+
+  // Notificações por e-mail
+  if (field === 'status' && value) {
+    if (['ABERTO', 'EM_ANDAMENTO'].includes(value) && ['RESOLVIDO', 'FECHADO'].includes(currentTicket.status)) {
+      await sendTicketEmail(ticket, 'REOPENED');
+    } else if (value === 'RESOLVIDO') {
+      await sendTicketEmail(ticket, 'RESOLVED');
+    }
+  }
 
   // Log opcional de quem mudou o que (descomente ou ajuste via interações internas se desejado)
   /*

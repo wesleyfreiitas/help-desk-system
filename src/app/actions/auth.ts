@@ -5,6 +5,7 @@ import { login as setSession, getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import { sendEmail } from '@/lib/mail';
 
 export async function authenticate(prevState: any, formData: FormData) {
   const email = formData.get('email') as string;
@@ -66,13 +67,37 @@ export async function forgotPasswordAction(prevState: any, formData: FormData) {
     create: { email, token, expires }
   });
 
-  // Log para o console (já que não há serviço de e-mail)
-  console.log(`\n--- RECUPERAÇÃO DE SENHA ---`);
-  console.log(`Usuário: ${user.name} (${user.email})`);
-  console.log(`Link: ${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/reset-password?token=${token}`);
-  console.log(`----------------------------\n`);
+  const resetLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
 
-  return { success: 'Instruções de recuperação foram registradas no log do sistema para teste.' };
+  // Enviar e-mail real
+  const emailResult = await sendEmail({
+    to: user.email,
+    subject: 'Recuperação de Senha - Upp HelpDesk',
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; borderRadius: 8px;">
+        <h2 style="color: #2563eb;">Recuperação de Senha</h2>
+        <p>Olá, <strong>${user.name}</strong>!</p>
+        <p>Recebemos uma solicitação para redefinir sua senha no Upp HelpDesk.</p>
+        <p>Clique no botão abaixo para criar uma nova senha:</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetLink}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Redefinir Minha Senha</a>
+        </div>
+        <p style="font-size: 0.875rem; color: #64748b;">Este link é válido por 1 hora. Se você não solicitou a troca, ignore este e-mail.</p>
+        <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
+        <p style="font-size: 0.75rem; color: #94a3b8;">Upp HelpDesk - Sistema de Suporte</p>
+      </div>
+    `
+  });
+
+  if (!emailResult.success) {
+    console.error('Failed to send reset email:', emailResult.error);
+    // Mesmo se falhar, mostramos a mensagem de sucesso por segurança no log para teste
+    console.log(`\n--- LINK DE RECUPERAÇÃO (FALLBACK) ---`);
+    console.log(`Link: ${resetLink}`);
+    console.log(`--------------------------------------\n`);
+  }
+
+  return { success: 'Se este e-mail estiver cadastrado, você receberá um link de recuperação em breve. Verifique sua caixa de entrada.' };
 }
 
 export async function resetPasswordAction(prevState: any, formData: FormData) {

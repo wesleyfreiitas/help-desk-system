@@ -4,6 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import nodemailer from 'nodemailer';
 
 export async function getSystemSetting(key: string) {
   try {
@@ -163,4 +164,30 @@ export async function deleteTicketOption(id: string) {
   });
 
   revalidatePath('/settings/options');
+}
+
+export async function testEmailConnection(config: { host: string, port: string, user: string, pass: string, fromEmail: string }) {
+  const session = await getSession();
+  if (!session || session.user.role !== 'ADMIN') throw new Error('Não autorizado');
+
+  const transporter = nodemailer.createTransport({
+    host: config.host,
+    port: parseInt(config.port),
+    secure: config.port === '465',
+    auth: {
+      user: config.user,
+      pass: config.pass,
+    },
+    // Timeout curto para o teste não travar
+    connectionTimeout: 5000,
+    greetingTimeout: 5000,
+  });
+
+  try {
+    await transporter.verify();
+    return { success: true };
+  } catch (error: any) {
+    console.error('SMTP Test Error:', error);
+    return { success: false, error: error.message };
+  }
 }
