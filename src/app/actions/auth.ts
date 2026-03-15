@@ -103,12 +103,14 @@ export async function autoLoginAction(userId: string, companyId: string) {
       });
     }
 
-    console.log(`Auto-login successful for user: ${user.email}. Redirecting to dashboard...`);
-    redirect('/dashboard');
+    console.log(`Auto-login logic completed for user: ${user.email}.`);
   } catch (error: any) {
     console.error('Auto login error:', error);
     return { error: error.message || 'Erro inesperado no auto-login.' };
   }
+
+  // Redirect deve ser fora do try/catch pois o Next.js lida com ele via exceções internas
+  redirect('/dashboard');
 }
 
 export async function logoutAction() {
