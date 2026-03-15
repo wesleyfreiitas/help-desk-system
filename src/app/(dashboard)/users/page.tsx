@@ -23,10 +23,12 @@ export default async function UsersPage() {
     <div className="table-wrapper">
       <div className="table-header-filters">
         <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Usuários e Membros</h3>
-        <Link href="/users/new" className="btn-primary" style={{ width: 'auto', display: 'inline-flex' }}>+ Novo Usuário</Link>
+        {session.user.role === 'ADMIN' && (
+          <Link href="/users/new" className="btn-primary" style={{ width: 'auto', display: 'inline-flex' }}>+ Novo Usuário</Link>
+        )}
       </div>
 
-      <UserListClient initialUsers={users} currentUserId={session.user.id} clients={clients} />
+      <UserListClient initialUsers={users} currentUserId={session.user.id} userRole={session.user.role} clients={clients} />
     </div>
   );
 }
