@@ -30,7 +30,14 @@ export async function login(user: { id: string; email: string; role: string; nam
   // No Next.js 15 cookies() é uma API assíncrona ou retorna read-only, 
   // mas dentro das server actions podemos '.set'
   const cookieStore = await cookies();
-  cookieStore.set('session', session, { expires, httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax', path: '/' });
+  // Para funcionar em iframes (embedded), precisamos de sameSite: 'none' e secure: true
+  cookieStore.set('session', session, { 
+    expires, 
+    httpOnly: true, 
+    secure: true, 
+    sameSite: 'none', 
+    path: '/' 
+  });
 }
 
 export async function logout() {
