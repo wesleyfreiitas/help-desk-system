@@ -23,7 +23,7 @@ export default async function UsersPage() {
     <div className="table-wrapper">
       <div className="table-header-filters">
         <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Usuários e Membros</h3>
-        {session.user.role === 'ADMIN' && (
+        {['ADMIN', 'ATTENDANT'].includes(session.user.role) && (
           <Link href="/users/new" className="btn-primary" style={{ width: 'auto', display: 'inline-flex' }}>+ Novo Usuário</Link>
         )}
       </div>
