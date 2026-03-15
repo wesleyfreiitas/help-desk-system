@@ -1,3 +1,5 @@
+'use client';
+
 import { Bell, X } from 'lucide-react';
 import { useNotifications } from './NotificationProvider';
 

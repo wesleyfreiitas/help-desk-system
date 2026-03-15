@@ -179,9 +179,7 @@ model SystemSetting {
 model PasswordResetToken {
   id        String   @id @default(cuid())
   token     String   @unique
-  email     String
+  email     String   @unique
   expires   DateTime
   createdAt DateTime @default(now())
-
-  @@unique([email, token])
 }
