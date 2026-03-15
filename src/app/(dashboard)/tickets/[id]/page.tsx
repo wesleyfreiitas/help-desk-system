@@ -307,94 +307,189 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
         </div>
 
         {/* Contact & Company Sidebar */}
-        <div className="ticket-contact-sidebar">
+        <div className="ticket-contact-sidebar" style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '1.5rem',
+          padding: '1rem',
+          backgroundColor: 'var(--bg-elevated)',
+          borderRadius: 'var(--radius-lg)',
+          border: '1px solid var(--border-color)',
+          height: 'fit-content'
+        }}>
           {/* Seção do Contato */}
-          <div className="sidebar-section">
-            <div className="sidebar-section-header">
-              <span><User size={14} /> Informações do Contato</span>
-            </div>
-            <div className="contact-info-card-v2">
-              <div className="contact-avatar-v2" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-                {creatorName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
-              </div>
-              <div className="contact-details-v2">
-                <Link 
-                  href={`/users/${openedBy?.id || requesterUser?.id || '#'}`}
-                  className="contact-name-v2 nt-link-hover"
-                  style={{ display: 'block', color: 'inherit', textDecoration: 'none' }}
-                >
-                  {creatorName}
-                </Link>
-                <Link 
-                  href={`/companies/${ticket.clientId}`}
-                  className="contact-company-v2 nt-link-hover"
-                  style={{ display: 'block', color: 'var(--primary)', textDecoration: 'none', fontSize: '0.75rem' }}
-                >
-                  {ticket.client.name}
-                </Link>
-              </div>
-            </div>
+          <div className="sidebar-section-v3">
+            <h4 style={{ 
+              fontSize: '0.7rem', 
+              fontWeight: 700, 
+              color: 'var(--text-muted)', 
+              textTransform: 'uppercase', 
+              letterSpacing: '0.05em',
+              marginBottom: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <User size={14} /> Informações do Contato
+            </h4>
             
-            <div className="contact-fields-list">
-              {creatorEmail && (
-                <div className="contact-field-v2">
-                  <label>Email</label>
-                  <span>{creatorEmail}</span>
+            <div style={{ 
+              background: 'var(--surface)', 
+              padding: '1.25rem', 
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-color)',
+              boxShadow: 'var(--shadow-sm)',
+              marginBottom: '1rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
+                <div style={{ 
+                  width: '44px', 
+                  height: '44px', 
+                  borderRadius: '10px', 
+                  background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+                  color: 'white',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontWeight: 700,
+                  fontSize: '1rem',
+                  flexShrink: 0
+                }}>
+                  {creatorName.slice(0, 2).toUpperCase()}
                 </div>
-              )}
-              {creatorPhone && (
-                <div className="contact-field-v2">
-                  <label>Telefone</label>
-                  <span>{creatorPhone}</span>
+                <div style={{ overflow: 'hidden' }}>
+                  <Link 
+                    href={`/users/${openedBy?.id || requesterUser?.id || '#'}`}
+                    style={{ 
+                      fontSize: '1rem', 
+                      fontWeight: 700, 
+                      color: 'var(--text-main)',
+                      display: 'block',
+                      whiteSpace: 'nowrap',
+                      textOverflow: 'ellipsis',
+                      overflow: 'hidden',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    {creatorName}
+                  </Link>
+                  <Link 
+                    href={`/companies/${ticket.clientId}`}
+                    style={{ 
+                      fontSize: '0.75rem', 
+                      fontWeight: 500, 
+                      color: 'var(--primary)',
+                      textDecoration: 'none'
+                    }}
+                  >
+                    {ticket.client.name}
+                  </Link>
                 </div>
-              )}
+              </div>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                {creatorEmail && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Email</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
+                      <Mail size={14} color="var(--text-muted)" />
+                      <span style={{ color: 'var(--text-main)', wordBreak: 'break-all' }}>{creatorEmail}</span>
+                    </div>
+                  </div>
+                )}
+                {creatorPhone && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Telefone</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
+                      <Phone size={14} color="var(--text-muted)" />
+                      <span style={{ color: 'var(--text-main)' }}>{creatorPhone}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Seção da Empresa */}
-          <div className="sidebar-section" style={{ borderTop: '1px solid var(--border-color)', marginTop: '1rem', paddingTop: '1rem' }}>
-            <div className="sidebar-section-header">
-              <span><ExternalLink size={14} /> Detalhes da Empresa</span>
-            </div>
-            
-            <div className="contact-fields-list">
-              <div className="contact-field-v2">
-                <label>CNPJ / Documento</label>
-                <span>{ticket.client.document}</span>
+          <div className="sidebar-section-v3">
+            <h4 style={{ 
+              fontSize: '0.7rem', 
+              fontWeight: 700, 
+              color: 'var(--text-muted)', 
+              textTransform: 'uppercase', 
+              letterSpacing: '0.05em',
+              marginBottom: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px'
+            }}>
+              <ExternalLink size={14} /> Detalhes da Empresa
+            </h4>
+
+            <div style={{ 
+              background: 'var(--surface)', 
+              padding: '1.25rem', 
+              borderRadius: 'var(--radius-md)',
+              border: '1px solid var(--border-color)',
+              boxShadow: 'var(--shadow-sm)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem'
+            }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>CNPJ / Documento</span>
+                <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-main)' }}>{ticket.client.document || '--'}</span>
               </div>
+
               {ticket.client.website && (
-                <div className="contact-field-v2">
-                  <label>Website</label>
-                  <a href={ticket.client.website.startsWith('http') ? ticket.client.website : `https://${ticket.client.website}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)', textDecoration: 'none' }}>
-                    {ticket.client.website}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Website</span>
+                  <a 
+                    href={ticket.client.website.startsWith('http') ? ticket.client.website : `https://${ticket.client.website}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    style={{ fontSize: '0.875rem', color: 'var(--primary)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    {ticket.client.website} <ExternalLink size={12} />
                   </a>
                 </div>
               )}
-            </div>
 
-            {/* Campos Personalizados da Empresa */}
-            {ticket.client.customFields && ticket.client.customFields.length > 0 && (
-              <div style={{ marginTop: '1rem' }}>
-                <h5 style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '0.5rem', letterSpacing: '0.05em' }}>
-                  Campos Personalizados
-                </h5>
-                <div className="contact-fields-list">
-                  {ticket.client.customFields.map((cf: any) => (
-                    <div key={cf.id} className="contact-field-v2">
-                      <label>{cf.field.name}</label>
-                      <span style={{ 
-                        display: 'block', 
-                        whiteSpace: cf.field.type === 'TEXTAREA' ? 'pre-wrap' : 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis'
-                      }}>
-                        {cf.value === 'true' ? 'Sim' : cf.value === 'false' ? 'Não' : cf.value || '--'}
-                      </span>
-                    </div>
-                  ))}
+              {/* Campos Personalizados da Empresa */}
+              {ticket.client.customFields && ticket.client.customFields.length > 0 && (
+                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: '0.25rem' }}>
+                  <span style={{ 
+                    fontSize: '0.65rem', 
+                    fontWeight: 700, 
+                    color: 'var(--text-muted)', 
+                    textTransform: 'uppercase',
+                    display: 'block',
+                    marginBottom: '0.75rem'
+                  }}>
+                    Campos Personalizados
+                  </span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    {ticket.client.customFields.map((cf: any) => (
+                      <div key={cf.id} style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                        <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-main)' }}>{cf.field.name}</span>
+                        <div style={{ 
+                          fontSize: '0.8rem', 
+                          color: 'var(--text-muted)', 
+                          lineHeight: '1.4',
+                          background: 'var(--bg-color)',
+                          padding: '0.5rem',
+                          borderRadius: '6px',
+                          border: '1px solid var(--border-color)',
+                          whiteSpace: 'pre-wrap'
+                        }}>
+                          {cf.value === 'true' ? 'Sim' : cf.value === 'false' ? 'Não' : cf.value || '--'}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
