@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import NotificationBell from './NotificationBell';
+import ThemeToggle from './ThemeToggle';
 
 export default function Header({ user }: { user: any }) {
   const pathname = usePathname();
@@ -20,7 +21,8 @@ export default function Header({ user }: { user: any }) {
     <header className="top-header">
       <div className="page-title">{getPageTitle()}</div>
       
-      <div className="top-actions" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+      <div className="top-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+         <ThemeToggle />
          <NotificationBell />
       </div>
     </header>
