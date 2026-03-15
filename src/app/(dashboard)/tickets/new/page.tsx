@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { createTicket } from '@/app/actions/ticket';
 import Link from 'next/link';
-
+import Combobox from '@/components/Combobox';
 import TicketDescriptionComposer from './TicketDescriptionComposer';
 
 export default async function NewTicketPage() {
@@ -65,14 +65,16 @@ export default async function NewTicketPage() {
             <div className="nt-field">
               <label className="nt-label">Contato <span className="nt-required">*</span></label>
               <div className="nt-contact-row">
-                <select name="contactId" className="nt-select" required>
-                  <option value="">— Selecione o contato —</option>
-                  {contacts.map((c: any) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}{c.client ? ` (${c.client.name})` : ''}
-                    </option>
-                  ))}
-                </select>
+                <Combobox 
+                  name="contactId"
+                  placeholder="Pesquisar contato por nome ou empresa..."
+                  required
+                  items={contacts.map((c: any) => ({
+                    id: c.id,
+                    label: c.name,
+                    subLabel: c.client?.name
+                  }))}
+                />
                 <div className="nt-contact-links">
                   <Link href="/users/new" className="nt-link">Adicionar novo contato</Link>
                 </div>
