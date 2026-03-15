@@ -5,7 +5,7 @@ import UserListClient from './UserListClient';
 
 export default async function UsersPage() {
   const session = await getSession();
-  if (!session || session.user.role !== 'ADMIN') return null;
+  if (!session || !['ADMIN', 'ATTENDANT'].includes(session.user.role)) return null;
 
   const [users, clients] = await Promise.all([
     prisma.user.findMany({
