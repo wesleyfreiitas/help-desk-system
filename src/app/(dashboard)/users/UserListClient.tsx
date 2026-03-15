@@ -153,7 +153,11 @@ export default function UserListClient({ initialUsers, currentUserId, clients }:
                            u.role === 'ORG_MEMBER' ? '#15803d' :
                            '#475569' 
                   }}>
-                    {u.role === 'ORG_MANAGER' ? 'Gerente' : u.role === 'ORG_MEMBER' ? 'Membro' : u.role}
+                    {u.role === 'ORG_MANAGER' ? 'Gerente (Cliente)' : 
+                     u.role === 'ORG_MEMBER' ? 'Membro (Cliente)' : 
+                     u.role === 'ATTENDANT' ? 'Staff (Atendente)' :
+                     u.role === 'ADMIN' ? 'Administrador' :
+                     u.role === 'CLIENT' ? 'Cliente (Legado)' : u.role}
                   </span>
                 </td>
                 <td>{u.client ? u.client.name : 'N/A (Staff)'}</td>

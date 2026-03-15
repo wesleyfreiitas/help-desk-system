@@ -96,8 +96,8 @@ export default function EditUserModal({ user, clients, currentRole }: { user: an
                       >
                         <option value="ORG_MEMBER">Membro (Cliente)</option>
                         <option value="ORG_MANAGER">Gerente (Cliente)</option>
-                        <option value="ATTENDANT">Atendente (Staff)</option>
-                        <option value="ADMIN">Administrador (Staff)</option>
+                        <option value="ATTENDANT">Staff (Atendente)</option>
+                        <option value="ADMIN">Administrador</option>
                         <option value="CLIENT">Cliente (Legado)</option>
                       </select>
                     </div>

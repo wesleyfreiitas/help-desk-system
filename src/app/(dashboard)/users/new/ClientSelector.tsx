@@ -22,6 +22,7 @@ export default function ClientSelector({ clients }: { clients: any[] }) {
            <option value="ORG_MANAGER">Gerente (Cliente)</option>
            <option value="ATTENDANT">Staff (Atendente)</option>
            <option value="ADMIN">Administrador</option>
+           <option value="CLIENT">Cliente (Legado)</option>
          </select>
       </div>
 
