@@ -137,131 +137,189 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ fr
         </div>
       </div>
 
-      {/* Saldo de Tickets (Backlog) */}
-      <div className="table-wrapper" style={{ marginTop: '1.5rem', padding: '1.5rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Saldo de Tickets (Backlog do Período) <Info size={14} /></h3>
-          <TrendingUp size={20} color="#f59e0b" />
+      {/* Saldo de Tickets (Backlog) - Apenas Admin */}
+      {user.role === 'ADMIN' && (
+        <div className="table-wrapper" style={{ marginTop: '1.5rem', padding: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Saldo de Tickets (Backlog do Período) <Info size={14} /></h3>
+            <TrendingUp size={20} color="#f59e0b" />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', textAlign: 'center' }}>
+            <div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Backlog Inicial</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{stats.backlog.initial}</div>
+            </div>
+            <div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>+ Abertos no Período</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#6366f1' }}>{stats.backlog.opened}</div>
+            </div>
+            <div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>- Fechados no Período</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10b981' }}>{stats.backlog.closed}</div>
+            </div>
+            <div>
+              <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>= Saldo Final</div>
+              <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ef4444' }}>{stats.backlog.final}</div>
+            </div>
+          </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', textAlign: 'center' }}>
-          <div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>Backlog Inicial</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{stats.backlog.initial}</div>
-          </div>
-          <div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>+ Abertos no Período</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#6366f1' }}>{stats.backlog.opened}</div>
-          </div>
-          <div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>- Fechados no Período</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#10b981' }}>{stats.backlog.closed}</div>
-          </div>
-          <div>
-            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>= Saldo Final</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#ef4444' }}>{stats.backlog.final}</div>
-          </div>
-        </div>
-      </div>
+      )}
 
-      {/* Rankings e Gráficos */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '1.5rem' }}>
-        {/* Top 10 Clientes */}
-        <div className="table-wrapper" style={{ margin: 0 }}>
-          <div className="table-header-filters">
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Top 10 Clientes <Info size={14} /></h3>
-          </div>
-          <div style={{ padding: '0 1rem' }}>
-            {stats.rankings.clients.map((c, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: i < 9 ? '1px solid var(--border-color)' : 'none' }}>
-                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                  <span style={{ background: '#f3f4f6', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', fontSize: '0.8rem', fontWeight: 600 }}>{i + 1}</span>
-                  <span style={{ fontSize: '0.9rem' }}>{c.name}</span>
-                </div>
-                <span style={{ fontWeight: 600, color: '#6366f1' }}>{c.count}</span>
+      {/* Rankings e Gráficos Avançados - Apenas Admin */}
+      {user.role === 'ADMIN' && (
+        <>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '1.5rem' }}>
+            {/* Top 10 Clientes */}
+            <div className="table-wrapper" style={{ margin: 0 }}>
+              <div className="table-header-filters">
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Top 10 Clientes <Info size={14} /></h3>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Cumprimento de SLA (Grafico) */}
-        <div className="table-wrapper" style={{ margin: 0 }}>
-          <div className="table-header-filters">
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Cumprimento de SLA <Info size={14} /></h3>
-          </div>
-          <SLARingChart percentage={parseFloat(stats.metrics.slaCompliance)} />
-        </div>
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '1.5rem' }}>
-        {/* Top 10 Categorias */}
-        <div className="table-wrapper" style={{ margin: 0 }}>
-          <div className="table-header-filters">
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Top 10 Categorias <Info size={14} /></h3>
-          </div>
-          <div style={{ padding: '0 1rem' }}>
-            {stats.rankings.categories.map((c, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: i < 9 ? '1px solid var(--border-color)' : 'none' }}>
-                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                  <span style={{ fontSize: '0.9rem' }}>{i + 1}. {c.name}</span>
-                </div>
-                <span style={{ fontWeight: 600, color: '#8b5cf6' }}>{c.count}</span>
+              <div style={{ padding: '0 1rem' }}>
+                {stats.rankings.clients.map((c: any, i: number) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: i < 9 ? '1px solid var(--border-color)' : 'none' }}>
+                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                      <span style={{ background: '#f3f4f6', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%', fontSize: '0.8rem', fontWeight: 600 }}>{i + 1}</span>
+                      <span style={{ fontSize: '0.9rem' }}>{c.name}</span>
+                    </div>
+                    <span style={{ fontWeight: 600, color: '#6366f1' }}>{c.count}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </div>
+            </div>
 
-        {/* Ranking por Produto */}
-        <div className="table-wrapper" style={{ margin: 0 }}>
-          <div className="table-header-filters">
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Ranking por Produto <Info size={14} /></h3>
+            {/* Cumprimento de SLA (Grafico) */}
+            <div className="table-wrapper" style={{ margin: 0 }}>
+              <div className="table-header-filters">
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Cumprimento de SLA <Info size={14} /></h3>
+              </div>
+              <SLARingChart percentage={parseFloat(stats.metrics.slaCompliance)} />
+            </div>
           </div>
-          <ProductRankingChart data={stats.rankings.products} />
-        </div>
-      </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '1.5rem' }}>
-        {/* Heatmap de Horários */}
-        <div className="table-wrapper" style={{ margin: 0 }}>
-          <div className="table-header-filters">
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Distribuição por Horário <Info size={14} /></h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '1.5rem' }}>
+            {/* Top 10 Categorias */}
+            <div className="table-wrapper" style={{ margin: 0 }}>
+              <div className="table-header-filters">
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Top 10 Categorias <Info size={14} /></h3>
+              </div>
+              <div style={{ padding: '0 1rem' }}>
+                {stats.rankings.categories.map((c: any, i: number) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: i < 9 ? '1px solid var(--border-color)' : 'none' }}>
+                    <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.9rem' }}>{i + 1}. {c.name}</span>
+                    </div>
+                    <span style={{ fontWeight: 600, color: '#8b5cf6' }}>{c.count}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Ranking por Produto */}
+            <div className="table-wrapper" style={{ margin: 0 }}>
+              <div className="table-header-filters">
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Ranking por Produto <Info size={14} /></h3>
+              </div>
+              <ProductRankingChart data={stats.rankings.products} />
+            </div>
           </div>
-          <HeatmapChart data={stats.distribution.heatmap} />
-        </div>
 
-        {/* Tickets por Produto (Donut) */}
-        <div className="table-wrapper" style={{ margin: 0 }}>
-          <div className="table-header-filters">
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Tickets por Produto <Info size={14} /></h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '1.5rem' }}>
+            {/* Heatmap de Horários */}
+            <div className="table-wrapper" style={{ margin: 0 }}>
+              <div className="table-header-filters">
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Distribuição por Horário <Info size={14} /></h3>
+              </div>
+              <HeatmapChart data={stats.distribution.heatmap} />
+            </div>
+
+            {/* Tickets por Produto (Donut) */}
+            <div className="table-wrapper" style={{ margin: 0 }}>
+              <div className="table-header-filters">
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Tickets por Produto <Info size={14} /></h3>
+              </div>
+              <ProductDistributionPie data={stats.rankings.products} />
+            </div>
           </div>
-          <ProductDistributionPie data={stats.rankings.products} />
-        </div>
-      </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '1.5rem' }}>
-        {/* Tempo Medio de Espera */}
-        <div className="table-wrapper" style={{ margin: 0 }}>
-          <div className="table-header-filters">
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Tempo Médio de Espera <Info size={14} /></h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginTop: '1.5rem' }}>
+            {/* Tempo Medio de Espera */}
+            <div className="table-wrapper" style={{ margin: 0 }}>
+              <div className="table-header-filters">
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Tempo Médio de Espera <Info size={14} /></h3>
+              </div>
+              <TimeTrendChart data={stats.timeSeries} dataKey="espera" color="#6366f1" name="Minutos" />
+            </div>
+
+            {/* Tempo Medio ate Encerramento */}
+            <div className="table-wrapper" style={{ margin: 0 }}>
+              <div className="table-header-filters">
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Tempo Médio até Encerramento <Info size={14} /></h3>
+              </div>
+              <TimeTrendChart data={stats.timeSeries} dataKey="encerramento" color="#1e293b" name="Minutos" />
+            </div>
           </div>
-          <TimeTrendChart data={stats.timeSeries} dataKey="espera" color="#6366f1" name="Minutos" />
-        </div>
 
-        {/* Tempo Medio ate Encerramento */}
-        <div className="table-wrapper" style={{ margin: 0 }}>
-          <div className="table-header-filters">
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Tempo Médio até Encerramento <Info size={14} /></h3>
+          <div className="table-wrapper" style={{ marginTop: '1.5rem' }}>
+            <div className="table-header-filters">
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Abertos vs Fechados vs Backlog <Info size={14} /></h3>
+            </div>
+            <TimeSeriesChart data={stats.timeSeries} />
           </div>
-          <TimeTrendChart data={stats.timeSeries} dataKey="encerramento" color="#1e293b" name="Minutos" />
-        </div>
-      </div>
 
-      {/* Gráfico de Tendência Geral (Linha) */}
-      <div className="table-wrapper" style={{ marginTop: '1.5rem' }}>
-        <div className="table-header-filters">
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Abertos vs Fechados vs Backlog <Info size={14} /></h3>
-        </div>
-        <TimeSeriesChart data={stats.timeSeries} />
-      </div>
+          <div className="table-wrapper" style={{ marginTop: '1.5rem' }}>
+            <div className="table-header-filters">
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Top 10 Empresas Sem Chamados por Produto <Info size={14} /></h3>
+            </div>
+            {stats.rankings.inactiveB2B && stats.rankings.inactiveB2B.length > 0 ? (
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: '60px', textAlign: 'center' }}>Posição</th>
+                    <th>Cliente (Empresa)</th>
+                    <th>Produto sem Engajamento</th>
+                    <th style={{ width: '120px', textAlign: 'center' }}>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stats.rankings.inactiveB2B.map((item: any, idx: number) => (
+                    <tr key={`${item.clientName}-${item.productName}-${idx}`}>
+                      <td style={{ textAlign: 'center', fontWeight: 'bold', color: 'var(--text-muted)' }}>{idx + 1}º</td>
+                      <td style={{ fontWeight: 600 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          {item.clientName}
+                          {item.openTicketsTotal > 0 && (
+                            <span 
+                              title={`Esta empresa possui ${item.openTicketsTotal} chamado(s) em aberto em outros produtos.`}
+                              style={{
+                                background: '#e0f2fe',
+                                color: '#0284c7',
+                                fontSize: '0.7rem',
+                                padding: '2px 6px',
+                                borderRadius: '12px',
+                                cursor: 'help'
+                              }}
+                            >
+                              {item.openTicketsTotal} aberto(s)
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td>{item.productName}</td>
+                      <td style={{ textAlign: 'center' }}>
+                        <span className="badge" style={{ backgroundColor: '#fee2e2', color: '#991b1b' }}>0 Chamados</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <p>Nenhuma combinação ociosa encontrada. Ótimo engajamento!</p>
+              </div>
+            )}
+          </div>
+        </>
+      )}
 
       {/* Chamados Reabertos */}
       <div className="table-wrapper" style={{ marginTop: '1.5rem' }}>
@@ -283,59 +341,8 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ fr
         </div>
       </div>
 
-      {/* Top 10 Empresas Sem Chamados por Produto (Ociosidade B2B) */}
-      <div className="table-wrapper" style={{ marginTop: '1.5rem' }}>
-        <div className="table-header-filters">
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 600 }}>Top 10 Empresas Sem Chamados por Produto <Info size={14} /></h3>
-        </div>
-        {stats.rankings.inactiveB2B && stats.rankings.inactiveB2B.length > 0 ? (
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th style={{ width: '60px', textAlign: 'center' }}>Posição</th>
-                <th>Cliente (Empresa)</th>
-                <th>Produto sem Engajamento</th>
-                <th style={{ width: '120px', textAlign: 'center' }}>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {stats.rankings.inactiveB2B.map((item: any, idx: number) => (
-                <tr key={`${item.clientName}-${item.productName}-${idx}`}>
-                  <td style={{ textAlign: 'center', fontWeight: 'bold', color: 'var(--text-muted)' }}>{idx + 1}º</td>
-                  <td style={{ fontWeight: 600 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      {item.clientName}
-                      {item.openTicketsTotal > 0 && (
-                        <span 
-                          title={`Esta empresa possui ${item.openTicketsTotal} chamado(s) em aberto em outros produtos.`}
-                          style={{
-                            background: '#e0f2fe',
-                            color: '#0284c7',
-                            fontSize: '0.7rem',
-                            padding: '2px 6px',
-                            borderRadius: '12px',
-                            cursor: 'help'
-                          }}
-                        >
-                          {item.openTicketsTotal} aberto(s)
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td>{item.productName}</td>
-                  <td style={{ textAlign: 'center' }}>
-                    <span className="badge" style={{ backgroundColor: '#fee2e2', color: '#991b1b' }}>0 Chamados</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-            <p>Nenhuma combinação ociosa encontrada. Ótimo engajamento!</p>
-          </div>
-        )}
-      </div>
+      {/* Espaçador entre métricas e lista para Staff */}
+      {user.role === 'ATTENDANT' && <div style={{ height: '0.5rem' }} />}
 
 
       {/* Chamados Recentes (Tabela Original) */}
