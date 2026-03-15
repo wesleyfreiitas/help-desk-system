@@ -275,6 +275,8 @@ export async function importTickets(payload: any[], targetClientId: string) {
             where: { id: existingTicket.id },
             data: {
                protocol: finalProtocol, // Força a remoção do TKT- do banco
+               deletedAt: null,         // Ressuscita caso tenha sido apagado via botão de "Excluir"
+               createdAt,               // Atualiza a data de criação pela planilha (ou data atual)
                ...ticketData
             }
          });
