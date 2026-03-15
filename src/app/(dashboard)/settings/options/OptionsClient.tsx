@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { upsertTicketOption, deleteTicketOption } from '@/app/actions/settings';
-import { Trash2, Plus, GripVertical } from 'lucide-react';
+import { Trash2, Plus, GripVertical, Pencil, X } from 'lucide-react';
 
 interface Option {
   id: string;
@@ -20,6 +20,7 @@ interface Props {
 export default function OptionsClient({ initialOptions }: Props) {
   const [options, setOptions] = useState(initialOptions);
   const [activeTab, setActiveTab] = useState('TYPE');
+  const [editingOption, setEditingOption] = useState<Option | null>(null);
 
   const types = [
     { id: 'TYPE', label: 'Tipos' },
@@ -34,7 +35,18 @@ export default function OptionsClient({ initialOptions }: Props) {
     if (confirm('Tem certeza que deseja excluir esta opção?')) {
       await deleteTicketOption(id);
       setOptions(prev => prev.filter(o => o.id !== id));
+      if (editingOption?.id === id) setEditingOption(null);
     }
+  };
+
+  const handleEdit = (opt: Option) => {
+    setEditingOption(opt);
+    // Scroll smoothly to form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setEditingOption(null);
   };
 
   return (
@@ -52,41 +64,81 @@ export default function OptionsClient({ initialOptions }: Props) {
       </div>
 
       <div className="options-main">
-        <div className="options-header">
+        <div className="options-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3>Gerenciar {types.find(t => t.id === activeTab)?.label}</h3>
+          {editingOption && (
+            <span className="edit-badge" style={{ fontSize: '0.8rem', background: '#fef3c7', color: '#92400e', padding: '4px 8px', borderRadius: '4px', fontWeight: 600 }}>
+              Editando: {editingOption.label}
+            </span>
+          )}
         </div>
 
         <form 
+          key={editingOption?.id || 'new'}
           className="options-add-form"
           action={async (formData) => {
             await upsertTicketOption(formData);
-            // Simples reload para atualizar a lista ou usar query local
             window.location.reload();
           }}
         >
           <input type="hidden" name="type" value={activeTab} />
+          {editingOption && <input type="hidden" name="id" value={editingOption.id} />}
+          
           <div className="opt-form-row" style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end' }}>
             <div style={{ flex: 1 }}>
               <label className="form-label">Nome Exibido</label>
-              <input name="label" placeholder="Ex: Urgente" required className="form-control" />
+              <input 
+                name="label" 
+                placeholder="Ex: Urgente" 
+                required 
+                className="form-control" 
+                defaultValue={editingOption?.label || ''}
+              />
             </div>
             <div style={{ flex: 1 }}>
               <label className="form-label">Código (Valor)</label>
-              <input name="value" placeholder="Ex: URGENTE" required className="form-control" />
+              <input 
+                name="value" 
+                placeholder="Ex: URGENTE" 
+                required 
+                className="form-control" 
+                defaultValue={editingOption?.value || ''}
+              />
             </div>
             {(activeTab === 'STATUS' || activeTab === 'PRIORITY') && (
               <div style={{ width: '60px' }}>
                 <label className="form-label">Cor</label>
-                <input name="color" type="color" defaultValue="#3b82f6" className="form-control" style={{ padding: '0.2rem', height: '42px' }} title="Cor" />
+                <input 
+                  name="color" 
+                  type="color" 
+                  defaultValue={editingOption?.color || "#3b82f6"} 
+                  className="form-control" 
+                  style={{ padding: '0.2rem', height: '42px' }} 
+                  title="Cor" 
+                />
               </div>
             )}
             <div style={{ width: '80px' }}>
               <label className="form-label">Ordem</label>
-              <input name="order" type="number" defaultValue={filteredOptions.length + 1} className="form-control" title="Ordem" />
+              <input 
+                name="order" 
+                type="number" 
+                defaultValue={editingOption ? editingOption.order : filteredOptions.length + 1} 
+                className="form-control" 
+                title="Ordem" 
+              />
             </div>
-            <button type="submit" className="btn-primary" style={{ height: '42px' }}>
-              <Plus size={16} /> Adicionar
-            </button>
+            
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button type="submit" className="btn-primary" style={{ height: '42px' }}>
+                {editingOption ? <><Pencil size={16} /> Salvar</> : <><Plus size={16} /> Adicionar</>}
+              </button>
+              {editingOption && (
+                <button type="button" onClick={cancelEdit} className="btn-outline" style={{ height: '42px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <X size={16} /> Cancelar
+                </button>
+              )}
+            </div>
           </div>
         </form>
 
@@ -121,9 +173,14 @@ export default function OptionsClient({ initialOptions }: Props) {
                     )}
                     <td>{opt.order}</td>
                     <td>
-                      <button onClick={() => handleDelete(opt.id)} className="btn-icon-delete">
-                        <Trash2 size={16} />
-                      </button>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button onClick={() => handleEdit(opt)} className="btn-icon-edit" title="Editar">
+                          <Pencil size={16} />
+                        </button>
+                        <button onClick={() => handleDelete(opt.id)} className="btn-icon-delete" title="Excluir">
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

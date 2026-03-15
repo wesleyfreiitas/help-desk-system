@@ -1599,6 +1599,10 @@ ul {
 .role-attendant { background: #e0f2fe; color: #075985; }
 .role-client { background: #f1f5f9; color: #475569; }
 .profile-header-actions { display: flex; gap: 0.5rem; }
+.profile-header-actions .btn-outline-sm {
+  min-width: 130px;
+  justify-content: center;
+}
 .btn-outline-sm {
   display: inline-flex; align-items: center; gap: 0.35rem;
   padding: 0.4rem 0.75rem; font-size: 0.8rem; font-weight: 500;
@@ -2508,6 +2512,20 @@ ul {
 
 .btn-icon-delete:hover {
   background: #fef2f2;
+}
+
+.btn-icon-edit {
+  color: var(--primary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.btn-icon-edit:hover {
+  background: var(--primary-light);
 }
 
 /* Botão Enviar */
