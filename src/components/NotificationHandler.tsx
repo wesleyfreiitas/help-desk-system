@@ -1,65 +1,8 @@
-'use client';
-
-import React, { useEffect, useState, useRef } from 'react';
 import { Bell, X } from 'lucide-react';
-
-interface NotificationEvent {
-  id: string;
-  ticketId: string;
-  protocol: string;
-  title: string;
-  type: 'NEW_TICKET' | 'TICKET_REOPENED';
-}
+import { useNotifications } from './NotificationProvider';
 
 export default function NotificationHandler() {
-  const [notifications, setNotifications] = useState<NotificationEvent[]>([]);
-  const lastCheckRef = useRef<Date>(new Date());
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    // Inicializar som de notificação (usando um som padrão do sistema ou URL externa confiável)
-    audioRef.current = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-    
-    const checkNotifications = async () => {
-      try {
-        const since = lastCheckRef.current.toISOString();
-        const response = await fetch(`/api/notifications/check?since=${since}`);
-        
-        if (!response.ok) return;
-        
-        const data = await response.json();
-        
-        if (data.events && data.events.length > 0) {
-          // Filtrar duplicados que já podem estar na lista
-          setNotifications(prev => {
-            const newEvents = data.events.filter((e: any) => !prev.some(p => p.id === e.id));
-            if (newEvents.length > 0) {
-              // Tocar som
-              audioRef.current?.play().catch(() => {});
-              return [...newEvents, ...prev].slice(0, 5); // Manter apenas as últimas 5
-            }
-            return prev;
-          });
-        }
-        
-        lastCheckRef.current = new Date();
-      } catch (error) {
-        console.error('Error checking notifications:', error);
-      }
-    };
-
-    // Checar a cada 30 segundos
-    const interval = setInterval(checkNotifications, 30000);
-    
-    // Checagem inicial imediata (mas marcando o tempo agora)
-    checkNotifications();
-
-    return () => clearInterval(interval);
-  }, []);
-
-  const removeNotification = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  };
+  const { notifications, removeNotification } = useNotifications();
 
   if (notifications.length === 0) return null;
 

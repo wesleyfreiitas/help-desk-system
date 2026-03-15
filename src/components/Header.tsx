@@ -1,6 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
+import NotificationBell from './NotificationBell';
 
 export default function Header({ user }: { user: any }) {
   const pathname = usePathname();
@@ -11,6 +12,7 @@ export default function Header({ user }: { user: any }) {
     if (pathname.startsWith('/clients')) return 'Gestão de Clientes';
     if (pathname.startsWith('/products')) return 'Catálogo de Produtos';
     if (pathname.startsWith('/users')) return 'Administração de Usuários';
+    if (pathname === '/profile') return 'Meu Perfil';
     return 'Bem-vindo';
   };
 
@@ -18,7 +20,9 @@ export default function Header({ user }: { user: any }) {
     <header className="top-header">
       <div className="page-title">{getPageTitle()}</div>
       
-      <div className="top-actions">
+      <div className="top-actions" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+         <NotificationBell />
+         
          {user.role !== 'CLIENT' && (
            <span className="badge" style={{ backgroundColor: '#e0f2fe', color: '#0369a1' }}>
              Modo Staff
