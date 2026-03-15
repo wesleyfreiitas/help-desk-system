@@ -87,6 +87,7 @@ export async function importTickets(payload: any[], targetClientId: string) {
   const categoryCache: Record<string, string> = {};
 
   for (const row of payload) {
+    let finalProtocol = '';
     try {
       if (!row.title) throw new Error('Título é obrigatório');
 
@@ -166,7 +167,6 @@ export async function importTickets(payload: any[], targetClientId: string) {
       let assignedToId = null;
       const assigneeName = row.assignedTo?.trim();
       if (assigneeName && assigneeName.length > 2) {
-        // Remove clientId restriction because Agents are global. Use 'contains' to match 'Alex Costa' to 'Alex'.
         let assignee = await prisma.user.findFirst({ 
           where: { 
             name: { contains: assigneeName, mode: 'insensitive' }, 
@@ -178,11 +178,10 @@ export async function importTickets(payload: any[], targetClientId: string) {
         }
       }
 
-      // 6. Parse de Datas (Suporte para formato BR DD/MM/YYYY)
+      // 6. Parse de Datas
       const parseDateStr = (dateStr: string) => {
         if (!dateStr) return null;
         let d = dateStr;
-        // DD/MM/YYYY HH:MM
         if (d.includes('/')) {
           const parts = d.split(' ');
           const dateParts = parts[0].split('/');
@@ -198,24 +197,28 @@ export async function importTickets(payload: any[], targetClientId: string) {
       let resolvedAt = parseDateStr(row.resolvedAt);
 
       // 7. Montar o protocolo sequencial robusto
-      let finalProtocol = '';
       if (row.protocol && row.protocol.trim() !== '') {
-        // Se a planilha já trouxe, honra o que vem da base antiga (ex: "19093")
-        finalProtocol = row.protocol.trim();
-      } else {
-        // Se a planilha não trouxe, continua a numeração sequenciada
-        const lastTicket = await prisma.ticket.findFirst({
-           orderBy: { createdAt: 'desc' }
-        });
-        
-        let lastNumber = 1000;
-        if (lastTicket && lastTicket.protocol) {
-          const matched = lastTicket.protocol.match(/\d+/);
-          if (matched) lastNumber = parseInt(matched[0], 10);
+        // Se a planilha já trouxe, garantir formatação (ex: 19093 virar TKT-19093 para seguir padrao e evitar colisoes numericas puras)
+        let rawProt = row.protocol.trim();
+        if (/^\d+$/.test(rawProt)) {
+           rawProt = `TKT-${rawProt}`;
         }
-        
-        // Pule erros de concorrência contando com a variável `successCount`
-        const nextProtocolNumber = lastNumber + 1 + successCount; 
+        finalProtocol = rawProt;
+      } else {
+        // Buscamos qual foi o último/maior ID salvo para iterar sobre ele
+        // IMPORTANTE: TKT-9 seria maior que TKT-10 em string. Entao buscamos sem limite e pegamos o max no js
+        const allTickets = await prisma.ticket.findMany({ select: { protocol: true } });
+        let maxNumber = 1000;
+        allTickets.forEach(t => {
+           if(t.protocol) {
+              const matched = t.protocol.match(/\d+/);
+              if (matched) {
+                 const num = parseInt(matched[0], 10);
+                 if (num > maxNumber) maxNumber = num;
+              }
+           }
+        });
+        const nextProtocolNumber = maxNumber + 1 + successCount; 
         finalProtocol = `TKT-${nextProtocolNumber}`;
       }
 
@@ -243,7 +246,7 @@ export async function importTickets(payload: any[], targetClientId: string) {
       else if (['ALTA', 'ALTO'].includes(rawPriority)) finalPriority = 'ALTA';
       else if (['URGENTE', 'CRITICA', 'CRITICO'].includes(rawPriority)) finalPriority = 'URGENTE';
 
-      const rawType = row.type ? row.type.trim() : null; // Apenas repassamos. A interface trata os valores corretos.
+      const rawType = row.type ? row.type.trim() : null; 
       const rawSource = row.source ? row.source.trim() : "Portal";
 
       // 9. Inserir no Banco
@@ -269,7 +272,7 @@ export async function importTickets(payload: any[], targetClientId: string) {
       successCount++;
     } catch (error: any) {
       errorCount++;
-      log.push(`Erro na linha (Título: ${row.title || 'Desconhecido'}): ${error.message}`);
+      log.push(`Erro na linha (Título: ${row.title || 'Desconhecido'}) [Tentou Protocolo: ${finalProtocol}]: ${error.message}`);
     }
   }
 
