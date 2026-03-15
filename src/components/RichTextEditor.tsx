@@ -59,7 +59,7 @@ export default function RichTextEditor({
       overflow: 'hidden',
       background: 'var(--bg-card)',
       transition: 'border-color 0.2s, box-shadow 0.2s',
-      boxShadow: isFocused ? '0 0 0 2px rgba(99, 102, 241, 0.1)' : 'none',
+      boxShadow: isFocused ? 'var(--shadow-md)' : 'none',
       borderColor: isFocused ? 'var(--primary)' : 'var(--border-color)',
     }}>
       {/* Toolbar */}
@@ -149,7 +149,7 @@ function ToolbarButton({ onClick, icon, title }: { onClick: () => void; icon: Re
         cursor: 'pointer',
         transition: 'background 0.2s',
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(0,0,0,0.05)')}
+      onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-elevated)')}
       onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
     >
       {icon}

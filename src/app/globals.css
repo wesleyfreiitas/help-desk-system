@@ -39,6 +39,9 @@
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 12px;
+  
+  --bg-card: #ffffff;
+  --bg-elevated: #f8fafc;
 }
 
 [data-theme='dark'] {
@@ -56,6 +59,9 @@
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.6);
+
+  --bg-card: #0f172a;
+  --bg-elevated: #1e293b;
 }
 
 * {
@@ -952,9 +958,14 @@ ul {
 }
 
 .ticket-list-item:hover {
-  border-color: #cbd5e1;
+  border-color: var(--primary);
   box-shadow: var(--shadow-sm);
-  background-color: #f8fafc;
+  background-color: var(--bg-elevated);
+}
+
+.ticket-list-item.selected {
+  background-color: var(--primary-light);
+  border-color: var(--primary);
 }
 
 .ticket-left-side {
@@ -969,7 +980,8 @@ ul {
   width: 1.125rem;
   height: 1.125rem;
   border-radius: 4px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-elevated);
   cursor: pointer;
   accent-color: var(--primary);
 }
@@ -1000,7 +1012,7 @@ ul {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background-color: white;
+  background-color: var(--bg-card);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1048,8 +1060,8 @@ ul {
   font-weight: 600;
   padding: 0.125rem 0.5rem;
   border-radius: 4px;
-  background-color: #fce7f3;
-  color: #db2777;
+  background-color: rgba(236, 72, 153, 0.1);
+  color: #ec4899;
   width: fit-content;
   text-transform: uppercase;
   letter-spacing: 0.025em;
@@ -1057,13 +1069,13 @@ ul {
 }
 
 .ticket-sla-tag.overdue {
-  background-color: #fee2e2;
-  color: #dc2626;
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
 }
 
 .ticket-sla-tag.ok {
-  background-color: #f1f5f9;
-  color: #475569;
+  background-color: var(--bg-elevated);
+  color: var(--text-muted);
 }
 
 .ticket-title-row {
@@ -1827,8 +1839,8 @@ ul {
   margin-bottom: 1rem;
   font-size: 0.8rem;
 }
-.ticket-sla-banner.on-track { background: #f0fdf4; border: 1px solid #bbf7d0; }
-.ticket-sla-banner.overdue { background: #fef2f2; border: 1px solid #fecaca; }
+.ticket-sla-banner.on-track { background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); }
+.ticket-sla-banner.overdue { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); }
 .sla-status-indicator { display: flex; align-items: center; gap: 0.5rem; font-weight: 500; }
 .sla-dot { width: 8px; height: 8px; border-radius: 50%; }
 .sla-dot.green { background: #22c55e; }
@@ -1843,7 +1855,7 @@ ul {
   border-radius: var(--radius-md);
   overflow: hidden;
 }
-.interaction-card.internal { border-left: 3px solid #fbbf24; background: #fffbeb; }
+.interaction-card.internal { border-left: 3px solid var(--warning); background: rgba(245, 158, 11, 0.05); }
 .interaction-header {
   display: flex; justify-content: space-between;
   padding: 0.75rem 1rem;
@@ -1862,7 +1874,7 @@ ul {
 .interaction-time { font-size: 0.75rem; color: var(--text-muted); }
 .badge-internal {
   display: inline-block;
-  background: #fef3c7; color: #92400e;
+  background: rgba(245, 158, 11, 0.15); color: var(--warning);
   padding: 0.1rem 0.4rem; border-radius: 4px;
   font-size: 0.7rem; font-weight: 600;
   margin-left: 0.35rem;
@@ -1908,6 +1920,8 @@ ul {
   width: 100%; padding: 0.75rem;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
+  background-color: var(--bg-card);
+  color: var(--text-main);
   font-family: inherit; font-size: 0.9rem;
   resize: vertical; outline: none;
 }
