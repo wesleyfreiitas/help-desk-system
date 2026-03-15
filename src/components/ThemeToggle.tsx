@@ -6,6 +6,13 @@ import { useTheme } from './ThemeProvider';
 
 export default function ThemeToggle() {
   const { theme, toggleTheme } = useTheme();
+  const [mounted, setMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return <div className="theme-toggle-btn" style={{ opacity: 0 }} />;
 
   return (
     <button 
