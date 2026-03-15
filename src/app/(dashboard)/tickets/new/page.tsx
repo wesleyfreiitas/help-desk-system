@@ -142,12 +142,15 @@ export default async function NewTicketPage() {
               {categories.length === 0 ? (
                 <div className="nt-empty-field">Nenhuma categoria encontrada</div>
               ) : (
-                <select name="categoryId" className="nt-select">
-                  <option value="">— Sem categoria —</option>
-                  {categories.map((cat: any) => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                  ))}
-                </select>
+                <Combobox 
+                  name="categoryId"
+                  placeholder="— Sem categoria —"
+                  allowClear
+                  items={categories.map((cat: any) => ({
+                    id: cat.id,
+                    label: cat.name
+                  }))}
+                />
               )}
             </div>
           )}
@@ -156,24 +159,31 @@ export default async function NewTicketPage() {
           {isInternalUser && (
             <div className="nt-field">
               <label className="nt-label">USUÁRIO</label>
-              <select name="assigneeId" className="nt-select" defaultValue={user.id}>
-                <option value="">— Não atribuído —</option>
-                {agents.map((a: any) => (
-                  <option key={a.id} value={a.id}>{a.name}</option>
-                ))}
-              </select>
+              <Combobox 
+                name="assigneeId"
+                placeholder="— Não atribuído —"
+                defaultValue={user.id}
+                allowClear
+                items={agents.map((a: any) => ({
+                  id: a.id,
+                  label: a.name
+                }))}
+              />
             </div>
           )}
 
           {/* Produto */}
           <div className="nt-field">
             <label className="nt-label">Produto</label>
-            <select name="productId" className="nt-select">
-              <option value="">— Selecione —</option>
-              {products.map((p: any) => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
-            </select>
+            <Combobox 
+              name="productId"
+              placeholder="— Selecione o produto —"
+              allowClear
+              items={products.map((p: any) => ({
+                id: p.id,
+                label: p.name
+              }))}
+            />
           </div>
 
           {/* Descrição */}

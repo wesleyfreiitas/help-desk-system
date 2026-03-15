@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search } from 'lucide-react';
+import Combobox from '@/components/Combobox';
 
 export default function TicketFilterSidebar({ clients, users, options, categories }: { clients: any[], users: any[], options: any[], categories: any[] }) {
   const router = useRouter();
@@ -43,16 +44,14 @@ export default function TicketFilterSidebar({ clients, users, options, categorie
 
       <div className="filter-group">
         <label className="filter-label">CATEGORIA</label>
-        <select
-          className="filter-select"
-          value={categoryId}
-          onChange={(e) => handleFilterChange('categoryId', e.target.value)}
-        >
-          <option value="">Qualquer categoria</option>
-          {categories.map(c => (
-            <option key={c.id} value={c.id}>{c.name}</option>
-          ))}
-        </select>
+        <Combobox 
+          name="categoryId"
+          placeholder="Qualquer categoria"
+          defaultValue={categoryId}
+          allowClear
+          onChange={(val) => handleFilterChange('categoryId', val)}
+          items={categories.map(c => ({ id: c.id, label: c.name }))}
+        />
       </div>
 
       <div className="filter-group">
@@ -71,62 +70,54 @@ export default function TicketFilterSidebar({ clients, users, options, categorie
 
       {users.length > 0 && (
         <div className="filter-group">
-          <label className="filter-label">Usuários Incluídos</label>
-          <select
-            className="filter-select"
-            value={assigneeId}
-            onChange={(e) => handleFilterChange('assigneeId', e.target.value)}
-          >
-            <option value="">Qualquer usuário</option>
-            {users.map(u => (
-              <option key={u.id} value={u.id}>{u.name}</option>
-            ))}
-          </select>
+          <label className="filter-label">Agente Responsável</label>
+          <Combobox 
+            name="assigneeId"
+            placeholder="Qualquer usuário"
+            defaultValue={assigneeId}
+            allowClear
+            onChange={(val) => handleFilterChange('assigneeId', val)}
+            items={users.map(u => ({ id: u.id, label: u.name }))}
+          />
         </div>
       )}
 
       {clients.length > 0 && (
         <div className="filter-group">
           <label className="filter-label">Empresas</label>
-          <select
-            className="filter-select"
-            value={clientId}
-            onChange={(e) => handleFilterChange('clientId', e.target.value)}
-          >
-            <option value="">Qualquer empresa</option>
-            {clients.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
+          <Combobox 
+            name="clientId"
+            placeholder="Qualquer empresa"
+            defaultValue={clientId}
+            allowClear
+            onChange={(val) => handleFilterChange('clientId', val)}
+            items={clients.map(c => ({ id: c.id, label: c.name }))}
+          />
         </div>
       )}
 
       <div className="filter-group">
         <label className="filter-label">Status</label>
-        <select
-          className="filter-select"
-          value={status}
-          onChange={(e) => handleFilterChange('status', e.target.value)}
-        >
-          <option value="">Qualquer status</option>
-          {options.filter(o => o.type === 'STATUS').map(o => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
+        <Combobox 
+          name="status"
+          placeholder="Qualquer status"
+          defaultValue={status}
+          allowClear
+          onChange={(val) => handleFilterChange('status', val)}
+          items={options.filter(o => o.type === 'STATUS').map(o => ({ id: o.value, label: o.label }))}
+        />
       </div>
 
       <div className="filter-group">
         <label className="filter-label">Prioridade</label>
-        <select
-          className="filter-select"
-          value={priority}
-          onChange={(e) => handleFilterChange('priority', e.target.value)}
-        >
-          <option value="">Qualquer prioridade</option>
-          {options.filter(o => o.type === 'PRIORITY').map(o => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
+        <Combobox 
+          name="priority"
+          placeholder="Qualquer prioridade"
+          defaultValue={priority}
+          allowClear
+          onChange={(val) => handleFilterChange('priority', val)}
+          items={options.filter(o => o.type === 'PRIORITY').map(o => ({ id: o.value, label: o.label }))}
+        />
       </div>
     </div>
   );

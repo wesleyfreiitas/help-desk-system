@@ -15,6 +15,8 @@ interface ComboboxProps {
   placeholder?: string;
   required?: boolean;
   defaultValue?: string;
+  onChange?: (value: string) => void;
+  allowClear?: boolean;
 }
 
 export default function Combobox({ 
@@ -22,12 +24,19 @@ export default function Combobox({
   name, 
   placeholder = "Pesquisar...", 
   required = false,
-  defaultValue = ""
+  defaultValue = "",
+  onChange,
+  allowClear = false
 }: ComboboxProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedValue, setSelectedValue] = useState(defaultValue);
   const [focusedIndex, setFocusedIndex] = useState(-1);
+
+  // Update internal state if defaultValue changes externally
+  useEffect(() => {
+    setSelectedValue(defaultValue);
+  }, [defaultValue]);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -56,11 +65,13 @@ export default function Combobox({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSelect = (item: ComboboxItem) => {
-    setSelectedValue(item.id);
+  const handleSelect = (item: ComboboxItem | null) => {
+    const newVal = item ? item.id : '';
+    setSelectedValue(newVal);
     setSearchTerm('');
     setIsOpen(false);
     setFocusedIndex(-1);
+    if (onChange) onChange(newVal);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -143,13 +154,24 @@ export default function Combobox({
             </>
           ) : placeholder}
         </span>
-        <ChevronDown size={16} style={{ 
-          color: 'var(--text-muted)', 
-          transform: isOpen ? 'rotate(180deg)' : 'none',
-          transition: 'transform 0.2s',
-          marginLeft: '8px',
-          flexShrink: 0
-        }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+          {allowClear && selectedValue && (
+            <div 
+              onClick={(e) => { e.stopPropagation(); handleSelect(null); }}
+              style={{ padding: '4px', borderRadius: '50%', display: 'flex' }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(0,0,0,0.05)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+            >
+              <X size={14} style={{ color: 'var(--text-muted)' }} />
+            </div>
+          )}
+          <ChevronDown size={14} style={{ 
+            color: 'var(--text-muted)', 
+            transform: isOpen ? 'rotate(180deg)' : 'none',
+            transition: 'transform 0.2s',
+            marginLeft: '4px'
+          }} />
+        </div>
       </div>
 
       {isOpen && (
