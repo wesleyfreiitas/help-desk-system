@@ -318,8 +318,20 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
                 {creatorName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
               </div>
               <div className="contact-details-v2">
-                <span className="contact-name-v2">{creatorName}</span>
-                <span className="contact-company-v2">{ticket.client.name}</span>
+                <Link 
+                  href={`/users/${openedBy?.id || requesterUser?.id || '#'}`}
+                  className="contact-name-v2 nt-link-hover"
+                  style={{ display: 'block', color: 'inherit', textDecoration: 'none' }}
+                >
+                  {creatorName}
+                </Link>
+                <Link 
+                  href={`/companies/${ticket.clientId}`}
+                  className="contact-company-v2 nt-link-hover"
+                  style={{ display: 'block', color: 'var(--primary)', textDecoration: 'none', fontSize: '0.75rem' }}
+                >
+                  {ticket.client.name}
+                </Link>
               </div>
             </div>
             

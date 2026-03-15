@@ -65,6 +65,12 @@ a:hover {
   color: var(--primary-hover);
 }
 
+.nt-link-hover:hover {
+  color: var(--primary) !important;
+  text-decoration: underline !important;
+  cursor: pointer;
+}
+
 ul {
   list-style: none;
 }
