@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { upsertTicketOption, deleteTicketOption } from '@/app/actions/settings';
 import { Trash2, Plus, GripVertical, Pencil, X } from 'lucide-react';
 
@@ -18,9 +19,26 @@ interface Props {
 }
 
 export default function OptionsClient({ initialOptions }: Props) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [options, setOptions] = useState(initialOptions);
-  const [activeTab, setActiveTab] = useState('TYPE');
+  
+  // Get active tab from URL or default to TYPE
+  const activeTab = searchParams.get('tab') || 'TYPE';
+
   const [editingOption, setEditingOption] = useState<Option | null>(null);
+
+  // Sync internal state when props change (after router.refresh)
+  useEffect(() => {
+    setOptions(initialOptions);
+  }, [initialOptions]);
+
+  const setActiveTab = (tab: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', tab);
+    router.push(`?${params.toString()}`, { scroll: false });
+    setEditingOption(null);
+  };
 
   const types = [
     { id: 'TYPE', label: 'Tipos' },
@@ -34,7 +52,7 @@ export default function OptionsClient({ initialOptions }: Props) {
   const handleDelete = async (id: string) => {
     if (confirm('Tem certeza que deseja excluir esta opção?')) {
       await deleteTicketOption(id);
-      setOptions(prev => prev.filter(o => o.id !== id));
+      router.refresh();
       if (editingOption?.id === id) setEditingOption(null);
     }
   };
@@ -78,7 +96,8 @@ export default function OptionsClient({ initialOptions }: Props) {
           className="options-add-form"
           action={async (formData) => {
             await upsertTicketOption(formData);
-            window.location.reload();
+            setEditingOption(null);
+            router.refresh();
           }}
         >
           <input type="hidden" name="type" value={activeTab} />
