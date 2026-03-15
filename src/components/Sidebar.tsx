@@ -15,8 +15,8 @@ export default function Sidebar({ user }: { user: any }) {
     { label: 'Dashboard', href: '/dashboard', roles: ['ADMIN', 'ATTENDANT', 'CLIENT', 'ORG_MANAGER', 'ORG_MEMBER'] },
     { label: 'Chamados', href: '/tickets', roles: ['ADMIN', 'ATTENDANT', 'CLIENT', 'ORG_MANAGER', 'ORG_MEMBER'] },
     { label: 'Empresas', href: '/companies', roles: ['ADMIN', 'ATTENDANT'] },
-    { label: 'Produtos', href: '/products', roles: ['ADMIN', 'ATTENDANT'] },
-    { label: 'Categorias', href: '/categories', roles: ['ADMIN', 'ATTENDANT'] },
+    { label: 'Produtos', href: '/products', roles: ['ADMIN'] },
+    { label: 'Categorias', href: '/categories', roles: ['ADMIN'] },
     { label: 'Usuários', href: '/users', roles: ['ADMIN'] },
     { label: 'Configurações', href: '/settings/custom-fields', roles: ['ADMIN'] },
   ];

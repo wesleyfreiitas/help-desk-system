@@ -5,7 +5,7 @@ import ProductListClient from './ProductListClient';
 
 export default async function ProductsPage() {
   const session = await getSession();
-  if (!session || session.user.role === 'CLIENT') return null;
+  if (!session || session.user.role !== 'ADMIN') return null;
 
   const products = await prisma.product.findMany({
     where: { deletedAt: null },

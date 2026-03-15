@@ -5,7 +5,7 @@ import CategoryListClient from './CategoryListClient';
 
 export default async function CategoriesPage() {
   const session = await getSession();
-  if (!session || session.user.role === 'CLIENT') return null;
+  if (!session || session.user.role !== 'ADMIN') return null;
 
   const categories = await prisma.category.findMany({
     where: { deletedAt: null },
