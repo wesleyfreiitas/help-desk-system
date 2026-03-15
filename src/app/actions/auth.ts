@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { login as setSession, getSession } from '@/lib/auth';
+import { getSSOConfig } from './sso';
 import { redirect } from 'next/navigation';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
@@ -46,10 +47,16 @@ export async function autoLoginAction(userId: string, companyId: string) {
   }
 
   try {
-    const response = await fetch(`https://api.helena.run/core/v1/agent/${userId}`, {
+    const ssoConfig = await getSSOConfig();
+    
+    if (!ssoConfig.enabled) {
+      return { error: 'Login automático (SSO) está desativado nas configurações.' };
+    }
+
+    const response = await fetch(`${ssoConfig.apiUrl}${userId}`, {
       method: 'GET',
       headers: {
-        'Authorization': 'pn_uVjECWGEkT2A9p9CXKZbYAriqhVPsvzZgBGdNZGbE',
+        'Authorization': ssoConfig.token,
         'accept': 'application/json'
       }
     });
