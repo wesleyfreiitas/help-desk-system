@@ -1,7 +1,7 @@
 'use client';
 
-import { useActionState, useEffect, useState, Suspense } from 'react';
-import { authenticate, autoLoginAction } from '@/app/actions/auth';
+import { useActionState, useEffect, useState, Suspense, useRef } from 'react';
+import { authenticate, autoLoginAction, checkSessionAction } from '@/app/actions/auth';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 
@@ -11,25 +11,44 @@ function LoginContent() {
   const router = useRouter();
   const [isAutoLogging, setIsAutoLogging] = useState(false);
   const [autoLoginError, setAutoLoginError] = useState<string | null>(null);
+  
+  // Ref para evitar loops e múltiplas chamadas simultâneas
+  const loginAttemptInProgress = useRef(false);
 
   useEffect(() => {
     const userParam = searchParams.get('user');
     const companyParam = searchParams.get('company');
 
-    if (userParam && companyParam) {
+    if (userParam && companyParam && !loginAttemptInProgress.current) {
       const performAutoLogin = async () => {
+        // Verifica se já não estamos logados antes de tentar
+        const alreadyLogged = await checkSessionAction();
+        if (alreadyLogged) {
+          console.log('User already authenticated. Redirecting to dashboard...');
+          router.push('/dashboard');
+          return;
+        }
+
+        console.log('Starting auto-login process for:', userParam);
+        loginAttemptInProgress.current = true;
         setIsAutoLogging(true);
+        
         try {
           const result = await autoLoginAction(userParam, companyParam);
-          if (result.success) {
-            router.push('/dashboard');
-          } else if (result.error) {
+          // Se o autoLoginAction redirecionar no servidor (com redirect()), 
+          // esta parte pode nem ser alcançada se for uma navegação completa.
+          // Mas se ele retornar erro, tratamos aqui.
+          if (result && result.error) {
+            console.error('Auto-login failed:', result.error);
             setAutoLoginError(result.error);
+            setIsAutoLogging(false);
+            loginAttemptInProgress.current = false;
           }
         } catch (err) {
+          console.error('Unexpected error during auto-login:', err);
           setAutoLoginError('Erro ao tentar realizar login automático.');
-        } finally {
           setIsAutoLogging(false);
+          loginAttemptInProgress.current = false;
         }
       };
 
@@ -44,6 +63,9 @@ function LoginContent() {
           <div className="loader" style={{ margin: '0 auto 1.5rem auto' }}></div>
           <h2>Autenticando...</h2>
           <p>Validando acesso via Uppchannel</p>
+          {autoLoginError && (
+             <div className="error-message" style={{ marginTop: '1rem' }}>{autoLoginError}</div>
+          )}
         </div>
       </div>
     );

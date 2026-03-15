@@ -103,15 +103,8 @@ export async function autoLoginAction(userId: string, companyId: string) {
       });
     }
 
-    await setSession({
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      clientId: user.clientId,
-    });
-
-    return { success: true };
+    console.log(`Auto-login successful for user: ${user.email}. Redirecting to dashboard...`);
+    redirect('/dashboard');
   } catch (error: any) {
     console.error('Auto login error:', error);
     return { error: error.message || 'Erro inesperado no auto-login.' };
@@ -238,4 +231,9 @@ export async function updatePasswordAction(prevState: any, formData: FormData) {
   });
 
   return { success: 'Senha atualizada com sucesso!' };
+}
+
+export async function checkSessionAction() {
+  const session = await getSession();
+  return !!session;
 }
