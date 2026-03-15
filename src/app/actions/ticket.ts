@@ -183,8 +183,22 @@ export async function createTicket(formData: FormData) {
 
   const { slaResolveDate, slaResponseDate } = calculateSLA(priority as 'ALTA' | 'MEDIA' | 'BAIXA');
 
-  const count = await prisma.ticket.count();
-  const protocolNumber = 1000 + count + 1;
+  // Recupera o maior ticket já criado para fazer a contagem sequencial
+  const lastTicket = await prisma.ticket.findFirst({
+     orderBy: { protocol: 'desc' }
+  });
+  
+  let nextId = 1000 + (await prisma.ticket.count());
+  if (lastTicket && lastTicket.protocol) {
+     const matched = lastTicket.protocol.match(/\d+/);
+     if (matched) {
+        const currentHigh = parseInt(matched[0], 10);
+        if (currentHigh > nextId) {
+            nextId = currentHigh;
+        }
+     }
+  }
+  const protocolNumber = nextId + 1;
 
   // Processar anexos do ticket inicial
   const files = formData.getAll('attachments') as File[];

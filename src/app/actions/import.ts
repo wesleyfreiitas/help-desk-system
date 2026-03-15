@@ -197,14 +197,26 @@ export async function importTickets(payload: any[], targetClientId: string) {
       let createdAt = parseDateStr(row.createdAt) || new Date();
       let resolvedAt = parseDateStr(row.resolvedAt);
 
-      // 7. Montar o protocolo de alta entropia (ou manter original íntegro)
+      // 7. Montar o protocolo sequencial robusto
       let finalProtocol = '';
       if (row.protocol && row.protocol.trim() !== '') {
+        // Se a planilha já trouxe, honra o que vem da base antiga (ex: "19093")
         finalProtocol = row.protocol.trim();
       } else {
-        const timePart = Date.now().toString(36).toUpperCase();
-        const randPart = Math.floor(Math.random() * 100000).toString(36).toUpperCase();
-        finalProtocol = `IMP-${timePart}-${randPart}`;
+        // Se a planilha não trouxe, continua a numeração sequenciada
+        const lastTicket = await prisma.ticket.findFirst({
+           orderBy: { createdAt: 'desc' }
+        });
+        
+        let lastNumber = 1000;
+        if (lastTicket && lastTicket.protocol) {
+          const matched = lastTicket.protocol.match(/\d+/);
+          if (matched) lastNumber = parseInt(matched[0], 10);
+        }
+        
+        // Pule erros de concorrência contando com a variável `successCount`
+        const nextProtocolNumber = lastNumber + 1 + successCount; 
+        finalProtocol = `TKT-${nextProtocolNumber}`;
       }
 
       // 8. Normalização Avançada de Status, Prioridade e Tipo
