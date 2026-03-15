@@ -84,7 +84,7 @@ export default function SSOSettingsClient({ initialConfig }: { initialConfig: SS
         <div style={{ padding: '1rem', background: 'rgba(2, 132, 199, 0.05)', borderRadius: '8px', border: '1px solid rgba(2, 132, 199, 0.2)', display: 'flex', gap: '0.75rem' }}>
           <AlertCircle size={20} className="text-primary" style={{ flexShrink: 0 }} />
           <div style={{ fontSize: '0.85rem', color: 'var(--text-main)' }}>
-            <strong>Como funciona:</strong> Ao acessar `/login?user=XYZ&company=ABC`, o sistema fará um GET em `{URL_BASE}{user}` enviando o Token no header de Authorization. Se o retorno for válido, o usuário entra automaticamente.
+            <strong>Como funciona:</strong> Ao acessar `/login?user=XYZ&company=ABC`, o sistema fará um GET em `URL_BASE/USER_ID` enviando o Token no header de Authorization. Se o retorno for válido, o usuário entra automaticamente.
           </div>
         </div>
       </div>
