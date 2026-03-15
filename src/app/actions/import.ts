@@ -249,7 +249,7 @@ export async function importTickets(payload: any[], targetClientId: string) {
       const rawType = row.type ? row.type.trim() : null; 
       const rawSource = row.source ? row.source.trim() : "Portal";
 
-      // 9. Inserir no Banco
+          // 9. Inserir no Banco
       await prisma.ticket.create({
         data: {
           protocol: finalProtocol,
@@ -261,7 +261,7 @@ export async function importTickets(payload: any[], targetClientId: string) {
           source: rawSource,
           createdAt,
           ...(resolvedAt ? { resolvedAt } : {}),
-          client: { connect: { id: clientId } },
+          client: { connect: { id: clientIdToUse } },
           ...(requesterId ? { requester: { connect: { id: requesterId } } } : {}),
           ...(productId ? { product: { connect: { id: productId } } } : {}),
           ...(categoryId ? { category: { connect: { id: categoryId } } } : {}),
