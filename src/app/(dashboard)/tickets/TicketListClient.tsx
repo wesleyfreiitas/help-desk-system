@@ -170,7 +170,16 @@ export default function TicketListClient({ tickets, userId, users, options }: Pr
                     alert('Selecione ao menos 2 chamados para mesclar');
                     return;
                   }
-                  if (confirm('Deseja mesclar os chamados selecionados? O mais antigo permanecerá aberto.')) {
+                  
+                  // Verifica se todos os selecionados estão "ABERTO"
+                  const selectedTickets = tickets.filter(t => selectedIdsArray.includes(t.id));
+                  const hasNonOpen = selectedTickets.some(t => t.status !== 'ABERTO');
+                  if (hasNonOpen) {
+                    alert('Apenas chamados com status "ABERTO" podem ser mesclados.');
+                    return;
+                  }
+
+                  if (confirm('Deseja mesclar os chamados selecionados? O mais antigo permanecerá aberto e os demais fechados.')) {
                     handleBulkAction(
                       () => bulkMerge(selectedIdsArray),
                       'Chamados mesclados',
