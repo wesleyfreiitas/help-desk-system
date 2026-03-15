@@ -310,6 +310,17 @@ export default function ImportClient({ organizationId }: { organizationId: strin
                 ) : null}
               </div>
 
+              {results?.log && results.log.length > 0 && (
+                <div style={{ marginTop: '1rem', marginBottom: '2rem', textAlign: 'left', background: '#fff1f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '1rem' }}>
+                  <h4 style={{ color: '#9f1239', marginBottom: '0.5rem', fontWeight: 600, fontSize: '0.95rem' }}>Detalhes do Erro:</h4>
+                  <ul style={{ margin: 0, paddingLeft: '1.2rem', color: '#be123c', fontSize: '0.85rem', lineHeight: 1.5 }}>
+                    {results.log.map((logItem: string, idx: number) => (
+                      <li key={idx} style={{ marginBottom: '0.25rem' }}>{logItem}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
                 <button className="btn btn-primary" onClick={resetProcess}>Nova Importação</button>
               </div>
