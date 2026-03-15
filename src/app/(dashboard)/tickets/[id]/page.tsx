@@ -149,9 +149,10 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
                   </div>
                 </div>
               </div>
-              <div className="interaction-body">
-                {ticket.description}
-              </div>
+              <div 
+                className="interaction-body"
+                dangerouslySetInnerHTML={{ __html: ticket.description }}
+              />
             </div>
 
             {/* Subsequent interactions */}
@@ -172,9 +173,10 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
                       </div>
                     </div>
                   </div>
-                  <div className="interaction-body">
-                    {interaction.message}
-                  </div>
+                  <div 
+                    className="interaction-body"
+                    dangerouslySetInnerHTML={{ __html: interaction.message }}
+                  />
                   {interaction.attachments.length > 0 && (
                     <div className="interaction-attachments">
                       {interaction.attachments.map((att: any) => (

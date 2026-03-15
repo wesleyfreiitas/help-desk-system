@@ -396,7 +396,7 @@ export async function bulkMerge(ticketIds: string[]) {
       data: {
         ticketId: t.id,
         userId: session.user.id,
-        message: `Este chamado foi mesclado ao chamado #${oldest.protocol}. Link: /tickets/${oldest.id}`,
+        message: `Este chamado foi mesclado ao chamado <a href="/tickets/${oldest.id}" class="nt-link">#${oldest.protocol}</a>.`,
         isInternal: true
       }
     });
@@ -406,7 +406,7 @@ export async function bulkMerge(ticketIds: string[]) {
       data: {
         ticketId: oldest.id,
         userId: session.user.id,
-        message: `O chamado #${t.protocol} foi mesclado a este.`,
+        message: `O chamado <a href="/tickets/${t.id}" class="nt-link">#${t.protocol}</a> foi mesclado a este.`,
         isInternal: true
       }
     });
