@@ -1,48 +1,86 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
+import { revalidatePath } from 'next/cache';
 
-export async function getTicketOptions(type?: string) {
-  return await prisma.ticketOption.findMany({
-    where: type ? { type } : {},
-    orderBy: { order: 'asc' },
-  });
+export async function getSystemSetting(key: string) {
+  try {
+    const setting = await prisma.systemSetting.findUnique({
+      where: { key }
+    });
+    return setting ? JSON.parse(setting.value) : null;
+  } catch (error) {
+    console.error(`Error fetching setting ${key}:`, error);
+    return null;
+  }
 }
 
-export async function upsertTicketOption(formData: FormData) {
+export async function updateSystemSetting(key: string, value: any) {
   const session = await getSession();
-  if (!session || session.user.role !== 'ADMIN') throw new Error('Unauthorized');
-
-  const id = formData.get('id') as string | null;
-  const type = formData.get('type') as string;
-  const label = formData.get('label') as string;
-  const value = formData.get('value') as string;
-  const color = formData.get('color') as string | null;
-  const order = parseInt(formData.get('order') as string || '0');
-
-  if (id) {
-    await prisma.ticketOption.update({
-      where: { id },
-      data: { type, label, value, color, order }
-    });
-  } else {
-    await prisma.ticketOption.create({
-      data: { type, label, value, color, order }
-    });
+  if (!session || session.user.role !== 'ADMIN') {
+    throw new Error('Não autorizado. Apenas administradores podem alterar configurações do sistema.');
   }
 
-  revalidatePath('/settings/options');
-}
+  const stringifiedValue = JSON.stringify(value);
 
-export async function deleteTicketOption(id: string) {
-  const session = await getSession();
-  if (!session || session.user.role !== 'ADMIN') throw new Error('Unauthorized');
-
-  await prisma.ticketOption.delete({
-    where: { id }
+  await prisma.systemSetting.upsert({
+    where: { key },
+    update: { value: stringifiedValue },
+    create: { key, value: stringifiedValue }
   });
 
-  revalidatePath('/settings/options');
+  revalidatePath('/settings/integrations/whatsapp');
+  return { success: true };
+}
+
+export async function sendWhatsAppMessage(to: string, contactName: string) {
+  const session = await getSession();
+  if (!session) throw new Error('Não autenticado');
+
+  // Buscar configurações da API
+  const config = await getSystemSetting('whatsapp_config');
+  if (!config || !config.enabled) {
+    throw new Error('A integração com WhatsApp não está configurada ou está desativada.');
+  }
+
+  const { apiUrl, token, templateId, from, attendantName } = config;
+
+  if (!apiUrl || !token || !templateId || !from) {
+    throw new Error('Configurações de WhatsApp incompletas.');
+  }
+
+  // Preparar o payload conforme a cURL fornecida
+  const payload = {
+    body: {
+      parameters: {
+        nome: attendantName || session.user.name
+      },
+      templateId: templateId
+    },
+    from: from,
+    to: to.replace(/\D/g, '') // Remove caracteres não numéricos
+  };
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': token,
+        'Accept': 'application/json',
+        'Content-Type': 'application/*+json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Erro na API: ${response.statusText}`);
+    }
+
+    return { success: true };
+  } catch (error: any) {
+    console.error('WhatsApp API Error:', error);
+    throw new Error(error.message || 'Falha ao enviar mensagem de WhatsApp');
+  }
 }

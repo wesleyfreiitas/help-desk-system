@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { getUserDetails } from '@/app/actions/admin';
 import { Edit, Trash2, ChevronLeft, ChevronRight, Plus, Phone, Mail, Tag, Clock, AlertCircle } from 'lucide-react';
 import EditUserModal from './EditUserModal';
+import WhatsAppButton from './WhatsAppButton';
 
 export default async function UserDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const session = await getSession();
@@ -87,7 +88,7 @@ export default async function UserDetailsPage({ params }: { params: Promise<{ id
                             <Link href={`/tickets/new?contactId=${user.id}`} className="btn-outline-sm">
                                 <Plus size={14} /> Novo chamado
                             </Link>
-                            <button className="btn-outline-sm"><Phone size={14} /> WhatsApp</button>
+                            <WhatsAppButton phone={user.phone || ''} contactName={user.name} />
                         </div>
                     </div>
 
