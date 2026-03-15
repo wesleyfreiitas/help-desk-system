@@ -103,14 +103,21 @@ export async function autoLoginAction(userId: string, companyId: string) {
       });
     }
 
-    console.log(`Auto-login logic completed for user: ${user.email}.`);
+    // Criar a sessão antes de retornar
+    await setSession({
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      clientId: user.clientId,
+    });
+
+    console.log(`Auto-login session created for: ${user.email}.`);
+    return { success: true };
   } catch (error: any) {
     console.error('Auto login error:', error);
     return { error: error.message || 'Erro inesperado no auto-login.' };
   }
-
-  // Redirect deve ser fora do try/catch pois o Next.js lida com ele via exceções internas
-  redirect('/dashboard');
 }
 
 export async function logoutAction() {

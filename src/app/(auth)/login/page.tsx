@@ -35,9 +35,13 @@ function LoginContent() {
         
         try {
           const result = await autoLoginAction(userParam, companyParam);
-          // Se o autoLoginAction redirecionar no servidor (com redirect()), 
-          // esta parte pode nem ser alcançada se for uma navegação completa.
-          // Mas se ele retornar erro, tratamos aqui.
+          
+          if (result && result.success) {
+            console.log('Auto-login successful, navigating to dashboard...');
+            router.push('/dashboard');
+            return;
+          }
+
           if (result && result.error) {
             console.error('Auto-login failed:', result.error);
             setAutoLoginError(result.error);
