@@ -306,180 +306,190 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
           </div>
         </div>
 
-        {/* Contact & Company Sidebar */}
+        {/* Contact & Company Sidebar Radical Redesign (v4) */}
         <div className="ticket-contact-sidebar" style={{ 
           display: 'flex', 
           flexDirection: 'column', 
-          gap: '1.5rem',
-          padding: '1rem',
-          backgroundColor: 'var(--bg-elevated)',
-          borderRadius: 'var(--radius-lg)',
-          border: '1px solid var(--border-color)',
-          height: 'fit-content'
+          gap: '2rem',
+          padding: '0'
         }}>
-          {/* Seção do Contato */}
-          <div className="sidebar-section-v3">
-            <h4 style={{ 
-              fontSize: '0.7rem', 
-              fontWeight: 700, 
-              color: 'var(--text-muted)', 
-              textTransform: 'uppercase', 
-              letterSpacing: '0.05em',
-              marginBottom: '1rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}>
-              <User size={14} /> Informações do Contato
-            </h4>
-            
+          {/* Main Container - Glassmorphism-like feel */}
+          <div style={{ 
+            backgroundColor: 'var(--bg-card)',
+            borderRadius: 'var(--radius-xl)',
+            border: '1px solid var(--border-color)',
+            boxShadow: 'var(--premium-shadow)',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            {/* Header Section with subtle gradient */}
             <div style={{ 
-              background: 'var(--surface)', 
-              padding: '1.25rem', 
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--border-color)',
-              boxShadow: 'var(--shadow-sm)',
-              marginBottom: '1rem'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.25rem' }}>
-                <div style={{ 
-                  width: '44px', 
-                  height: '44px', 
-                  borderRadius: '10px', 
-                  background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
-                  color: 'white',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 700,
-                  fontSize: '1rem',
-                  flexShrink: 0
-                }}>
-                  {creatorName.slice(0, 2).toUpperCase()}
-                </div>
-                <div style={{ overflow: 'hidden' }}>
-                  <Link 
-                    href={`/users/${openedBy?.id || requesterUser?.id || '#'}`}
-                    style={{ 
-                      fontSize: '1rem', 
-                      fontWeight: 700, 
-                      color: 'var(--text-main)',
-                      display: 'block',
-                      whiteSpace: 'nowrap',
-                      textOverflow: 'ellipsis',
-                      overflow: 'hidden',
-                      textDecoration: 'none'
-                    }}
-                  >
-                    {creatorName}
-                  </Link>
-                  <Link 
-                    href={`/companies/${ticket.clientId}`}
-                    style={{ 
-                      fontSize: '0.75rem', 
-                      fontWeight: 500, 
-                      color: 'var(--primary)',
-                      textDecoration: 'none'
-                    }}
-                  >
-                    {ticket.client.name}
-                  </Link>
-                </div>
-              </div>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                {creatorEmail && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                    <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Email</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
-                      <Mail size={14} color="var(--text-muted)" />
-                      <span style={{ color: 'var(--text-main)', wordBreak: 'break-all' }}>{creatorEmail}</span>
-                    </div>
-                  </div>
-                )}
-                {creatorPhone && (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                    <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Telefone</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem' }}>
-                      <Phone size={14} color="var(--text-muted)" />
-                      <span style={{ color: 'var(--text-main)' }}>{creatorPhone}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Seção da Empresa */}
-          <div className="sidebar-section-v3">
-            <h4 style={{ 
-              fontSize: '0.7rem', 
-              fontWeight: 700, 
-              color: 'var(--text-muted)', 
-              textTransform: 'uppercase', 
-              letterSpacing: '0.05em',
-              marginBottom: '1rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}>
-              <ExternalLink size={14} /> Detalhes da Empresa
-            </h4>
-
-            <div style={{ 
-              background: 'var(--surface)', 
-              padding: '1.25rem', 
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--border-color)',
-              boxShadow: 'var(--shadow-sm)',
+              padding: '2rem 1.5rem 1.5rem',
+              background: 'linear-gradient(to bottom, var(--bg-elevated), transparent)',
+              borderBottom: '1px solid var(--border-color)',
               display: 'flex',
               flexDirection: 'column',
-              gap: '1rem'
+              alignItems: 'center',
+              textAlign: 'center'
             }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>CNPJ / Documento</span>
-                <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-main)' }}>{ticket.client.document || '--'}</span>
+              <div style={{ 
+                width: '64px', 
+                height: '64px', 
+                borderRadius: '20px', 
+                background: 'linear-gradient(135deg, var(--primary) 0%, #0ea5e9 100%)',
+                color: 'white',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 700,
+                fontSize: '1.5rem',
+                marginBottom: '1rem',
+                boxShadow: '0 8px 16px -4px rgba(2, 132, 199, 0.4)',
+                flexShrink: 0
+              }}>
+                {creatorName.slice(0, 2).toUpperCase()}
+              </div>
+              
+              <Link 
+                href={`/users/${openedBy?.id || requesterUser?.id || '#'}`}
+                style={{ 
+                  fontSize: '1.25rem', 
+                  fontWeight: 800, 
+                  color: 'var(--text-main)',
+                  textDecoration: 'none',
+                  letterSpacing: '-0.02em',
+                  marginBottom: '0.25rem'
+                }}
+              >
+                {creatorName}
+              </Link>
+              
+              <Link 
+                href={`/companies/${ticket.clientId}`}
+                style={{ 
+                  fontSize: '0.875rem', 
+                  fontWeight: 600, 
+                  color: 'var(--primary)',
+                  textDecoration: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                {ticket.client.name} <ExternalLink size={12} />
+              </Link>
+            </div>
+
+            {/* Information Grid */}
+            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              
+              {/* Contact Details Group */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
+                  <div style={{ width: '2px', height: '14px', backgroundColor: 'var(--primary)', borderRadius: '2px' }}></div>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    Contato
+                  </span>
+                </div>
+
+                {creatorEmail && (
+                  <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+                    <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
+                      <Mail size={16} />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Email</span>
+                      <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500, wordBreak: 'break-all' }}>{creatorEmail}</span>
+                    </div>
+                  </div>
+                )}
+
+                {creatorPhone && (
+                  <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+                    <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
+                      <Phone size={16} />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Telefone</span>
+                      <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>{creatorPhone}</span>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {ticket.client.website && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                  <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Website</span>
-                  <a 
-                    href={ticket.client.website.startsWith('http') ? ticket.client.website : `https://${ticket.client.website}`} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    style={{ fontSize: '0.875rem', color: 'var(--primary)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}
-                  >
-                    {ticket.client.website} <ExternalLink size={12} />
-                  </a>
-                </div>
-              )}
-
-              {/* Campos Personalizados da Empresa */}
-              {ticket.client.customFields && ticket.client.customFields.length > 0 && (
-                <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem', marginTop: '0.25rem' }}>
-                  <span style={{ 
-                    fontSize: '0.65rem', 
-                    fontWeight: 700, 
-                    color: 'var(--text-muted)', 
-                    textTransform: 'uppercase',
-                    display: 'block',
-                    marginBottom: '0.75rem'
-                  }}>
-                    Campos Personalizados
+              {/* Company Details Group */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
+                  <div style={{ width: '2px', height: '14px', backgroundColor: 'var(--primary)', borderRadius: '2px' }}></div>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    Empresa
                   </span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+                  <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
+                    <Globe size={16} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>CNPJ / Documento</span>
+                    <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>{ticket.client.document || '--'}</span>
+                  </div>
+                </div>
+
+                {ticket.client.website && (
+                  <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+                    <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
+                      <ExternalLink size={16} />
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Website</span>
+                      <a 
+                        href={ticket.client.website.startsWith('http') ? ticket.client.website : `https://${ticket.client.website}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        style={{ fontSize: '0.9rem', color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}
+                      >
+                        Acessar Site
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Custom Fields Group (Conditional) */}
+              {ticket.client.customFields && ticket.client.customFields.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
+                    <div style={{ width: '2px', height: '14px', backgroundColor: 'var(--info)', borderRadius: '2px' }}></div>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                      Específico
+                    </span>
+                  </div>
+
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                     {ticket.client.customFields.map((cf: any) => (
-                      <div key={cf.id} style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                        <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-main)' }}>{cf.field.name}</span>
-                        <div style={{ 
-                          fontSize: '0.8rem', 
+                      <div key={cf.id} style={{ 
+                        backgroundColor: 'var(--bg-elevated)', 
+                        padding: '1rem', 
+                        borderRadius: '12px',
+                        border: '1px solid var(--border-color)'
+                      }}>
+                        <span style={{ 
+                          fontSize: '0.65rem', 
+                          fontWeight: 800, 
                           color: 'var(--text-muted)', 
-                          lineHeight: '1.4',
-                          background: 'var(--bg-color)',
-                          padding: '0.5rem',
-                          borderRadius: '6px',
-                          border: '1px solid var(--border-color)',
+                          textTransform: 'uppercase',
+                          display: 'block',
+                          marginBottom: '4px'
+                        }}>
+                          {cf.field.name}
+                        </span>
+                        <div style={{ 
+                          fontSize: '0.85rem', 
+                          color: 'var(--text-main)', 
+                          fontWeight: 500,
+                          lineHeight: '1.5',
                           whiteSpace: 'pre-wrap'
                         }}>
                           {cf.value === 'true' ? 'Sim' : cf.value === 'false' ? 'Não' : cf.value || '--'}
