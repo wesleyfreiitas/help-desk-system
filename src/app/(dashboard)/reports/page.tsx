@@ -189,13 +189,6 @@ export default function ReportsPage() {
         ))}
       </div>
 
-      <style jsx>{`
-        .report-card-premium:hover {
-          transform: translateY(-4px);
-          box-shadow: var(--premium-shadow) !important;
-          border-color: transparent !important;
-        }
-      `}</style>
     </div>
   );
 }

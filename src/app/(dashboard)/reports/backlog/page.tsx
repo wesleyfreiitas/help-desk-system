@@ -144,14 +144,6 @@ export default async function BacklogReportPage() {
         )}
       </div>
 
-      <style jsx>{`
-        .backlog-row:hover {
-          background-color: var(--bg-elevated);
-        }
-        .action-btn:hover {
-          background-color: var(--primary-light) !important;
-        }
-      `}</style>
     </div>
   );
 }
