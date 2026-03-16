@@ -7,7 +7,7 @@ import TicketPropertySelect from './TicketPropertySelect';
 import TicketTagsInput from './TicketTagsInput';
 import TicketEmailComposer from './TicketEmailComposer';
 import TimeTrackerDisplay from './TimeTrackerDisplay';
-import { Clock, Reply, StickyNote, Forward, XCircle, Star, MoreHorizontal, User, Mail, Phone, ExternalLink, CheckSquare, Timer, ListTodo, AlertCircle, Paperclip } from 'lucide-react';
+import { Clock, Reply, StickyNote, Forward, XCircle, Star, MoreHorizontal, User, Mail, Phone, ExternalLink, CheckSquare, Timer, ListTodo, AlertCircle, Paperclip, Globe } from 'lucide-react';
 
 export default async function TicketDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
