@@ -63,6 +63,14 @@ export default function ReportsPage() {
       badge: 'Backlog'
     },
     {
+      title: 'Log de Recebimento de Emails',
+      description: 'Log detalhado de todos os emails processados ou rejeitados pelo sistema.',
+      icon: <ShieldCheck size={24} />,
+      href: '/reports/email-logs',
+      color: '#ec4899', // Pink
+      badge: 'Comunicação'
+    },
+    {
       title: 'Auditoria de Acessos',
       description: 'Log detalhado de acessos e logins realizados no sistema.',
       icon: <ShieldCheck size={24} />,

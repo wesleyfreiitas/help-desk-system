@@ -8,6 +8,7 @@ export default function ReportsLayout({ children }: { children: React.ReactNode 
 
   const tabs = [
     { label: 'Geral', href: '/reports' },
+    { label: 'Log de Emails', href: '/reports/email-logs' },
     { label: 'Auditoria', href: '/reports/audit' },
   ];
 
