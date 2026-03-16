@@ -7,8 +7,8 @@ export default function ReportsLayout({ children }: { children: React.ReactNode 
   const pathname = usePathname();
 
   const tabs = [
+    { label: 'Geral', href: '/reports' },
     { label: 'Auditoria', href: '/reports/audit' },
-    // Outros relatórios podem ser adicionados aqui no futuro
   ];
 
   return (
