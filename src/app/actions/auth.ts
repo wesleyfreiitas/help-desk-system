@@ -8,6 +8,7 @@ import { redirect } from 'next/navigation';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { sendEmail } from '@/lib/mail';
+import { headers } from 'next/headers';
 
 export async function authenticate(prevState: any, formData: FormData) {
   const email = formData.get('email') as string;
@@ -195,7 +196,12 @@ export async function forgotPasswordAction(prevState: any, formData: FormData) {
     create: { email, token, expires }
   });
 
-  const resetLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/reset-password?token=${token}`;
+  const headersList = await headers();
+  const host = headersList.get('host');
+  const proto = headersList.get('x-forwarded-proto') || 'http';
+  const baseUrl = `${proto}://${host}`;
+
+  const resetLink = `${baseUrl}/reset-password?token=${token}`;
 
   // Enviar e-mail real
   const emailResult = await sendEmail({
