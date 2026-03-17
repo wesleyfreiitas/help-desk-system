@@ -91,6 +91,16 @@ export async function createUser(formData: FormData) {
     throw new Error('Este e-mail já está em uso por outro usuário.');
   }
 
+  // Verificar se o telefone já existe
+  if (phone) {
+    const existingPhone = await prisma.user.findFirst({
+      where: { phone: phone.trim() }
+    });
+    if (existingPhone) {
+      throw new Error('Este telefone já está em uso por outro usuário.');
+    }
+  }
+
   // Usa bcrypt como no auth
   const bcrypt = require('bcryptjs');
   const password = await bcrypt.hash(rawPassword, 10);
@@ -306,6 +316,19 @@ export async function updateUser(userId: string, data: { name: string, email: st
 
   if (existingUser) {
     throw new Error('Este e-mail já está em uso por outro usuário.');
+  }
+
+  // Verificar se o telefone já está em uso por outro usuário
+  if (data.phone) {
+    const existingPhone = await prisma.user.findFirst({
+      where: {
+        phone: data.phone.trim(),
+        id: { not: userId }
+      }
+    });
+    if (existingPhone) {
+      throw new Error('Este telefone já está em uso por outro usuário.');
+    }
   }
 
   await prisma.user.update({

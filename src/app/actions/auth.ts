@@ -100,6 +100,18 @@ export async function autoLoginAction(userId: string, companyId: string) {
 
     if (!user) {
       // Como o usuário foi validado na Uppchannel, criamos ele localmente
+      const phone = data.phoneNumber || data.phoneNumberFormatted || null;
+
+      // Verificar se o telefone já está em uso por outro e-mail
+      if (phone) {
+        const existingPhone = await prisma.user.findFirst({
+          where: { phone: phone }
+        });
+        if (existingPhone) {
+          throw new Error('Este telefone já está vinculado a outro e-mail no nosso sistema.');
+        }
+      }
+
       const randomPassword = crypto.randomBytes(32).toString('hex');
       const hashedPassword = await bcrypt.hash(randomPassword, 10);
       
