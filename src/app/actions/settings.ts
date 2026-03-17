@@ -110,10 +110,45 @@ export async function sendWhatsAppMessage(to: string, contactName: string) {
       throw new Error(errorData.message || `Erro na API: ${response.statusText}`);
     }
 
-    return { success: true };
+    const data = await response.json();
+    return { success: true, data };
   } catch (error: any) {
     console.error('WhatsApp API Error:', error);
     throw new Error(error.message || 'Falha ao enviar mensagem de WhatsApp');
+  }
+}
+
+export async function getWhatsAppMessageStatus(id: string) {
+  const session = await getSession();
+  if (!session) throw new Error('Não autenticado');
+
+  const config = await getSystemSetting('whatsapp_config');
+  if (!config || !config.enabled) throw new Error('Configuração inválida');
+
+  // Ajustar URL para o endpoint de status: /chat/v1/message/{id}/status
+  // A URL base configurada costuma ser o endpoint de envio, precisamos extrair a base correta
+  let baseUrl = config.apiUrl.split('/chat/v1/')[0];
+  if (!baseUrl) baseUrl = 'https://api.app.uppchannel.com.br';
+  
+  const statusUrl = `${baseUrl}/chat/v1/message/${encodeURIComponent(id)}/status`;
+
+  try {
+    const response = await fetch(statusUrl, {
+      method: 'GET',
+      headers: {
+        'Authorization': config.token,
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Erro ao buscar status: ${response.statusText}`);
+    }
+
+    return await response.json();
+  } catch (error: any) {
+    console.error('WhatsApp Status Error:', error);
+    throw new Error(error.message || 'Falha ao consultar status da mensagem');
   }
 }
 
