@@ -8,6 +8,7 @@ import TicketTagsInput from './TicketTagsInput';
 import TicketEmailComposer from './TicketEmailComposer';
 import TimeTrackerDisplay from './TimeTrackerDisplay';
 import { Clock, Reply, StickyNote, Forward, XCircle, Star, MoreHorizontal, User, Mail, Phone, ExternalLink, CheckSquare, Timer, ListTodo, AlertCircle, Paperclip, Globe } from 'lucide-react';
+import WhatsAppButton from '../../users/[id]/WhatsAppButton';
 
 export default async function TicketDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
@@ -412,7 +413,10 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                       <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Telefone</span>
-                      <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>{creatorPhone}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>{creatorPhone}</span>
+                        <WhatsAppButton phone={creatorPhone} contactName={creatorName} />
+                      </div>
                     </div>
                   </div>
                 )}
@@ -503,6 +507,7 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
           </div>
         </div>
       </div>
+      <WhatsAppButton phone={creatorPhone} contactName={creatorName} isFloating={true} />
     </div>
   );
 }

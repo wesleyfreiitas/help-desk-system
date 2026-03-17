@@ -232,6 +232,7 @@ export default async function UserDetailsPage({ params }: { params: Promise<{ id
                     )}
                 </div>
             </div>
+            <WhatsAppButton phone={user.phone || ''} contactName={user.name} isFloating={true} />
         </div>
     );
 }
