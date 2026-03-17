@@ -201,7 +201,7 @@ export async function forgotPasswordAction(prevState: any, formData: FormData) {
   const proto = headersList.get('x-forwarded-proto') || 'http';
   const baseUrl = `${proto}://${host}`;
 
-  const resetLink = `${baseUrl}/reset-password?token=${token}`;
+  const resetLink = `${baseUrl}/reset?token=${token}`;
 
   // Enviar e-mail real
   const emailResult = await sendEmail({
