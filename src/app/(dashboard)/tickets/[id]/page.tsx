@@ -507,7 +507,6 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
           </div>
         </div>
       </div>
-      <WhatsAppButton phone={creatorPhone} contactName={creatorName} isFloating={true} />
     </div>
   );
 }
