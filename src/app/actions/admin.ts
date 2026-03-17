@@ -79,6 +79,18 @@ export async function createUser(formData: FormData) {
   const clientId = formData.get('clientId') as string;
   const phone = formData.get('phone') as string;
 
+  // Verificar se o e-mail já existe (incluindo deletados para evitar conflito de chave única)
+  const existingUser = await prisma.user.findUnique({
+    where: { email }
+  });
+
+  if (existingUser) {
+    if (existingUser.deletedAt) {
+      throw new Error('Este e-mail pertence a um usuário que foi excluído. Por favor, utilize outro e-mail ou restaure o usuário anterior.');
+    }
+    throw new Error('Este e-mail já está em uso por outro usuário.');
+  }
+
   // Usa bcrypt como no auth
   const bcrypt = require('bcryptjs');
   const password = await bcrypt.hash(rawPassword, 10);
@@ -282,6 +294,18 @@ export async function updateUser(userId: string, data: { name: string, email: st
   
   if (session.user.role === 'ATTENDANT' && data.role === 'ADMIN') {
     throw new Error('Unauthorized');
+  }
+
+  // Verificar se o e-mail já está em uso por outro usuário
+  const existingUser = await prisma.user.findFirst({
+    where: { 
+      email: data.email,
+      id: { not: userId }
+    }
+  });
+
+  if (existingUser) {
+    throw new Error('Este e-mail já está em uso por outro usuário.');
   }
 
   await prisma.user.update({
