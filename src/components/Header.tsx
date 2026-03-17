@@ -3,8 +3,9 @@
 import { usePathname } from 'next/navigation';
 import NotificationBell from './NotificationBell';
 import ThemeToggle from './ThemeToggle';
+import { Menu } from 'lucide-react';
 
-export default function Header({ user }: { user: any }) {
+export default function Header({ user, onMenuClick }: { user: any, onMenuClick: () => void }) {
   const pathname = usePathname();
 
   const getPageTitle = () => {
@@ -20,12 +21,38 @@ export default function Header({ user }: { user: any }) {
 
   return (
     <header className="top-header">
-      <div className="page-title">{getPageTitle()}</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <button 
+          onClick={onMenuClick}
+          className="mobile-menu-btn"
+          style={{ 
+            background: 'none', 
+            border: 'none', 
+            color: 'var(--text-main)', 
+            display: 'none',
+            cursor: 'pointer',
+            padding: '4px'
+          }}
+        >
+          <Menu size={24} />
+        </button>
+        <div className="page-title">{getPageTitle()}</div>
+      </div>
       
       <div className="top-actions" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
          <ThemeToggle />
          <NotificationBell />
       </div>
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .mobile-menu-btn {
+            display: block !important;
+          }
+          .page-title {
+            font-size: 1rem;
+          }
+        }
+      `}</style>
     </header>
   );
 }

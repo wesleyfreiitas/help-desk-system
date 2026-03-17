@@ -3,8 +3,9 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { logoutAction } from '@/app/actions/auth';
+import { X } from 'lucide-react';
 
-export default function Sidebar({ user }: { user: any }) {
+export default function Sidebar({ user, isOpen, onClose }: { user: any, isOpen: boolean, onClose: () => void }) {
   const pathname = usePathname();
 
   const getInitials = (name: string) => {
@@ -25,15 +26,35 @@ export default function Sidebar({ user }: { user: any }) {
   const filteredNav = navItems.filter(item => item.roles.includes(user.role));
 
   return (
-    <aside className="sidebar">
-      <div className="sidebar-brand">
-        <img 
-          src="https://suporte.absolutatelecom.com.br/arquivos/files/logo_u_black.png" 
-          alt="Upp HelpDesk" 
-          style={{ height: '32px', width: 'auto', objectFit: 'contain' }}
-        />
-        <span style={{ marginLeft: '10px' }}>Upp HelpDesk</span>
-      </div>
+    <>
+      <div 
+        className={`sidebar-overlay ${isOpen ? 'visible' : ''}`} 
+        onClick={onClose}
+      />
+      <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
+        <div className="sidebar-brand">
+          <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
+            <img 
+              src="https://suporte.absolutatelecom.com.br/arquivos/files/logo_u_black.png" 
+              alt="Upp HelpDesk" 
+              style={{ height: '32px', width: 'auto', objectFit: 'contain' }}
+            />
+            <span style={{ marginLeft: '10px' }}>Upp HelpDesk</span>
+          </div>
+          <button 
+            onClick={onClose}
+            className="mobile-close-btn"
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              color: 'white', 
+              display: 'none',
+              cursor: 'pointer'
+            }}
+          >
+            <X size={24} />
+          </button>
+        </div>
 
       <nav className="sidebar-nav">
         <ul>
@@ -42,6 +63,7 @@ export default function Sidebar({ user }: { user: any }) {
               <Link 
                 href={item.href} 
                 className={`nav-item ${pathname === item.href || pathname.startsWith(item.href + '/') ? 'active' : ''}`}
+                onClick={onClose}
               >
                 {item.label === 'Dashboard' && ['CLIENT', 'ORG_MANAGER', 'ORG_MEMBER'].includes(user.role) ? 'Portal do Cliente' : item.label}
               </Link>
@@ -66,6 +88,15 @@ export default function Sidebar({ user }: { user: any }) {
            <button type="submit" className="btn-logout">Sair do sistema</button>
         </form>
       </div>
-    </aside>
+      </aside>
+
+      <style jsx>{`
+        @media (max-width: 768px) {
+          .mobile-close-btn {
+            display: block !important;
+          }
+        }
+      `}</style>
+    </>
   );
 }

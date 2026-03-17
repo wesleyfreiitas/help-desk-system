@@ -1,6 +1,5 @@
 import { ReactNode } from 'react';
-import Sidebar from '@/components/Sidebar';
-import Header from '@/components/Header';
+import DashboardContainer from '@/components/DashboardContainer';
 import NotificationHandler from '@/components/NotificationHandler';
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
@@ -15,17 +14,10 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   return (
     <NotificationProvider>
-      <div className="app-layout">
-        <Sidebar user={session.user} />
+      <DashboardContainer user={session.user}>
         <NotificationHandler />
-        
-        <main className="main-content">
-          <Header user={session.user} />
-          <div className="page-container">
-            {children}
-          </div>
-        </main>
-      </div>
+        {children}
+      </DashboardContainer>
     </NotificationProvider>
   );
 }
