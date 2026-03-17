@@ -10,6 +10,7 @@ export default function EditUserModal({ user, clients, currentRole }: { user: an
     name: user.name,
     email: user.email,
     role: user.role,
+    phone: user.phone || '',
     clientId: user.clientId || ''
   });
   const [isSaving, setIsSaving] = useState(false);
@@ -26,7 +27,8 @@ export default function EditUserModal({ user, clients, currentRole }: { user: an
       const payload: any = {
         name: formData.name.trim(),
         email: formData.email.trim(),
-        role: formData.role
+        role: formData.role,
+        phone: formData.phone.trim() || null
       };
 
       const isClientRelated = ['ORG_MEMBER', 'ORG_MANAGER', 'CLIENT'].includes(formData.role);
@@ -82,6 +84,17 @@ export default function EditUserModal({ user, clients, currentRole }: { user: an
                       value={formData.email}
                       onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                       required
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Telefone</label>
+                    <input 
+                      type="text" 
+                      className="form-control"
+                      placeholder="(00) 00000-0000"
+                      value={formData.phone}
+                      onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                     />
                   </div>
 

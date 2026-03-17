@@ -21,7 +21,7 @@ export default function WhatsAppButton({ phone, contactName }: { phone: string, 
 
     try {
       const result = await sendWhatsAppMessage(phone, contactName);
-      
+
       if (result.success && result.data) {
         let sessionId = result.data.sessionId;
         const messageId = result.data.id;
@@ -29,15 +29,15 @@ export default function WhatsAppButton({ phone, contactName }: { phone: string, 
         // Se o sessionId não veio na resposta imediata, fazemos polling
         if (!sessionId && messageId) {
           const { getWhatsAppMessageStatus } = await import('@/app/actions/settings');
-          
+
           let attempts = 0;
           const maxAttempts = 5; // Tenta por 5 segundos
-          
+
           while (!sessionId && attempts < maxAttempts) {
             attempts++;
             // Espera 1 segundo
             await new Promise(resolve => setTimeout(resolve, 1000));
-            
+
             try {
               const statusData = await getWhatsAppMessageStatus(messageId);
               if (statusData.sessionId) {
@@ -53,7 +53,7 @@ export default function WhatsAppButton({ phone, contactName }: { phone: string, 
         if (sessionId) {
           setStatus('success');
           // Redirecionar para a sessão
-          window.open(`https://app.uppchannel.com.br/chat2/sessions/${sessionId}`, '_blank');
+          window.open(`https://app.uppchannel.com.br/chat2/sessions/${sessionId}`);
           setTimeout(() => setStatus('idle'), 3000);
         } else {
           // Se mesmo após polling não temos sessionId, marcamos sucesso mas sem redirect
@@ -84,7 +84,7 @@ export default function WhatsAppButton({ phone, contactName }: { phone: string, 
 
   return (
     <div style={{ position: 'relative', display: 'inline-block' }}>
-      <button 
+      <button
         onClick={handleClick}
         className={`btn-outline-sm whatsapp-btn ${status}`}
         disabled={status === 'loading' || !phone}
