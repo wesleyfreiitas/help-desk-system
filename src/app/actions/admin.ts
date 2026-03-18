@@ -83,25 +83,25 @@ export async function createUser(formData: FormData) {
   const clientId = formData.get('clientId') as string;
   const phone = formData.get('phone') as string;
 
-  // Verificar se o e-mail já existe (incluindo deletados para evitar conflito de chave única)
+  // Verificar se o e-mail já existe (incluindo deletados para permitir reativação)
   const existingUser = await prisma.user.findUnique({
     where: { email }
   });
 
-  if (existingUser) {
-    if (existingUser.deletedAt) {
-      throw new Error('Este e-mail pertence a um usuário que foi excluído. Por favor, utilize outro e-mail ou restaure o usuário anterior.');
-    }
+  if (existingUser && !existingUser.deletedAt) {
     throw new Error('Este e-mail já está em uso por outro usuário.');
   }
 
   // Verificar se o telefone já existe
   if (phone) {
     const existingPhone = await prisma.user.findFirst({
-      where: { phone: phone.trim() }
+      where: { 
+        phone: phone.trim(),
+        deletedAt: null // Apenas usuários ativos
+      }
     });
-    if (existingPhone) {
-      throw new Error('Este telefone já está em uso por outro usuário.');
+    if (existingPhone && existingPhone.id !== existingUser?.id) {
+      throw new Error('Este telefone já está em uso por outro usuário ativo.');
     }
   }
 
@@ -118,16 +118,39 @@ export async function createUser(formData: FormData) {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const newUser = await prisma.user.create({
-    data: {
-      name,
-      email,
-      password: hashedPassword,
-      role,
-      phone: phone || null,
-      clientId: clientId ? clientId : null
-    }
-  });
+  let newUser;
+  if (existingUser && existingUser.deletedAt) {
+    // Reativar usuário existente
+    newUser = await prisma.user.update({
+      where: { id: existingUser.id },
+      data: {
+        name,
+        password: hashedPassword,
+        role,
+        phone: phone || null,
+        clientId: clientId ? clientId : null,
+        updatedAt: new Date(),
+        deletedAt: null // Reativar!
+      }
+    });
+
+    // Limpar campos personalizados antigos para garantir integridade
+    await prisma.customFieldValue.deleteMany({
+      where: { userId: newUser.id }
+    });
+  } else {
+    // Criar novo usuário
+    newUser = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword,
+        role,
+        phone: phone || null,
+        clientId: clientId ? clientId : null
+      }
+    });
+  }
 
   // Handle custom fields if any
   const customFieldData: Record<string, string> = {};
