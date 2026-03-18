@@ -297,9 +297,6 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
             ) : (
               <div style={{ fontWeight: 500 }}>{ticket.assignee?.name || 'Não atribuído'}</div>
             )}
-            {user.role !== 'CLIENT' && !ticket.assigneeId && (
-              <span className="add-agent-link">+ Atribuir Usuário</span>
-            )}
           </div>
 
           <div className="property-group">
