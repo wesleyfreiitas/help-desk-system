@@ -4,9 +4,9 @@ import { Bell, X } from 'lucide-react';
 import { useNotifications } from './NotificationProvider';
 
 export default function NotificationHandler() {
-  const { notifications, removeNotification } = useNotifications();
+  const { toasts, removeToast } = useNotifications();
 
-  if (notifications.length === 0) return null;
+  if (toasts.length === 0) return null;
 
   return (
     <div className="notification-container" style={{
@@ -19,7 +19,7 @@ export default function NotificationHandler() {
       gap: '1rem',
       maxWidth: '350px'
     }}>
-      {notifications.map(n => (
+      {toasts.map(n => (
         <div key={n.id} className="notification-toast" style={{
           background: 'white',
           border: '1px solid var(--border-color)',
@@ -40,7 +40,7 @@ export default function NotificationHandler() {
             height: '3px',
             background: n.type === 'NEW_TICKET' ? 'var(--primary)' : '#f59e0b',
             animation: 'notification-progress 10s linear forwards'
-          }} onAnimationEnd={() => removeNotification(n.id)} />
+          }} onAnimationEnd={() => removeToast(n.id)} />
 
           <div style={{
             background: n.type === 'NEW_TICKET' ? '#eff6ff' : '#fffbeb',
@@ -68,7 +68,7 @@ export default function NotificationHandler() {
           </div>
 
           <button 
-            onClick={() => removeNotification(n.id)}
+            onClick={() => removeToast(n.id)}
             style={{
               position: 'absolute',
               top: '0.5rem',
