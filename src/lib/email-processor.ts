@@ -43,22 +43,53 @@ export async function processInboundEmails() {
           if (!fetchResult || !fetchResult.source) continue;
 
           const parsed = await simpleParser(fetchResult.source);
-        const subject = parsed.subject || '';
-        const from = parsed.from?.value[0]?.address || '';
-        const body = parsed.text || parsed.html || '';
-        const to = parsed.to as any;
-        const destination = Array.isArray(to?.value) ? to.value[0]?.address : config.imapUser;
+          const subject = parsed.subject || '';
+          const from = parsed.from?.value[0]?.address || '';
+          const body = parsed.text || parsed.html || '';
+          const messageId = parsed.messageId;
+          const inReplyTo = parsed.inReplyTo;
+          const references = Array.isArray(parsed.references) ? parsed.references : (parsed.references ? [parsed.references] : []);
+          
+          const to = parsed.to as any;
+          const destination = Array.isArray(to?.value) ? to.value[0]?.address : config.imapUser;
 
-        // Tentar extrair protocolo do assunto (ex: #1234)
-        const protocolMatch = subject.match(/#(\d+)/);
-        const protocol = protocolMatch ? protocolMatch[1] : null;
+          // Tentar extrair protocolo do assunto (ex: #1234)
+          const protocolMatch = subject.match(/#(\d+)/);
+          const protocol = protocolMatch ? protocolMatch[1] : null;
 
-        try {
+          let parentTicket = null;
+
+          // 1. Tentar por protocolo (mais confiável)
           if (protocol) {
-            // É uma resposta a um chamado existente
-            const ticket = await prisma.ticket.findUnique({
-              where: { protocol }
+            parentTicket = await prisma.ticket.findUnique({ where: { protocol } });
+          }
+
+          // 2. Se não achou por protocolo, tentar por Threading (In-Reply-To / References)
+          if (!parentTicket && (inReplyTo || references.length > 0)) {
+            const threadIds = [inReplyTo, ...references].filter(Boolean) as string[];
+            
+            // Procurar se algum desses IDs é o messageId de um Ticket ou Interaction
+            const existingTicket = await prisma.ticket.findFirst({
+              where: { messageId: { in: threadIds } }
             });
+
+            if (existingTicket) {
+              parentTicket = existingTicket;
+            } else {
+              const existingInteraction = await prisma.interaction.findFirst({
+                where: { messageId: { in: threadIds } },
+                include: { ticket: true }
+              });
+              if (existingInteraction) {
+                parentTicket = existingInteraction.ticket;
+              }
+            }
+          }
+
+          try {
+            if (parentTicket) {
+              // É uma resposta a um chamado existente
+              const ticket = parentTicket;
 
             if (ticket) {
               // Encontrar ou criar usuário para o remetente
@@ -75,7 +106,8 @@ export async function processInboundEmails() {
                     ticketId: ticket.id,
                     userId: user.id,
                     message: body,
-                    isInternal: false
+                    isInternal: false,
+                    messageId: messageId // Salva o ID deste e-mail para threads futuras
                   }
                 });
 
@@ -169,7 +201,8 @@ export async function processInboundEmails() {
                 clientId: user.clientId,
                 requesterId: user.id,
                 slaResponseDate,
-                slaResolveDate
+                slaResolveDate,
+                messageId: messageId // Salva o ID deste e-mail inicial
               }
             });
 
@@ -180,6 +213,7 @@ export async function processInboundEmails() {
                 subject,
                 type: 'CRIAÇÃO',
                 status: 'PROCESSADO',
+                messageId: messageId,
                 details: `Novo chamado #${protocolString} criado com sucesso.`
               }
             });

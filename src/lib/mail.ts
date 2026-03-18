@@ -26,7 +26,7 @@ export async function getEmailTransporter() {
   });
 }
 
-export async function sendEmail({ to, subject, html }: { to: string, subject: string, html: string }) {
+export async function sendEmail({ to, subject, html, messageId, inReplyTo, references }: { to: string, subject: string, html: string, messageId?: string, inReplyTo?: string, references?: string | string[] }) {
   const transporter = await getEmailTransporter();
   
   if (!transporter) {
@@ -45,11 +45,14 @@ export async function sendEmail({ to, subject, html }: { to: string, subject: st
   const config = JSON.parse(configRaw!.value);
 
   try {
-    await transporter.sendMail({
+    const info = await transporter.sendMail({
       from: `"${config.fromName || 'Upp HelpDesk'}" <${config.fromEmail || config.user}>`,
       to,
       subject,
       html,
+      messageId,
+      inReplyTo,
+      references
     });
 
     // Log do e-mail de saída
@@ -60,11 +63,12 @@ export async function sendEmail({ to, subject, html }: { to: string, subject: st
         subject,
         type: 'NOTIFICAÇÃO',
         status: 'PROCESSADO',
+        messageId: info.messageId,
         details: 'E-mail enviado com sucesso via SMTP.'
       }
     });
 
-    return { success: true };
+    return { success: true, messageId: info.messageId };
   } catch (error: any) {
     console.error('Error sending email:', error);
 
@@ -135,9 +139,22 @@ export async function sendTicketEmail(ticket: any, type: 'NEW' | 'REOPENED' | 'R
     </div>
   `;
 
-  return sendEmail({
+  const result = await sendEmail({
     to: requester.email,
     subject: subjects[type],
     html,
+    inReplyTo: ticket.messageId || undefined,
+    references: ticket.messageId ? [ticket.messageId] : undefined
   });
+
+  // Somente atualizamos se o ticket ainda não tiver um messageId (ex: criado via portal)
+  // Se veio via e-mail, mantemos o ID do e-mail original como chave da thread
+  if (result.success && result.messageId && !ticket.messageId) {
+    await prisma.ticket.update({
+      where: { id: ticket.id },
+      data: { messageId: result.messageId }
+    });
+  }
+
+  return result;
 }

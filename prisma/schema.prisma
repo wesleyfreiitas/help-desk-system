@@ -118,6 +118,7 @@ model Ticket {
   isSlaPaused     Boolean  @default(false)
   totalWorkTime   Int      @default(0)
   lastWorkStartedAt DateTime?
+  messageId       String?  @unique
   deletedAt       DateTime?
 }
 
@@ -141,6 +142,7 @@ model Interaction {
   message     String
   isInternal  Boolean  @default(false)
   attachments Attachment[]
+  messageId   String?  @unique
   createdAt   DateTime @default(now())
 }
 
@@ -203,5 +205,6 @@ model EmailLog {
   type            String   // CRIAÇÃO, RESPOSTA
   status          String   // PROCESSADO, REJEITADO
   details         String?
+  messageId       String?  @unique
   createdAt       DateTime @default(now())
 }
