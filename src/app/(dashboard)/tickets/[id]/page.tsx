@@ -59,6 +59,7 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
   const typeOptions = allOptions.filter((o: any) => o.type === 'TYPE').map((o: any) => ({ id: o.value, name: o.label }));
   const statusOptions = allOptions.filter((o: any) => o.type === 'STATUS').map((o: any) => ({ id: o.value, name: o.label }));
   const priorityOptions = allOptions.filter((o: any) => o.type === 'PRIORITY').map((o: any) => ({ id: o.value, name: o.label }));
+  const sourceOptions = allOptions.filter((o: any) => o.type === 'SOURCE').map((o: any) => ({ id: o.value, name: o.label }));
 
   // Busca o criador real do chamado (campo createdById gravado na criação)
   const openedBy = ticket.createdById
@@ -222,6 +223,21 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
               />
             ) : (
               <div style={{ fontWeight: 500 }}>{ticket.type || 'N/A'}</div>
+            )}
+          </div>
+
+          <div className="property-group">
+            <label>Fonte</label>
+            {user.role !== 'CLIENT' ? (
+              <TicketPropertySelect
+                ticketId={ticket.id}
+                field="source"
+                currentValue={ticket.source}
+                options={sourceOptions}
+                placeholder="Selecione"
+              />
+            ) : (
+              <div style={{ fontWeight: 500 }}>{ticket.source || 'N/A'}</div>
             )}
           </div>
 

@@ -198,7 +198,7 @@ export async function processInboundEmails() {
                 description: body,
                 priority: 'BAIXA',
                 status: 'ABERTO',
-                source: 'E-mail',
+                source: 'Email',
                 clientId: user.clientId,
                 requesterId: user.id,
                 slaResponseDate,

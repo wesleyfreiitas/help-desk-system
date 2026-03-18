@@ -221,6 +221,8 @@ export async function createTicket(formData: FormData) {
   const files = formData.getAll('attachments') as File[];
   const validFiles = files.filter(file => file.name && file.size > 0);
 
+  const source = formData.get('source') as string | null;
+
   const ticket = await prisma.ticket.create({
     data: {
       protocol: finalProtocolString,
@@ -229,6 +231,7 @@ export async function createTicket(formData: FormData) {
       priority: priority as 'ALTA' | 'MEDIA' | 'BAIXA',
       status,
       type: type || null,
+      source: source || 'Portal',
       clientId,
       requesterId,
       assigneeId: assigneeId || null,
@@ -237,9 +240,6 @@ export async function createTicket(formData: FormData) {
       ...(userExists ? { createdById: session.user.id } : {}),
       slaResponseDate,
       slaResolveDate,
-      // Criar anexos iniciais (armazenados como interações se o sistema exigir, 
-      // mas aqui estamos simplificando e colocando no ticket se o schema permitir, 
-      // ou podemos criar uma interação inicial com eles)
     } as any
   });
 
@@ -293,7 +293,7 @@ export async function updateTicketField(ticketId: string, field: string, value: 
   }
 
   // Allowed fields check
-  const allowedFields = ['productId', 'categoryId', 'assigneeId', 'status', 'priority', 'type', 'tags'];
+  const allowedFields = ['productId', 'categoryId', 'assigneeId', 'status', 'priority', 'type', 'tags', 'source'];
   if (!allowedFields.includes(field)) {
     throw new Error('Invalid field update');
   }
