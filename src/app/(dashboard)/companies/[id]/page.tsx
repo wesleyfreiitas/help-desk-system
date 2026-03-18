@@ -44,10 +44,6 @@ export default async function ClientDetailsPage({ params }: { params: Promise<{ 
                     <EditEmpresaModal client={client} />
                     <button className="action-bar-btn danger"><Trash2 size={14} /> Excluir</button>
                 </div>
-                <div className="detail-action-bar-right">
-                    <Link href="/companies" className="action-bar-btn"><ChevronLeft size={14} /></Link>
-                    <button className="action-bar-btn"><ChevronRight size={14} /></button>
-                </div>
             </div>
 
             {/* Main Content */}
