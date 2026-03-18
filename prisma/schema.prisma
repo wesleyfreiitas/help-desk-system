@@ -23,6 +23,7 @@ model User {
   ticketsCreated Ticket[] @relation("TicketRequester")
   ticketsOpenedByMe Ticket[] @relation("TicketCreatedBy")
   interactions Interaction[]
+  customFields CustomFieldValue[]
   accessLogs   AccessLog[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -49,6 +50,7 @@ model CustomField {
   id        String   @id @default(cuid())
   name      String
   type      String   // TEXT, NUMBER, BOOLEAN, SELECT, MULTISELECT
+  target    String   @default("CLIENT") // CLIENT or USER
   options   String?  // JSON string for select options
   values    CustomFieldValue[]
   createdAt DateTime @default(now())
@@ -57,8 +59,10 @@ model CustomField {
 
 model CustomFieldValue {
   id          String      @id @default(cuid())
-  clientId    String
-  client      Client      @relation(fields: [clientId], references: [id])
+  clientId    String?
+  client      Client?     @relation(fields: [clientId], references: [id])
+  userId      String?
+  user        User?       @relation(fields: [userId], references: [id])
   fieldId     String
   field       CustomField @relation(fields: [fieldId], references: [id])
   value       String      // Serialized value
@@ -66,6 +70,7 @@ model CustomFieldValue {
   updatedAt   DateTime    @updatedAt
 
   @@unique([clientId, fieldId])
+  @@unique([userId, fieldId])
 }
 
 model Product {

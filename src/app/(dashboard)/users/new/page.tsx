@@ -8,7 +8,10 @@ export default async function NewUserPage() {
   const session = await getSession();
   if (!session || session.user.role !== 'ADMIN') return null;
 
-  const clients = await prisma.client.findMany({ orderBy: { name: 'asc' } });
+  const [clients, userFields] = await Promise.all([
+    prisma.client.findMany({ orderBy: { name: 'asc' } }),
+    prisma.customField.findMany({ where: { target: 'USER' }, orderBy: { createdAt: 'asc' } })
+  ]);
 
   return (
     <div style={{ maxWidth: '600px', margin: '0 auto' }}>
@@ -68,6 +71,45 @@ export default async function NewUserPage() {
 
           {/* Usamos o Client Component ClientSelector para ocultar/mostrar o combo de clientes dependendo da role */}
           <ClientSelector clients={clients} />
+
+          {userFields.length > 0 && (
+            <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem', marginTop: '0.5rem' }}>
+              <h4 style={{ fontSize: '0.75rem', marginBottom: '1.25rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Campos Personalizados</h4>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+                {userFields.map(field => (
+                  <div key={field.id} className="form-group" style={{ gridColumn: field.type === 'TEXTAREA' ? '1 / span 2' : 'auto', marginBottom: 0 }}>
+                    <label className="form-label" style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{field.name}</label>
+                    {field.type === 'BOOLEAN' ? (
+                      <select name={`cf_${field.id}`} className="form-control">
+                        <option value="false">Não</option>
+                        <option value="true">Sim</option>
+                      </select>
+                    ) : field.type === 'SELECT' || field.type === 'MULTISELECT' ? (
+                      <select name={`cf_${field.id}`} className="form-control" multiple={field.type === 'MULTISELECT'}>
+                        <option value="">Selecione...</option>
+                        {field.options?.split(',').map((opt: string) => (
+                          <option key={opt.trim()} value={opt.trim()}>{opt.trim()}</option>
+                        ))}
+                      </select>
+                    ) : field.type === 'TEXTAREA' ? (
+                      <textarea 
+                        name={`cf_${field.id}`}
+                        className="form-control"
+                        style={{ minHeight: '80px', resize: 'vertical' }}
+                        maxLength={300}
+                      />
+                    ) : (
+                      <input 
+                        type={field.type === 'NUMBER' ? 'number' : 'text'}
+                        name={`cf_${field.id}`}
+                        className="form-control"
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem' }}>
              <Link href="/users" className="btn-outline" style={{ display: 'inline-flex', alignItems: 'center' }}>Cancelar</Link>

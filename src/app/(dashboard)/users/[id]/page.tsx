@@ -25,6 +25,12 @@ export default async function UserDetailsPage({ params }: { params: Promise<{ id
             orderBy: { name: 'asc' }
         });
     }
+    
+    // Custom Fields for Users
+    const userCustomFields = await prisma.customField.findMany({
+        where: { target: 'USER' },
+        orderBy: { createdAt: 'asc' }
+    });
 
     // Determine the tickets to show based on user role
     // Using cast 'any' temporarily to bypass Prisma relation type mismatch if any
@@ -53,7 +59,12 @@ export default async function UserDetailsPage({ params }: { params: Promise<{ id
             {/* Top Action Bar */}
             <div className="detail-action-bar">
                 <div className="detail-action-bar-left">
-                    <EditUserModal user={user} clients={clients} currentRole={session.user.role} />
+                    <EditUserModal 
+                        user={user} 
+                        clients={clients} 
+                        currentRole={session.user.role} 
+                        availableCustomFields={userCustomFields}
+                    />
                     <button className="action-bar-btn danger"><Trash2 size={14} /> Excluir</button>
                 </div>
             </div>
@@ -186,6 +197,25 @@ export default async function UserDetailsPage({ params }: { params: Promise<{ id
                                                     <WhatsAppButton phone={user.phone} contactName={user.name} />
                                                 </div>
                                             </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* User Custom Fields */}
+                                {user.customFields && user.customFields.length > 0 && (
+                                    <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem', marginTop: '0.25rem' }}>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                                            {user.customFields.map((cf: any) => (
+                                                <div key={cf.id} style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+                                                    <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
+                                                        <Tag size={16} />
+                                                    </div>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                                                        <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2px' }}>{cf.field.name}</span>
+                                                        <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 500, lineHeight: '1.2' }}>{cf.value || '--'}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 )}

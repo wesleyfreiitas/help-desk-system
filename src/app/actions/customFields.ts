@@ -14,7 +14,7 @@ export async function getCustomFields() {
   });
 }
 
-export async function createCustomField(data: { name: string, type: string, options?: string }) {
+export async function createCustomField(data: { name: string, type: string, target: string, options?: string }) {
   const session = await getSession();
   if (!session || session.user.role !== 'ADMIN') throw new Error('Unauthorized');
 
@@ -22,6 +22,7 @@ export async function createCustomField(data: { name: string, type: string, opti
     data: {
       name: data.name,
       type: data.type,
+      target: data.target,
       options: data.options || null
     }
   });
@@ -30,7 +31,7 @@ export async function createCustomField(data: { name: string, type: string, opti
   return field;
 }
 
-export async function updateCustomField(id: string, data: { name: string, type: string, options?: string }) {
+export async function updateCustomField(id: string, data: { name: string, type: string, target: string, options?: string }) {
   const session = await getSession();
   if (!session || session.user.role !== 'ADMIN') throw new Error('Unauthorized');
 
@@ -39,6 +40,7 @@ export async function updateCustomField(id: string, data: { name: string, type: 
     data: {
       name: data.name,
       type: data.type,
+      target: data.target,
       options: data.options || null
     }
   });

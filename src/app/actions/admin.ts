@@ -129,6 +129,28 @@ export async function createUser(formData: FormData) {
     }
   });
 
+  // Handle custom fields if any
+  const customFieldData: Record<string, string> = {};
+  formData.forEach((value, key) => {
+    if (typeof key === 'string' && key.startsWith('cf_')) {
+      customFieldData[key.replace('cf_', '')] = value as string;
+    }
+  });
+
+  if (Object.keys(customFieldData).length > 0) {
+    await prisma.$transaction(
+      Object.entries(customFieldData).map(([fieldId, value]) => 
+        prisma.customFieldValue.create({
+          data: {
+            userId: newUser.id,
+            fieldId,
+            value
+          }
+        })
+      )
+    );
+  }
+
   // Enviar e-mail de boas-vindas se solicitado
   if (sendWelcomeEmail) {
     const token = crypto.randomBytes(32).toString('hex');
@@ -177,6 +199,9 @@ export async function getUserDetails(userId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     include: {
+      customFields: {
+        include: { field: true }
+      },
       client: {
         include: {
           customFields: {
@@ -399,31 +424,41 @@ export async function updateCustomFieldValues(clientId: string, values: Record<s
   const session = await getSession();
   if (!session || session.user.role === 'CLIENT') throw new Error('Unauthorized');
 
-  // Using a transaction to avoid partial updates
-  // We first delete existing values for these fields and then create new ones
-  // This avoids dependency on specific unique index naming in the Prisma Client
   await prisma.$transaction(async (tx) => {
     for (const [fieldId, value] of Object.entries(values)) {
-      // Delete if exists
       await tx.customFieldValue.deleteMany({
-        where: {
-          clientId,
-          fieldId
-        }
+        where: { clientId, fieldId }
       });
       
-      // Create new one if value is not empty
       if (value) {
         await tx.customFieldValue.create({
-          data: {
-            clientId,
-            fieldId,
-            value
-          }
+          data: { clientId, fieldId, value }
         });
       }
     }
   });
 
   revalidatePath('/companies/' + clientId);
+}
+
+export async function updateUserCustomFieldValues(userId: string, values: Record<string, string>) {
+  const session = await getSession();
+  const isOrgUser = ['CLIENT', 'ORG_MANAGER', 'ORG_MEMBER'].includes(session?.user?.role || '');
+  if (!session || isOrgUser) throw new Error('Unauthorized');
+
+  await prisma.$transaction(async (tx) => {
+    for (const [fieldId, value] of Object.entries(values)) {
+      await tx.customFieldValue.deleteMany({
+        where: { userId, fieldId }
+      });
+      
+      if (value) {
+        await tx.customFieldValue.create({
+          data: { userId, fieldId, value }
+        });
+      }
+    }
+  });
+
+  revalidatePath('/users/' + userId);
 }

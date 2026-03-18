@@ -4,7 +4,9 @@ import { useState } from 'react';
 import { X, Edit } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-export default function EditUserModal({ user, clients, currentRole }: { user: any, clients: any[], currentRole: string }) {
+import MultiSelectDropdown from '@/app/components/MultiSelectDropdown';
+
+export default function EditUserModal({ user, clients, currentRole, availableCustomFields = [] }: { user: any, clients: any[], currentRole: string, availableCustomFields?: any[] }) {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: user.name,
@@ -12,6 +14,13 @@ export default function EditUserModal({ user, clients, currentRole }: { user: an
     role: user.role,
     phone: user.phone || '',
     clientId: user.clientId || ''
+  });
+  const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>(() => {
+    const initial: Record<string, string> = {};
+    user.customFields?.forEach((cf: any) => {
+      initial[cf.fieldId] = cf.value;
+    });
+    return initial;
   });
   const [isSaving, setIsSaving] = useState(false);
   const router = useRouter();
@@ -39,6 +48,13 @@ export default function EditUserModal({ user, clients, currentRole }: { user: an
       }
 
       await updateUser(user.id, payload);
+      
+      // Update custom fields if any
+      const { updateUserCustomFieldValues } = await import('@/app/actions/admin');
+      if (Object.keys(customFieldValues).length > 0 || availableCustomFields.length > 0) {
+        await updateUserCustomFieldValues(user.id, customFieldValues);
+      }
+
       setIsOpen(false);
       router.refresh();
     } catch (error: any) {
@@ -49,6 +65,10 @@ export default function EditUserModal({ user, clients, currentRole }: { user: an
   };
 
   const isClientRelated = ['ORG_MEMBER', 'ORG_MANAGER', 'CLIENT'].includes(formData.role);
+
+  const handleCustomFieldChange = (fieldId: string, value: string) => {
+    setCustomFieldValues(prev => ({ ...prev, [fieldId]: value }));
+  };
 
   return (
     <>
@@ -130,6 +150,63 @@ export default function EditUserModal({ user, clients, currentRole }: { user: an
                           <option key={c.id} value={c.id}>{c.name}</option>
                         ))}
                       </select>
+                    </div>
+                  )}
+
+                  {availableCustomFields.length > 0 && (
+                    <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem', marginTop: '0.5rem' }}>
+                      <h4 style={{ fontSize: '0.75rem', marginBottom: '1.25rem', color: 'var(--text-muted)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Campos Personalizados</h4>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+                        {availableCustomFields.map(field => (
+                          <div key={field.id} className="form-group" style={{ gridColumn: field.type === 'TEXTAREA' ? '1 / span 2' : 'auto' }}>
+                            <label className="form-label" style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{field.name}</label>
+                            {field.type === 'BOOLEAN' ? (
+                              <select 
+                                value={customFieldValues[field.id] || 'false'} 
+                                onChange={e => handleCustomFieldChange(field.id, e.target.value)}
+                                className="form-control"
+                              >
+                                <option value="true">Sim</option>
+                                <option value="false">Não</option>
+                              </select>
+                            ) : field.type === 'SELECT' || field.type === 'MULTISELECT' ? (
+                              field.type === 'MULTISELECT' ? (
+                                <MultiSelectDropdown
+                                  options={field.options?.split(',').map((o: string) => o.trim()) || []}
+                                  selectedValues={customFieldValues[field.id]?.split(',').filter(Boolean) || []}
+                                  onChange={(values) => handleCustomFieldChange(field.id, values.join(','))}
+                                />
+                              ) : (
+                                <select 
+                                  value={customFieldValues[field.id] || ''} 
+                                  onChange={e => handleCustomFieldChange(field.id, e.target.value)}
+                                  className="form-control"
+                                >
+                                  <option value="">Selecione...</option>
+                                  {field.options?.split(',').map((opt: string) => (
+                                    <option key={opt.trim()} value={opt.trim()}>{opt.trim()}</option>
+                                  ))}
+                                </select>
+                              )
+                            ) : field.type === 'TEXTAREA' ? (
+                              <textarea 
+                                value={customFieldValues[field.id] || ''}
+                                onChange={e => handleCustomFieldChange(field.id, e.target.value)}
+                                className="form-control"
+                                style={{ minHeight: '100px', resize: 'vertical' }}
+                                maxLength={300}
+                              />
+                            ) : (
+                              <input 
+                                type={field.type === 'NUMBER' ? 'number' : 'text'}
+                                value={customFieldValues[field.id] || ''}
+                                onChange={e => handleCustomFieldChange(field.id, e.target.value)}
+                                className="form-control"
+                              />
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   )}
                 </div>

@@ -9,7 +9,7 @@ export default function CustomFieldsClient({ initialFields }: { initialFields: a
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [newField, setNewField] = useState({ name: '', type: 'TEXT', options: '' });
+  const [newField, setNewField] = useState({ name: '', type: 'TEXT', target: 'CLIENT', options: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleAddField = async (e: React.FormEvent) => {
@@ -34,7 +34,7 @@ export default function CustomFieldsClient({ initialFields }: { initialFields: a
   };
 
   const handleEdit = (field: any) => {
-    setNewField({ name: field.name, type: field.type, options: field.options || '' });
+    setNewField({ name: field.name, type: field.type, target: field.target || 'CLIENT', options: field.options || '' });
     setEditingId(field.id);
     setIsEditing(true);
     setIsAdding(true);
@@ -44,7 +44,7 @@ export default function CustomFieldsClient({ initialFields }: { initialFields: a
     setIsAdding(false);
     setIsEditing(false);
     setEditingId(null);
-    setNewField({ name: '', type: 'TEXT', options: '' });
+    setNewField({ name: '', type: 'TEXT', target: 'CLIENT', options: '' });
   };
 
   const handleDelete = async (id: string) => {
@@ -63,7 +63,7 @@ export default function CustomFieldsClient({ initialFields }: { initialFields: a
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
         <div>
           <h2 style={{ fontSize: '1.5rem', fontWeight: 600 }}>Campos Personalizados</h2>
-          <p style={{ color: 'var(--text-muted)' }}>Defina campos extras para o cadastro de empresas.</p>
+          <p style={{ color: 'var(--text-muted)' }}>Defina campos extras para o cadastro de empresas e usuários.</p>
         </div>
         <button className="btn-primary" onClick={() => setIsAdding(true)} style={{ width: 'auto' }}>
           <Plus size={18} style={{ marginRight: '0.5rem' }} /> Novo Campo
@@ -74,7 +74,8 @@ export default function CustomFieldsClient({ initialFields }: { initialFields: a
         <table className="data-table">
           <thead>
             <tr>
-              <th>Nome do Campo</th>
+               <th>Nome do Campo</th>
+              <th>Alvo</th>
               <th>Tipo</th>
               <th>Opções</th>
               <th style={{ width: '100px', textAlign: 'center' }}>Ações</th>
@@ -83,14 +84,19 @@ export default function CustomFieldsClient({ initialFields }: { initialFields: a
           <tbody>
             {fields.length === 0 ? (
               <tr>
-                <td colSpan={4} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+                <td colSpan={5} style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
                   Nenhum campo personalizado definido.
                 </td>
               </tr>
             ) : (
               fields.map(f => (
                 <tr key={f.id}>
-                  <td style={{ fontWeight: 500 }}>{f.name}</td>
+                   <td style={{ fontWeight: 500 }}>{f.name}</td>
+                  <td>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '0.2rem 0.5rem', borderRadius: '4px', background: f.target === 'USER' ? '#fef3c7' : '#dcfce7', color: f.target === 'USER' ? '#92400e' : '#166534' }}>
+                      {f.target === 'USER' ? 'USUÁRIO' : 'EMPRESA'}
+                    </span>
+                  </td>
                   <td>
                     <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '0.2rem 0.6rem', borderRadius: '1rem', background: '#f1f5f9', color: '#475569', textTransform: 'uppercase' }}>
                       {f.type}
@@ -148,6 +154,17 @@ export default function CustomFieldsClient({ initialFields }: { initialFields: a
                       <option value="BOOLEAN">Booleano (Sim/Não)</option>
                       <option value="SELECT">Lista (Seleção única)</option>
                       <option value="MULTISELECT">Multiseleção</option>
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label className="form-label">Destino do Campo</label>
+                    <select 
+                      className="form-control" 
+                      value={newField.target} 
+                      onChange={e => setNewField({...newField, target: e.target.value})}
+                    >
+                      <option value="CLIENT">Empresa</option>
+                      <option value="USER">Usuário (Contato)</option>
                     </select>
                   </div>
                   {(newField.type === 'SELECT' || newField.type === 'MULTISELECT') && (
