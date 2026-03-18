@@ -3053,6 +3053,32 @@ textarea.form-control {
   border-radius: 20px;
 }
 
+/* Drag and Drop for Options */
+.options-table tr.dragging {
+  background-color: var(--primary-light);
+  opacity: 0.5;
+}
+
+.options-table tr[draggable="true"] {
+  cursor: grab;
+}
+
+.drag-handle-cell {
+  cursor: grab;
+  color: var(--text-muted);
+  width: 40px !important;
+  text-align: center;
+  transition: color 0.2s;
+}
+
+.drag-handle-cell:hover {
+  color: var(--primary);
+}
+
+.options-table tr:active {
+  cursor: grabbing;
+}
+
 .message-toast.success {
   background: rgba(22, 101, 52, 0.15);
   color: #22c55e;

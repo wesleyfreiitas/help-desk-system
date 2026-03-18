@@ -264,3 +264,19 @@ export async function runEmailProcessor() {
   revalidatePath('/reports/email-logs');
   return result;
 }
+
+export async function updateTicketOptionsOrder(ids: string[]) {
+  const session = await getSession();
+  if (!session || session.user.role !== 'ADMIN') throw new Error('Unauthorized');
+
+  await prisma.$transaction(
+    ids.map((id, index) => 
+      prisma.ticketOption.update({
+        where: { id },
+        data: { order: index + 1 }
+      })
+    )
+  );
+
+  revalidatePath('/settings/options');
+}

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { upsertTicketOption, deleteTicketOption } from '@/app/actions/settings';
+import { upsertTicketOption, deleteTicketOption, updateTicketOptionsOrder } from '@/app/actions/settings';
 import { Trash2, Plus, GripVertical, Pencil, X } from 'lucide-react';
 
 interface Option {
@@ -27,6 +27,8 @@ export default function OptionsClient({ initialOptions }: Props) {
   const activeTab = searchParams.get('tab') || 'TYPE';
 
   const [editingOption, setEditingOption] = useState<Option | null>(null);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [isUpdatingOrder, setIsUpdatingOrder] = useState(false);
 
   // Sync internal state when props change (after router.refresh)
   useEffect(() => {
@@ -67,6 +69,53 @@ export default function OptionsClient({ initialOptions }: Props) {
     setEditingOption(null);
   };
 
+  const onDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    // Adicionar transparência para o item sendo arrastado
+    const target = e.target as HTMLElement;
+    setTimeout(() => {
+      target.style.opacity = '0.4';
+    }, 0);
+  };
+
+  const onDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+
+    const list = [...options];
+    // Pegar as opções filtradas para reordenar apenas estas
+    const currentFiltered = list.filter(o => o.type === activeTab);
+    
+    // Simplificar: apenas reordenar o array filtrado e depois mesclar
+    const reorderedFiltered = [...currentFiltered];
+    const [removed] = reorderedFiltered.splice(draggedIndex, 1);
+    reorderedFiltered.splice(index, 0, removed);
+
+    // Mesclar de volta no options mantendo a ordem dos tipos
+    const otherTypes = list.filter(o => o.type !== activeTab);
+    setOptions([...otherTypes, ...reorderedFiltered]);
+    setDraggedIndex(index);
+  };
+
+  const onDragEnd = async (e: React.DragEvent) => {
+    const target = e.target as HTMLElement;
+    target.style.opacity = '1';
+    setDraggedIndex(null);
+
+    // Persistir no banco
+    try {
+      setIsUpdatingOrder(true);
+      const currentFiltered = options.filter(o => o.type === activeTab);
+      await updateTicketOptionsOrder(currentFiltered.map(o => o.id));
+      router.refresh();
+    } catch (error) {
+      console.error('Erro ao salvar ordem:', error);
+      alert('Erro ao salvar nova ordem.');
+    } finally {
+      setIsUpdatingOrder(false);
+    }
+  };
   return (
     <div className="options-manager">
       <div className="options-sidebar">
@@ -177,9 +226,17 @@ export default function OptionsClient({ initialOptions }: Props) {
                 </tr>
               </thead>
               <tbody>
-                {filteredOptions.map(opt => (
-                  <tr key={opt.id}>
-                    <td><GripVertical size={14} className="drag-handle" /></td>
+                {filteredOptions.map((opt, index) => (
+                  <tr 
+                    key={opt.id}
+                    draggable={!isUpdatingOrder}
+                    onDragStart={(e) => onDragStart(e, index)}
+                    onDragOver={(e) => onDragOver(e, index)}
+                    onDragEnd={onDragEnd}
+                    className={draggedIndex === index ? 'dragging' : ''}
+                    style={{ cursor: isUpdatingOrder ? 'wait' : 'grab' }}
+                  >
+                    <td className="drag-handle-cell"><GripVertical size={14} className="drag-handle" /></td>
                     <td>{opt.label}</td>
                     <td><code>{opt.value}</code></td>
                     {(activeTab === 'STATUS' || activeTab === 'PRIORITY') && (
