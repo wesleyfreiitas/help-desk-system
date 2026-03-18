@@ -386,7 +386,7 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
               
               {/* Contact Details Group */}
               <div className="sidebar-section-v2">
-                <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.25rem' }}>
                     <div style={{ width: '2px', height: '14px', backgroundColor: 'var(--primary)', borderRadius: '2px' }}></div>
                     <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
@@ -399,9 +399,9 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
                       <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
                         <Mail size={16} />
                       </div>
-                      <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Email</span>
-                        <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500, wordBreak: 'break-all' }}>{creatorEmail}</span>
+                      <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                        <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2px' }}>Email</span>
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 500, wordBreak: 'break-word', lineHeight: '1.2' }}>{creatorEmail}</span>
                       </div>
                     </div>
                   )}
@@ -411,11 +411,13 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
                       <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
                         <Phone size={16} />
                       </div>
-                      <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Telefone</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>{creatorPhone}</span>
-                          <WhatsAppButton phone={creatorPhone} contactName={creatorName} />
+                      <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                        <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2px' }}>Telefone</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap' }}>
+                          <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 600, whiteSpace: 'nowrap' }}>{creatorPhone}</span>
+                          <div style={{ flexShrink: 0 }}>
+                            <WhatsAppButton phone={creatorPhone} contactName={creatorName} />
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -425,7 +427,7 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
 
               {/* Company Details Group */}
               <div className="sidebar-section-v2">
-                <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.25rem' }}>
                     <div style={{ width: '2px', height: '14px', backgroundColor: 'var(--primary)', borderRadius: '2px' }}></div>
                     <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
@@ -437,9 +439,9 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
                     <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
                       <Globe size={16} />
                     </div>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>CNPJ / Documento</span>
-                      <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>{ticket.client.document || '--'}</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                      <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2px' }}>CNPJ / Documento</span>
+                      <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 500 }}>{ticket.client.document || '--'}</span>
                     </div>
                   </div>
 
@@ -448,13 +450,13 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
                       <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
                         <ExternalLink size={16} />
                       </div>
-                      <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Website</span>
+                      <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                        <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2px' }}>Website</span>
                         <a 
                           href={ticket.client.website.startsWith('http') ? ticket.client.website : `https://${ticket.client.website}`} 
                           target="_blank" 
                           rel="noopener noreferrer" 
-                          style={{ fontSize: '0.9rem', color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}
+                          style={{ fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 600, textDecoration: 'none', wordBreak: 'break-all' }}
                         >
                           Acessar Site
                         </a>
@@ -467,7 +469,7 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
               {/* Custom Fields Group (Conditional) */}
               {ticket.client.customFields && ticket.client.customFields.length > 0 && (
                 <div className="sidebar-section-v2">
-                  <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.25rem' }}>
                       <div style={{ width: '2px', height: '14px', backgroundColor: 'var(--info)', borderRadius: '2px' }}></div>
                       <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>

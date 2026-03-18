@@ -2159,6 +2159,13 @@ input[type="checkbox"]:focus, input[type="radio"]:focus {
   border-color: var(--primary);
 }
 
+.sidebar-section-v2 span, 
+.sidebar-section-v2 a {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* =========================================
    Novo Chamado - Formulário estilo Freshdesk
    ========================================= */
