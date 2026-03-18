@@ -8,6 +8,7 @@ import { sendEmail } from '@/lib/mail';
 import { headers } from 'next/headers';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
+import { recordAuditLog } from '@/lib/audit';
 
 export async function createClient(formData: FormData) {
   const session = await getSession();
@@ -28,6 +29,13 @@ export async function createClient(formData: FormData) {
       website: website || null,
       active: formData.get('active') === 'on'
     }
+  });
+
+  await recordAuditLog({
+    action: 'CREATE',
+    resource: 'CLIENT',
+    resourceId: client.id,
+    details: { name, document, email }
   });
 
   // Handle custom fields if any
@@ -64,8 +72,15 @@ export async function createProduct(formData: FormData) {
   const name = formData.get('name') as string;
   if (!name || !name.trim()) throw new Error('Nome do produto é obrigatório');
 
-  await prisma.product.create({
+  const product = await prisma.product.create({
     data: { name: name.trim() }
+  });
+
+  await recordAuditLog({
+    action: 'CREATE',
+    resource: 'PRODUCT',
+    resourceId: product.id,
+    details: { name: name.trim() }
   });
 
   revalidatePath('/products');
@@ -138,6 +153,13 @@ export async function createUser(formData: FormData) {
     await prisma.customFieldValue.deleteMany({
       where: { userId: newUser.id }
     });
+
+    await recordAuditLog({
+      action: 'RESTORE',
+      resource: 'USER',
+      resourceId: newUser.id,
+      details: { name, email, role }
+    });
   } else {
     // Criar novo usuário
     newUser = await prisma.user.create({
@@ -149,6 +171,13 @@ export async function createUser(formData: FormData) {
         phone: phone || null,
         clientId: clientId ? clientId : null
       }
+    });
+
+    await recordAuditLog({
+      action: 'CREATE',
+      resource: 'USER',
+      resourceId: newUser.id,
+      details: { name, email, role }
     });
   }
 
@@ -283,7 +312,14 @@ export async function createCategory(formData: FormData) {
   const name = formData.get('name') as string;
   if (!name || !name.trim()) throw new Error('Nome da categoria é obrigatório');
 
-  await prisma.category.create({ data: { name: name.trim() } });
+  const category = await prisma.category.create({ data: { name: name.trim() } });
+  
+  await recordAuditLog({
+    action: 'CREATE',
+    resource: 'CATEGORY',
+    resourceId: category.id,
+    details: { name: name.trim() }
+  });
   revalidatePath('/categories');
 }
 
@@ -294,6 +330,12 @@ export async function deleteCategory(categoryId: string) {
   await prisma.category.update({
     where: { id: categoryId },
     data: { deletedAt: new Date() }
+  });
+
+  await recordAuditLog({
+    action: 'DELETE',
+    resource: 'CATEGORY',
+    resourceId: categoryId
   });
 
   revalidatePath('/categories');
@@ -313,6 +355,14 @@ export async function bulkDeleteUsers(userIds: string[]) {
     data: { deletedAt: new Date() }
   });
 
+  for (const id of userIds) {
+    await recordAuditLog({
+      action: 'DELETE',
+      resource: 'USER',
+      resourceId: id
+    });
+  }
+
   revalidatePath('/users');
 }
 
@@ -324,6 +374,14 @@ export async function bulkDeleteProducts(productIds: string[]) {
     where: { id: { in: productIds } },
     data: { deletedAt: new Date() }
   });
+
+  for (const id of productIds) {
+    await recordAuditLog({
+      action: 'DELETE',
+      resource: 'PRODUCT',
+      resourceId: id
+    });
+  }
 
   revalidatePath('/products');
 }
@@ -337,6 +395,14 @@ export async function bulkDeleteCategories(categoryIds: string[]) {
     data: { deletedAt: new Date() }
   });
 
+  for (const id of categoryIds) {
+    await recordAuditLog({
+      action: 'DELETE',
+      resource: 'CATEGORY',
+      resourceId: id
+    });
+  }
+
   revalidatePath('/categories');
 }
 
@@ -349,6 +415,14 @@ export async function bulkDeleteClients(clientIds: string[]) {
     data: { deletedAt: new Date() }
   });
 
+  for (const id of clientIds) {
+    await recordAuditLog({
+      action: 'DELETE',
+      resource: 'CLIENT',
+      resourceId: id
+    });
+  }
+
   revalidatePath('/companies');
 }
 
@@ -359,6 +433,13 @@ export async function updateCategory(categoryId: string, name: string) {
   await prisma.category.update({
     where: { id: categoryId },
     data: { name }
+  });
+
+  await recordAuditLog({
+    action: 'UPDATE',
+    resource: 'CATEGORY',
+    resourceId: categoryId,
+    details: { name }
   });
 }
 
@@ -371,6 +452,13 @@ export async function updateProduct(productId: string, data: { name: string }) {
     data: {
       name: data.name
     }
+  });
+
+  await recordAuditLog({
+    action: 'UPDATE',
+    resource: 'PRODUCT',
+    resourceId: productId,
+    details: { name: data.name }
   });
 }
 
@@ -388,6 +476,13 @@ export async function updateClient(clientId: string, data: { name: string, docum
       website: data.website || null,
       active: data.active !== undefined ? data.active : undefined
     }
+  });
+
+  await recordAuditLog({
+    action: 'UPDATE',
+    resource: 'CLIENT',
+    resourceId: clientId,
+    details: { name: data.name, email: data.email }
   });
 
   revalidatePath('/companies/' + clientId);
@@ -439,6 +534,13 @@ export async function updateUser(userId: string, data: { name: string, email: st
     }
   });
 
+  await recordAuditLog({
+    action: 'UPDATE',
+    resource: 'USER',
+    resourceId: userId,
+    details: { name: data.name, email: data.email, role: data.role }
+  });
+
   revalidatePath('/users/' + userId);
   revalidatePath('/users');
 }
@@ -461,6 +563,13 @@ export async function updateCustomFieldValues(clientId: string, values: Record<s
     }
   });
 
+  await recordAuditLog({
+    action: 'UPDATE',
+    resource: 'CLIENT_CUSTOM_FIELDS',
+    resourceId: clientId,
+    details: values
+  });
+
   revalidatePath('/companies/' + clientId);
 }
 
@@ -481,6 +590,13 @@ export async function updateUserCustomFieldValues(userId: string, values: Record
         });
       }
     }
+  });
+
+  await recordAuditLog({
+    action: 'UPDATE',
+    resource: 'USER_CUSTOM_FIELDS',
+    resourceId: userId,
+    details: values
   });
 
   revalidatePath('/users/' + userId);

@@ -7,6 +7,7 @@ import { calculateSLA } from '@/lib/sla';
 import { redirect } from 'next/navigation';
 import { sendTicketEmail } from '@/lib/mail';
 import { assignTicket } from '@/lib/distribution';
+import { recordAuditLog } from '@/lib/audit';
 
 export async function addInteraction(ticketId: string, formData: FormData) {
   const session = await getSession();
@@ -50,6 +51,13 @@ export async function addInteraction(ticketId: string, formData: FormData) {
         }))
       }
     }
+  });
+
+  await recordAuditLog({
+    action: 'CREATE',
+    resource: 'TICKET_INTERACTION',
+    resourceId: interaction.id,
+    details: { ticketId, isInternal: interaction.isInternal }
   });
 
 
@@ -128,6 +136,13 @@ export async function changeTicketStatus(ticketId: string, formData: FormData) {
   await prisma.ticket.update({
     where: { id: ticketId },
     data: updateData
+  });
+
+  await recordAuditLog({
+    action: 'UPDATE',
+    resource: 'TICKET_STATUS',
+    resourceId: ticketId,
+    details: { oldStatus: ticket.status, newStatus: status }
   });
 
   revalidatePath(`/tickets/${ticketId}`);
@@ -243,6 +258,13 @@ export async function createTicket(formData: FormData) {
     } as any
   });
 
+  await recordAuditLog({
+    action: 'CREATE',
+    resource: 'TICKET',
+    resourceId: ticket.id,
+    details: { protocol: ticket.protocol, title: ticket.title }
+  });
+
   // Salvar anexos (vinculados a uma interação inicial ou ao ticket se houver relação direto)
   // No nosso schema, Attachment pertence a Interaction. 
   // Então vamos criar uma interação inicial "abertura do chamado" com os anexos.
@@ -347,6 +369,13 @@ export async function updateTicketField(ticketId: string, field: string, value: 
     }
   });
 
+  await recordAuditLog({
+    action: 'UPDATE',
+    resource: 'TICKET_FIELD',
+    resourceId: ticketId,
+    details: { field, value, oldStatus: currentTicket.status }
+  });
+
   // Notificações por e-mail
   if (field === 'status' && value) {
     if (['ABERTO', 'EM_ANDAMENTO'].includes(value) && ['RESOLVIDO', 'FECHADO'].includes(currentTicket.status)) {
@@ -383,6 +412,15 @@ export async function bulkUpdateStatus(ticketIds: string[], status: string) {
     data: { status, resolvedAt: (status === 'RESOLVIDO' || status === 'FECHADO') ? new Date() : undefined }
   });
 
+  for (const id of ticketIds) {
+    await recordAuditLog({
+      action: 'UPDATE',
+      resource: 'TICKET_STATUS',
+      resourceId: id,
+      details: { newStatus: status, bulk: true }
+    });
+  }
+
   revalidatePath('/tickets');
 }
 
@@ -395,6 +433,15 @@ export async function bulkAssign(ticketIds: string[], assigneeId: string | null)
     data: { assigneeId }
   });
 
+  for (const id of ticketIds) {
+    await recordAuditLog({
+      action: 'UPDATE',
+      resource: 'TICKET_ASSIGNEE',
+      resourceId: id,
+      details: { assigneeId, bulk: true }
+    });
+  }
+
   revalidatePath('/tickets');
 }
 
@@ -406,6 +453,14 @@ export async function bulkDelete(ticketIds: string[]) {
     where: { id: { in: ticketIds } },
     data: { deletedAt: new Date() }
   });
+
+  for (const id of ticketIds) {
+    await recordAuditLog({
+      action: 'DELETE',
+      resource: 'TICKET',
+      resourceId: id
+    });
+  }
 
   revalidatePath('/tickets');
 }
@@ -449,6 +504,13 @@ export async function bulkMerge(ticketIds: string[]) {
         message: `O chamado <a href="/tickets/${t.id}" class="nt-link">#${t.protocol}</a> foi mesclado a este.`,
         isInternal: true
       }
+    });
+
+    await recordAuditLog({
+      action: 'UPDATE',
+      resource: 'TICKET_MERGE',
+      resourceId: t.id,
+      details: { mergedInto: oldest.id }
     });
   }
 
@@ -509,14 +571,12 @@ export async function bulkUpdateTickets(
       });
     }
 
-    if (message) {
-      await prisma.interaction.create({
-        data: {
-          ticketId: id,
-          userId: session.user.id,
-          message,
-          isInternal
-        }
+    if (Object.keys(updateData).length > 0 || message) {
+      await recordAuditLog({
+        action: 'UPDATE',
+        resource: 'TICKET_BULK',
+        resourceId: id,
+        details: { status, priority, message: !!message }
       });
     }
   }

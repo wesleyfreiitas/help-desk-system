@@ -5,6 +5,7 @@ import { getSession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import nodemailer from 'nodemailer';
+import { recordAuditLog } from '@/lib/audit';
 
 export async function getSystemSetting(key: string) {
   try {
@@ -32,6 +33,13 @@ export async function updateSystemSetting(key: string, value: any) {
     create: { key, value: stringifiedValue }
   });
 
+  await recordAuditLog({
+    action: 'UPDATE',
+    resource: 'SYSTEM_SETTING',
+    resourceId: key,
+    details: value
+  });
+
   revalidatePath('/settings/integrations/whatsapp');
   return { success: true };
 }
@@ -49,6 +57,12 @@ export async function updateOrgSettings(settings: { managersCanViewAll: boolean,
     where: { key },
     update: { value },
     create: { key, value }
+  });
+
+  await recordAuditLog({
+    action: 'UPDATE',
+    resource: 'ORG_SETTINGS',
+    details: settings
   });
 
   revalidatePath('/settings/organization');
@@ -175,8 +189,15 @@ export async function upsertTicketOption(formData: FormData) {
         order 
       }
     });
+
+    await recordAuditLog({
+      action: 'UPDATE',
+      resource: 'TICKET_OPTION',
+      resourceId: id,
+      details: { type, label, value }
+    });
   } else {
-    await prisma.ticketOption.create({
+    const option = await prisma.ticketOption.create({
       data: { 
         type, 
         label, 
@@ -184,6 +205,13 @@ export async function upsertTicketOption(formData: FormData) {
         color: color || null, 
         order 
       }
+    });
+
+    await recordAuditLog({
+      action: 'CREATE',
+      resource: 'TICKET_OPTION',
+      resourceId: option.id,
+      details: { type, label, value }
     });
   }
 
@@ -196,6 +224,12 @@ export async function deleteTicketOption(id: string) {
 
   await prisma.ticketOption.delete({
     where: { id }
+  });
+
+  await recordAuditLog({
+    action: 'DELETE',
+    resource: 'TICKET_OPTION',
+    resourceId: id
   });
 
   revalidatePath('/settings/options');

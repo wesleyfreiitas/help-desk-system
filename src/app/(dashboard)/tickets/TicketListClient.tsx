@@ -477,6 +477,18 @@ export default function TicketListClient({ tickets, userId, users, options }: Pr
                         >
                           Atribuir a mim
                         </button>
+                        <div style={{ borderTop: '1px solid var(--border-color)', margin: '4px 0' }}></div>
+                        {users.map(u => (
+                          <button
+                            key={u.id}
+                            className={`property-dropdown-item ${ticket.assigneeId === u.id ? 'selected' : ''}`}
+                            onClick={() => handleUpdateField(ticket.id, 'assigneeId', u.id)}
+                            disabled={isPending}
+                          >
+                            {u.name}
+                            {ticket.assigneeId === u.id && <Check size={14} />}
+                          </button>
+                        ))}
                       </div>
                     )}
                   </div>

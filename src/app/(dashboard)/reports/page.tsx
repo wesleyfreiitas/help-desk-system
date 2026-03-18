@@ -55,6 +55,14 @@ export default function ReportsPage() {
       badge: 'Clientes'
     },
     {
+      title: 'Menor Engajamento',
+      description: 'Ranking dos 10 clientes com menor volume de aberturas de chamados.',
+      icon: <TrendingUp size={24} style={{ transform: 'rotate(180deg)' }} />,
+      href: '/reports/clients/low-volume',
+      color: '#06b6d4', // Cyan
+      badge: 'Clientes'
+    },
+    {
       title: 'Gestão de Backlog',
       description: 'Analise chamados pendentes e identifique gargalos de atendimento.',
       icon: <Clock9 size={24} />,

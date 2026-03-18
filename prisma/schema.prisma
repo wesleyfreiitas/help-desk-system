@@ -25,6 +25,7 @@ model User {
   interactions Interaction[]
   customFields CustomFieldValue[]
   accessLogs   AccessLog[]
+  auditLogs    AuditLog[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   deletedAt DateTime?
@@ -212,4 +213,16 @@ model EmailLog {
   details         String?
   messageId       String?  @unique
   createdAt       DateTime @default(now())
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  action      String   // CREATE, UPDATE, DELETE
+  resource    String   // USER, CLIENT, PRODUCT, TICKET, CATEGORY, etc.
+  resourceId  String?
+  details     String?  // JSON string with changes or info
+  ip          String?
+  createdAt   DateTime @default(now())
 }

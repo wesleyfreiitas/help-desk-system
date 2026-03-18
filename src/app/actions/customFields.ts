@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
+import { recordAuditLog } from '@/lib/audit';
 
 export async function getCustomFields() {
   const session = await getSession();
@@ -27,6 +28,13 @@ export async function createCustomField(data: { name: string, type: string, targ
     }
   });
 
+  await recordAuditLog({
+    action: 'CREATE',
+    resource: 'CUSTOM_FIELD',
+    resourceId: field.id,
+    details: { name: data.name, target: data.target }
+  });
+
   revalidatePath('/settings/custom-fields');
   return field;
 }
@@ -45,6 +53,13 @@ export async function updateCustomField(id: string, data: { name: string, type: 
     }
   });
 
+  await recordAuditLog({
+    action: 'UPDATE',
+    resource: 'CUSTOM_FIELD',
+    resourceId: field.id,
+    details: { name: data.name }
+  });
+
   revalidatePath('/settings/custom-fields');
   return field;
 }
@@ -56,6 +71,12 @@ export async function deleteCustomField(id: string) {
   // Also delete values
   await prisma.customFieldValue.deleteMany({ where: { fieldId: id } });
   await prisma.customField.delete({ where: { id } });
+
+  await recordAuditLog({
+    action: 'DELETE',
+    resource: 'CUSTOM_FIELD',
+    resourceId: id
+  });
 
   revalidatePath('/settings/custom-fields');
 }
