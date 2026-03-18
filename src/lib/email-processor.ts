@@ -126,7 +126,8 @@ export async function processInboundEmails() {
                     subject,
                     type: 'RESPOSTA',
                     status: 'PROCESSADO',
-                    details: `Resposta adicionada ao chamado #${protocol}.`
+                    messageId: messageId,
+                    details: `Resposta adicionada ao chamado #${ticket.protocol}.`
                   }
                 });
               } else {
