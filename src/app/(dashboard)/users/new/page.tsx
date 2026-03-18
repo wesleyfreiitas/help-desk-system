@@ -34,7 +34,36 @@ export default async function NewUserPage() {
 
           <div className="form-group" style={{ marginBottom: 0 }}>
              <label htmlFor="password">Senha Inicial</label>
-             <input type="password" id="password" name="password" required placeholder="Defina uma senha" />
+             <input type="password" id="password" name="password" placeholder="Defina uma senha ou deixe em branco se enviar e-mail" />
+             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                Obrigatório se o e-mail de boas-vindas não for enviado.
+             </p>
+          </div>
+
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'start', 
+            gap: '12px', 
+            padding: '1rem', 
+            backgroundColor: 'var(--bg-elevated)', 
+            borderRadius: '12px',
+            border: '1px solid var(--border-color)',
+            marginTop: '-0.5rem'
+          }}>
+            <input 
+              type="checkbox" 
+              id="sendWelcomeEmail" 
+              name="sendWelcomeEmail" 
+              defaultChecked 
+            />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <label htmlFor="sendWelcomeEmail" style={{ fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer', color: 'var(--text-main)' }}>
+                Enviar e-mail de boas-vindas
+              </label>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>
+                O usuário receberá um link para definir sua própria senha e ativar a conta.
+              </p>
+            </div>
           </div>
 
           {/* Usamos o Client Component ClientSelector para ocultar/mostrar o combo de clientes dependendo da role */}

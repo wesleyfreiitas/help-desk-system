@@ -382,124 +382,129 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
               </Link>
             </div>
 
-            {/* Information Grid */}
-            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div style={{ padding: '0 1.5rem 1.75rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               
               {/* Contact Details Group */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
-                  <div style={{ width: '2px', height: '14px', backgroundColor: 'var(--primary)', borderRadius: '2px' }}></div>
-                  <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                    Contato
-                  </span>
-                </div>
-
-                {creatorEmail && (
-                  <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
-                    <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                      <Mail size={16} />
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Email</span>
-                      <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500, wordBreak: 'break-all' }}>{creatorEmail}</span>
-                    </div>
+              <div className="sidebar-section-v2">
+                <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.25rem' }}>
+                    <div style={{ width: '2px', height: '14px', backgroundColor: 'var(--primary)', borderRadius: '2px' }}></div>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                      Contato
+                    </span>
                   </div>
-                )}
 
-                {creatorPhone && (
-                  <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
-                    <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                      <Phone size={16} />
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Telefone</span>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>{creatorPhone}</span>
-                        <WhatsAppButton phone={creatorPhone} contactName={creatorName} />
+                  {creatorEmail && (
+                    <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+                      <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
+                        <Mail size={16} />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Email</span>
+                        <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500, wordBreak: 'break-all' }}>{creatorEmail}</span>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+
+                  {creatorPhone && (
+                    <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+                      <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
+                        <Phone size={16} />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Telefone</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>{creatorPhone}</span>
+                          <WhatsAppButton phone={creatorPhone} contactName={creatorName} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Company Details Group */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
-                  <div style={{ width: '2px', height: '14px', backgroundColor: 'var(--primary)', borderRadius: '2px' }}></div>
-                  <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                    Empresa
-                  </span>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
-                  <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                    <Globe size={16} />
+              <div className="sidebar-section-v2">
+                <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.25rem' }}>
+                    <div style={{ width: '2px', height: '14px', backgroundColor: 'var(--primary)', borderRadius: '2px' }}></div>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                      Empresa
+                    </span>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>CNPJ / Documento</span>
-                    <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>{ticket.client.document || '--'}</span>
-                  </div>
-                </div>
 
-                {ticket.client.website && (
                   <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
                     <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                      <ExternalLink size={16} />
+                      <Globe size={16} />
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Website</span>
-                      <a 
-                        href={ticket.client.website.startsWith('http') ? ticket.client.website : `https://${ticket.client.website}`} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        style={{ fontSize: '0.9rem', color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}
-                      >
-                        Acessar Site
-                      </a>
+                      <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>CNPJ / Documento</span>
+                      <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>{ticket.client.document || '--'}</span>
                     </div>
                   </div>
-                )}
+
+                  {ticket.client.website && (
+                    <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+                      <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
+                        <ExternalLink size={16} />
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Website</span>
+                        <a 
+                          href={ticket.client.website.startsWith('http') ? ticket.client.website : `https://${ticket.client.website}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          style={{ fontSize: '0.9rem', color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}
+                        >
+                          Acessar Site
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Custom Fields Group (Conditional) */}
               {ticket.client.customFields && ticket.client.customFields.length > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.5rem' }}>
-                    <div style={{ width: '2px', height: '14px', backgroundColor: 'var(--info)', borderRadius: '2px' }}></div>
-                    <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                      Específico
-                    </span>
-                  </div>
+                <div className="sidebar-section-v2">
+                  <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.25rem' }}>
+                      <div style={{ width: '2px', height: '14px', backgroundColor: 'var(--info)', borderRadius: '2px' }}></div>
+                      <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                        Específico
+                      </span>
+                    </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                    {ticket.client.customFields.map((cf: any) => (
-                      <div key={cf.id} style={{ 
-                        backgroundColor: 'var(--bg-elevated)', 
-                        padding: '1rem', 
-                        borderRadius: '12px',
-                        border: '1px solid var(--border-color)'
-                      }}>
-                        <span style={{ 
-                          fontSize: '0.65rem', 
-                          fontWeight: 800, 
-                          color: 'var(--text-muted)', 
-                          textTransform: 'uppercase',
-                          display: 'block',
-                          marginBottom: '4px'
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      {ticket.client.customFields.map((cf: any) => (
+                        <div key={cf.id} style={{ 
+                          backgroundColor: 'var(--bg-elevated)', 
+                          padding: '0.75rem 1rem', 
+                          borderRadius: '12px',
+                          border: '1px solid var(--border-color)'
                         }}>
-                          {cf.field.name}
-                        </span>
-                        <div style={{ 
-                          fontSize: '0.85rem', 
-                          color: 'var(--text-main)', 
-                          fontWeight: 500,
-                          lineHeight: '1.5',
-                          whiteSpace: 'pre-wrap'
-                        }}>
-                          {cf.value === 'true' ? 'Sim' : cf.value === 'false' ? 'Não' : cf.value || '--'}
+                          <span style={{ 
+                            fontSize: '0.65rem', 
+                            fontWeight: 800, 
+                            color: 'var(--text-muted)', 
+                            textTransform: 'uppercase',
+                            display: 'block',
+                            marginBottom: '4px'
+                          }}>
+                            {cf.field.name}
+                          </span>
+                          <div style={{ 
+                            fontSize: '0.85rem', 
+                            color: 'var(--text-main)', 
+                            fontWeight: 500,
+                            lineHeight: '1.5',
+                            whiteSpace: 'pre-wrap'
+                          }}>
+                            {cf.value === 'true' ? 'Sim' : cf.value === 'false' ? 'Não' : cf.value || '--'}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}

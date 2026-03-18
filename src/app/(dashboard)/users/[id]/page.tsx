@@ -3,7 +3,7 @@ import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getUserDetails } from '@/app/actions/admin';
-import { Edit, Trash2, ChevronLeft, ChevronRight, Plus, Phone, Mail, Tag, Clock, AlertCircle } from 'lucide-react';
+import { Edit, Trash2, ChevronLeft, ChevronRight, Plus, Phone, Mail, Tag, Clock, AlertCircle, Globe, ExternalLink } from 'lucide-react';
 import EditUserModal from './EditUserModal';
 import WhatsAppButton from './WhatsAppButton';
 
@@ -155,73 +155,114 @@ export default async function UserDetailsPage({ params }: { params: Promise<{ id
 
                 {/* Right Sidebar */}
                 <div className="detail-sidebar ticket-contact-sidebar">
-                    {/* Contact Info */}
-                    <div className="sidebar-section">
-                        <div className="sidebar-section-header">
-                            <Mail size={14} /> Informações de Contato
-                        </div>
-                        <div className="contact-fields-list">
-                            <div className="contact-field-v2">
-                                <label>E-mails</label>
-                                <span>{user.email}</span>
+                    {/* Contact Info Card */}
+                    <div className="sidebar-section-v2">
+                        <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                            {/* Group Header */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.25rem' }}>
+                                <div style={{ width: '2px', height: '14px', backgroundColor: 'var(--primary)', borderRadius: '2px' }}></div>
+                                <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                                    Contato
+                                </span>
                             </div>
-                            {user.phone && (
-                                <div className="contact-field-v2">
-                                    <label>Telefone</label>
-                                    <span>{user.phone}</span>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+                                    <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
+                                        <Mail size={16} />
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                        <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Email</span>
+                                        <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500, wordBreak: 'break-all' }}>{user.email}</span>
+                                    </div>
                                 </div>
-                            )}
-                            <div className="contact-field-v2">
-                                <label>Tags</label>
-                                <span className="sidebar-link" style={{ fontSize: '0.8rem', color: 'var(--primary)', cursor: 'pointer' }}>Adicionar tags</span>
+
+                                {user.phone && (
+                                    <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+                                        <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
+                                            <Phone size={16} />
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Telefone</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>{user.phone}</span>
+                                                <WhatsAppButton phone={user.phone} contactName={user.name} />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
 
-                    {/* Company Info */}
+                    {/* Company Info Card */}
                     {user.client && (
-                        <div className="sidebar-section">
-                            <div className="sidebar-section-header">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
-                                    <rect x="4" y="2" width="16" height="20" rx="2" ry="2" />
-                                    <path d="M9 22v-4h6v4" />
-                                    <path d="M8 6h.01" /><path d="M16 6h.01" />
-                                    <path d="M12 6h.01" /><path d="M12 10h.01" />
-                                    <path d="M12 14h.01" /><path d="M16 10h.01" />
-                                    <path d="M16 14h.01" /><path d="M8 10h.01" />
-                                    <path d="M8 14h.01" />
-                                </svg>
-                                Informações da Empresa
-                            </div>
-                            <div className="contact-fields-list">
-                                <div className="contact-field-v2">
-                                    <label>Razão Social</label>
-                                    <Link href={`/companies/${user.client.id}`} style={{ color: 'var(--primary)', fontWeight: 500 }}>
-                                        {user.client.name}
-                                    </Link>
+                        <div className="sidebar-section-v2" style={{ marginTop: '1rem' }}>
+                            <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                                {/* Group Header */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.25rem' }}>
+                                    <div style={{ width: '2px', height: '14px', backgroundColor: 'var(--primary)', borderRadius: '2px' }}></div>
+                                    <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                                        Empresa
+                                    </span>
                                 </div>
-                                <div className="contact-field-v2">
-                                    <label>CNPJ / Documento</label>
-                                    <span>{user.client.document || '--'}</span>
-                                </div>
-                                {user.client.website && (
-                                    <div className="contact-field-v2">
-                                        <label>Website</label>
-                                        <a href={user.client.website.startsWith('http') ? user.client.website : `https://${user.client.website}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--primary)' }}>
-                                            {user.client.website}
-                                        </a>
+
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+                                    <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+                                        <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
+                                            <Globe size={16} />
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Razão Social</span>
+                                            <Link href={`/companies/${user.client.id}`} style={{ fontSize: '0.9rem', color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}>
+                                                {user.client.name}
+                                            </Link>
+                                        </div>
                                     </div>
-                                )}
+
+                                    <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+                                        <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
+                                            <Tag size={16} />
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>CNPJ / Documento</span>
+                                            <span style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontWeight: 500 }}>{user.client.document || '--'}</span>
+                                        </div>
+                                    </div>
+
+                                    {user.client.website && (
+                                        <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+                                            <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
+                                                <ExternalLink size={16} />
+                                            </div>
+                                            <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Website</span>
+                                                <a href={user.client.website.startsWith('http') ? user.client.website : `https://${user.client.website}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.9rem', color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}>
+                                                    {user.client.website}
+                                                </a>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
 
                                 {/* Custom Fields */}
                                 {user.client.customFields && user.client.customFields.length > 0 && (
-                                    <div style={{ marginTop: '0.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.75rem' }}>
-                                        <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.75rem', textTransform: 'uppercase' }}>Campos Adicionais</div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                    <div style={{ marginTop: '0.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
+                                        <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '1.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Campos Adicionais</div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                                             {user.client.customFields.map((cf: any) => (
-                                                <div key={cf.id} className="contact-field-v2">
-                                                    <label>{cf.field.name}</label>
-                                                    <span>{cf.value || '--'}</span>
+                                                <div key={cf.id} style={{ 
+                                                    backgroundColor: 'var(--bg-elevated)', 
+                                                    padding: '1rem', 
+                                                    borderRadius: '12px',
+                                                    border: '1px solid var(--border-color)'
+                                                }}>
+                                                    <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
+                                                        {cf.field.name}
+                                                    </span>
+                                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 500, lineHeight: '1.5' }}>
+                                                        {cf.value || '--'}
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>

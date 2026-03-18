@@ -4,6 +4,10 @@ import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
+import { sendEmail } from '@/lib/mail';
+import { headers } from 'next/headers';
+import crypto from 'crypto';
+import bcrypt from 'bcryptjs';
 
 export async function createClient(formData: FormData) {
   const session = await getSession();
@@ -101,20 +105,65 @@ export async function createUser(formData: FormData) {
     }
   }
 
-  // Usa bcrypt como no auth
-  const bcrypt = require('bcryptjs');
-  const password = await bcrypt.hash(rawPassword, 10);
+  const sendWelcomeEmail = formData.get('sendWelcomeEmail') === 'on';
 
-  await prisma.user.create({
+  // Usa bcrypt como no auth
+  let password = rawPassword;
+  if (!password && sendWelcomeEmail) {
+    // Gerar uma senha aleatória segura se o e-mail de boas-vindas estiver marcado
+    password = crypto.randomBytes(16).toString('hex');
+  } else if (!password) {
+    throw new Error('A senha é obrigatória se o e-mail de boas-vindas não for enviado.');
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const newUser = await prisma.user.create({
     data: {
       name,
       email,
-      password,
+      password: hashedPassword,
       role,
       phone: phone || null,
       clientId: clientId ? clientId : null
     }
   });
+
+  // Enviar e-mail de boas-vindas se solicitado
+  if (sendWelcomeEmail) {
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 3600000 * 24); // 24 horas para ativação
+
+    await prisma.passwordResetToken.upsert({
+      where: { email },
+      update: { token, expires },
+      create: { email, token, expires }
+    });
+
+    const headersList = await headers();
+    const host = headersList.get('host');
+    const proto = headersList.get('x-forwarded-proto') || 'http';
+    const baseUrl = `${proto}://${host}`;
+    const resetLink = `${baseUrl}/reset?token=${token}`;
+
+    await sendEmail({
+      to: email,
+      subject: 'Bem-vindo ao Upp HelpDesk - Ative sua conta',
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+          <h2 style="color: #2563eb;">Bem-vindo, ${name}!</h2>
+          <p>Sua conta no <strong>Upp HelpDesk</strong> foi criada com sucesso.</p>
+          <p>Para começar a usar o sistema, você precisa definir sua senha de acesso clicando no botão abaixo:</p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetLink}" style="background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold;">Definir Minha Senha</a>
+          </div>
+          <p style="font-size: 0.875rem; color: #64748b;">Este link de ativação é válido por 24 horas.</p>
+          <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0;" />
+          <p style="font-size: 0.75rem; color: #94a3b8;">Upp HelpDesk - Sistema de Suporte</p>
+        </div>
+      `
+    });
+  }
 
   revalidatePath('/users');
   redirect('/users');

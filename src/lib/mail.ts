@@ -51,9 +51,39 @@ export async function sendEmail({ to, subject, html }: { to: string, subject: st
       subject,
       html,
     });
+
+    // Log do e-mail de saída
+    await prisma.emailLog.create({
+      data: {
+        from: config.fromEmail || config.user,
+        to,
+        subject,
+        type: 'NOTIFICAÇÃO',
+        status: 'PROCESSADO',
+        details: 'E-mail enviado com sucesso via SMTP.'
+      }
+    });
+
     return { success: true };
   } catch (error: any) {
     console.error('Error sending email:', error);
+
+    // Registrar falha no log
+    try {
+      await prisma.emailLog.create({
+        data: {
+          from: config.fromEmail || config.user,
+          to,
+          subject,
+          type: 'NOTIFICAÇÃO',
+          status: 'REJEITADO',
+          details: `Falha no envio SMTP: ${error.message}`
+        }
+      });
+    } catch (logError) {
+      console.error('Erro ao gravar log de falha de e-mail:', logError);
+    }
+
     return { success: false, error: error.message };
   }
 }

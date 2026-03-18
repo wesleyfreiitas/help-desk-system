@@ -11,12 +11,17 @@ interface EmailConfig {
   pass: string;
   fromEmail: string;
   fromName: string;
+  imapHost?: string;
+  imapPort?: string;
+  imapUser?: string;
+  imapPass?: string;
 }
 
 export default function EmailSettingsClient({ initialConfig }: { initialConfig: EmailConfig }) {
   const [config, setConfig] = useState<EmailConfig>(initialConfig);
   const [isSaving, setIsSaving] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
+  const [isTestingImap, setIsTestingImap] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   const handleSave = async () => {
@@ -47,6 +52,30 @@ export default function EmailSettingsClient({ initialConfig }: { initialConfig: 
       setMessage({ type: 'error', text: error.message || 'Erro ao testar conexão.' });
     } finally {
       setIsTesting(false);
+    }
+  };
+
+  const handleTestImap = async () => {
+    setIsTestingImap(true);
+    setMessage({ type: 'success', text: 'Testando conexão IMAP...' });
+    try {
+      const { testImapConnection } = await import('@/app/actions/settings');
+      const imapConfig = {
+        host: config.imapHost || '',
+        port: config.imapPort || '',
+        user: config.imapUser || '',
+        pass: config.imapPass || ''
+      };
+      const result = await testImapConnection(imapConfig);
+      if (result.success) {
+        setMessage({ type: 'success', text: 'Conexão IMAP estabelecida com sucesso! ✅' });
+      } else {
+        setMessage({ type: 'error', text: `Falha na conexão IMAP: ${result.error} ❌` });
+      }
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.message || 'Erro ao testar conexão IMAP.' });
+    } finally {
+      setIsTestingImap(false);
     }
   };
 
@@ -127,21 +156,49 @@ export default function EmailSettingsClient({ initialConfig }: { initialConfig: 
             />
           </div>
 
-          <div style={{ 
-            background: 'rgba(2, 132, 199, 0.1)', 
-            border: '1px solid rgba(2, 132, 199, 0.2)', 
-            borderRadius: '12px', 
-            padding: '1.5rem',
-            marginTop: '1rem'
-          }}>
-            <h5 style={{ margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem' }}>
-              <Shield size={16} /> Dicas de Configuração
-            </h5>
-            <ul style={{ paddingLeft: '1.25rem', margin: 0, fontSize: '0.825rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <li>Use a porta **465** com SSL para conexões seguras.</li>
-              <li>A porta **587** é usada geralmente com STARTTLS.</li>
-              <li>Certifique-se de que o firewall permite conexões externas para estas portas.</li>
-            </ul>
+          <h4 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '1rem 0 0 0', fontSize: '1rem', color: 'var(--primary)' }}>
+            <Server size={18} /> Servidor IMAP (Recebimento)
+          </h4>
+
+          <div className="form-group">
+            <label>Host IMAP</label>
+            <input 
+              type="text" 
+              value={config.imapHost || ''} 
+              onChange={e => setConfig({ ...config, imapHost: e.target.value })}
+              placeholder="imap.exemplo.com"
+            />
+          </div>
+
+          <div className="form-group" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem' }}>
+            <div>
+              <label>Porta IMAP</label>
+              <input 
+                type="text" 
+                value={config.imapPort || ''} 
+                onChange={e => setConfig({ ...config, imapPort: e.target.value })}
+                placeholder="993"
+              />
+            </div>
+            <div>
+              <label>Usuário IMAP</label>
+              <input 
+                type="text" 
+                value={config.imapUser || ''} 
+                onChange={e => setConfig({ ...config, imapUser: e.target.value })}
+                placeholder="seu-email@provedor.com"
+              />
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>Senha IMAP</label>
+            <input 
+              type="password" 
+              value={config.imapPass || ''} 
+              onChange={e => setConfig({ ...config, imapPass: e.target.value })}
+              placeholder="••••••••"
+            />
           </div>
         </div>
       </div>
@@ -160,12 +217,22 @@ export default function EmailSettingsClient({ initialConfig }: { initialConfig: 
           
           <button 
             onClick={handleTest} 
-            disabled={isSaving || isTesting || !config.host}
+            disabled={isSaving || isTesting || isTestingImap || !config.host}
             className="btn-outline" 
-            style={{ width: 'auto', padding: '0.75rem 2rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            style={{ width: 'auto', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}
           >
             <Play size={18} />
-            {isTesting ? 'Testando...' : 'Testar Conexão'}
+            {isTesting ? 'Smtp...' : 'Testar SMTP'}
+          </button>
+
+          <button 
+            onClick={handleTestImap} 
+            disabled={isSaving || isTesting || isTestingImap || !config.imapHost}
+            className="btn-outline" 
+            style={{ width: 'auto', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}
+          >
+            <Play size={18} />
+            {isTestingImap ? 'Imap...' : 'Testar IMAP'}
           </button>
         </div>
 

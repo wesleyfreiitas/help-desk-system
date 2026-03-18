@@ -226,3 +226,41 @@ export async function testEmailConnection(config: { host: string, port: string, 
     return { success: false, error: error.message };
   }
 }
+
+export async function testImapConnection(config: { host: string, port: string, user: string, pass: string }) {
+  const session = await getSession();
+  if (!session || session.user.role !== 'ADMIN') throw new Error('Não autorizado');
+
+  const { ImapFlow } = require('imapflow');
+
+  const client = new ImapFlow({
+    host: config.host,
+    port: parseInt(config.port),
+    secure: config.port === '993',
+    auth: {
+      user: config.user,
+      pass: config.pass
+    },
+    logger: false
+  });
+
+  try {
+    await client.connect();
+    await client.logout();
+    return { success: true };
+  } catch (error: any) {
+    console.error('IMAP Test Error:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function runEmailProcessor() {
+  const session = await getSession();
+  if (!session || session.user.role !== 'ADMIN') throw new Error('Não autorizado');
+
+  const { processInboundEmails } = await import('@/lib/email-processor');
+  const result = await processInboundEmails();
+  
+  revalidatePath('/reports/email-logs');
+  return result;
+}

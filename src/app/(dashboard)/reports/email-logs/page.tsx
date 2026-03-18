@@ -1,7 +1,8 @@
 import { prisma } from '@/lib/prisma';
 import { format, subDays, startOfDay, endOfDay, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Search, Mail, AlertCircle, CheckCircle2, Filter, Calendar } from 'lucide-react';
+import { Search, Mail, AlertCircle, CheckCircle2, Filter, Calendar, RefreshCw } from 'lucide-react';
+import { runEmailProcessor } from '@/app/actions/settings';
 
 export default async function EmailLogsPage({ 
   searchParams 
@@ -15,8 +16,6 @@ export default async function EmailLogsPage({
   const endDate = params.end ? endOfDay(parseISO(params.end)) : endOfDay(new Date());
   const startDate = params.start ? startOfDay(parseISO(params.start)) : startOfDay(subDays(endDate, 30));
 
-  // Simulação de dados para visualização inicial caso não existam no banco
-  // Em uma aplicação real, removeríamos este mock após validar o layout
   let logs = await prisma.emailLog.findMany({
     where: {
       createdAt: { gte: startDate, lte: endDate },
@@ -26,24 +25,39 @@ export default async function EmailLogsPage({
     orderBy: { createdAt: 'desc' }
   });
 
-  // Mock data para preencher o visual se estiver vazio (conforme solicitado pelo usuário)
-  if (logs.length === 0 && !params.start) {
-    logs = [
-      { id: '1', from: 'postmaster@rvbmalhas.onmicrosoft.com', to: 'noreply@absoluta-auditoria.tomticket.com', subject: 'Rejeição', type: 'CRIAÇÃO', status: 'REJEITADO', details: 'Protocolo vazio.', createdAt: new Date() },
-      { id: '2', from: 'postmaster@rvbmalhas.onmicrosoft.com', to: 'helpdesk@absoluta-auditoria.tomticket.com', subject: 'Rejeição', type: 'RESPOSTA', status: 'REJEITADO', details: 'Respondido diretamente para local-part sem protocolo.', createdAt: subDays(new Date(), 1) },
-      { id: '3', from: 'suporte@cliente.com', to: 'chamados@helpdesk.com', subject: 'Novo Chamado', type: 'CRIAÇÃO', status: 'PROCESSADO', details: 'Chamado #1234 criado com sucesso.', createdAt: subDays(new Date(), 2) },
-    ] as any;
-  }
-
   return (
     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.025em' }}>
-          Log de Recebimento de Emails
-        </h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-          Monitore todos os emails que o sistema tenta processar.
-        </p>
+      <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <div>
+          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)', letterSpacing: '-0.025em' }}>
+            Log de E-mails
+          </h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+            Monitore todos os e-mails recebidos e enviados pelo sistema.
+          </p>
+        </div>
+
+        <form action={async () => {
+          'use server';
+          await runEmailProcessor();
+        }}>
+          <button type="submit" style={{
+            backgroundColor: 'var(--primary)',
+            color: 'white',
+            border: 'none',
+            padding: '10px 20px',
+            borderRadius: '12px',
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            cursor: 'pointer',
+            fontSize: '0.9rem',
+            boxShadow: 'var(--shadow-sm)'
+          }}>
+            <RefreshCw size={18} /> Sincronizar Agora
+          </button>
+        </form>
       </div>
 
       {/* Filtros */}
@@ -139,29 +153,41 @@ export default async function EmailLogsPage({
             {logs.map((log) => (
               <tr key={log.id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background-color 0.2s' }}>
                 <td style={{ padding: '1.25rem' }}>
-                  <span style={{ 
-                    padding: '4px 8px', 
-                    borderRadius: '4px', 
-                    fontSize: '0.7rem', 
-                    fontWeight: 800,
-                    backgroundColor: log.status === 'REJEITADO' ? '#fee2e2' : '#dcfce7',
-                    color: log.status === 'REJEITADO' ? '#b91c1c' : '#15803d',
-                    textTransform: 'uppercase'
-                  }}>
-                    {log.status}
-                  </span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <span style={{ 
+                      padding: '4px 8px', 
+                      borderRadius: '4px', 
+                      fontSize: '0.7rem', 
+                      fontWeight: 800,
+                      backgroundColor: log.status === 'REJEITADO' ? '#fee2e2' : '#dcfce7',
+                      color: log.status === 'REJEITADO' ? '#b91c1c' : '#15803d',
+                      textTransform: 'uppercase',
+                      textAlign: 'center',
+                      width: 'fit-content'
+                    }}>
+                      {log.status}
+                    </span>
+                    <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                      {log.type}
+                    </span>
+                  </div>
                 </td>
                 <td style={{ padding: '1.25rem', fontSize: '0.9rem', color: 'var(--text-main)' }}>
                   {format(log.createdAt, 'dd/MM/yyyy HH:mm:ss')}
                 </td>
-                <td style={{ padding: '1.25rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                  {log.from}
+                <td style={{ padding: '1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                  <div style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {log.from}
+                  </div>
                 </td>
-                <td style={{ padding: '1.25rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                  {log.to}
+                <td style={{ padding: '1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                  <div style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {log.to}
+                  </div>
                 </td>
                 <td style={{ padding: '1.25rem', fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 500 }}>
-                  {log.details}
+                  <div style={{ fontWeight: 700, marginBottom: '4px', fontSize: '0.9rem' }}>{log.subject}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{log.details}</div>
                 </td>
               </tr>
             ))}
