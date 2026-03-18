@@ -56,10 +56,6 @@ export default async function UserDetailsPage({ params }: { params: Promise<{ id
                     <EditUserModal user={user} clients={clients} currentRole={session.user.role} />
                     <button className="action-bar-btn danger"><Trash2 size={14} /> Excluir</button>
                 </div>
-                <div className="detail-action-bar-right">
-                    <Link href="/users" className="action-bar-btn"><ChevronLeft size={14} /></Link>
-                    <button className="action-bar-btn"><ChevronRight size={14} /></button>
-                </div>
             </div>
 
             {/* Main Content Area */}
