@@ -43,41 +43,84 @@ export default function WhatsAppButton({
   const getButtonContent = () => {
     switch (status) {
       case 'loading':
-        return <><RefreshCw size={14} className="animate-spin" /> Enviando...</>;
+        return <RefreshCw size={16} className="animate-spin" />;
       case 'success':
-        return <><Check size={14} /> Enviado!</>;
+        return <Check size={16} />;
       case 'error':
-        return <><AlertCircle size={14} /> Falhou</>;
+        return <AlertCircle size={16} />;
       default:
-        return <><Phone size={14} /> WhatsApp</>;
+        // Using a more recognizable green color for the WhatsApp icon handle
+        return <Phone size={16} />;
     }
   };
 
+  const getButtonTitle = () => {
+    if (status === 'loading') return 'Enviando...';
+    if (status === 'success') return 'Mensagem enviada!';
+    if (status === 'error') return errorMessage || 'Erro ao enviar';
+    return `Falar com ${contactName} no WhatsApp`;
+  };
+
   return (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
+    <div style={{ position: 'relative', display: 'inline-block', verticalAlign: 'middle' }}>
       <button
         onClick={handleClick}
-        className={`btn-outline-sm whatsapp-btn ${status}`}
+        className={`whatsapp-icon-btn ${status}`}
         disabled={status === 'loading' || !phone}
-        title={errorMessage || undefined}
+        title={getButtonTitle()}
       >
         {getButtonContent()}
       </button>
 
       <style jsx>{`
-        .whatsapp-btn.success {
-          background-color: #dcfce7;
-          color: #166534;
-          border-color: #bbf7d0;
+        .whatsapp-icon-btn {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 32px;
+          height: 32px;
+          border-radius: 6px;
+          border: 1px solid #25d366;
+          background: transparent;
+          color: #25d366;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          padding: 0;
         }
-        .whatsapp-btn.error {
-          background-color: #fef2f2;
-          color: #991b1b;
+
+        .whatsapp-icon-btn:hover:not(:disabled) {
+          background-color: #25d366;
+          color: white;
+        }
+
+        .whatsapp-icon-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          border-color: var(--border-color);
+          color: var(--text-muted);
+        }
+
+        .whatsapp-icon-btn.loading {
+          border-color: var(--primary);
+          color: var(--primary);
+        }
+
+        .whatsapp-icon-btn.success {
+          background-color: #25d366;
+          color: white;
+          border-color: #25d366;
+        }
+
+        .whatsapp-icon-btn.error {
+          background-color: #fee2e2;
+          color: #dc2626;
           border-color: #fecaca;
         }
+
         .animate-spin {
           animation: spin 1s linear infinite;
         }
+
         @keyframes spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
