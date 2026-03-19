@@ -159,7 +159,7 @@ export default async function ClientDetailsPage({ params }: { params: Promise<{ 
                                     <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>CNPJ / Documento</span>
                                     <span style={{ fontSize: '0.9rem' }}>{client.document || '--'}</span>
                                 </div>
-                                {client.customFields && client.customFields.map((cf: any) => (
+                                {client.customFields && client.customFields.filter((cf: any) => cf.field.target === 'CLIENT').map((cf: any) => (
                                     <div key={cf.id}>
                                         <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>{cf.field.name}</span>
                                         <span style={{ fontSize: '0.9rem' }}>{cf.value || '--'}</span>

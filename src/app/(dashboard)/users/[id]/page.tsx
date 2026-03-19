@@ -200,10 +200,10 @@ export default async function UserDetailsPage({ params }: { params: Promise<{ id
                                 )}
 
                                 {/* User Custom Fields */}
-                                {user.customFields && user.customFields.length > 0 && (
+                                {user.customFields && user.customFields.filter((cf: any) => cf.field.target === 'USER').length > 0 && (
                                     <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem', marginTop: '0.25rem' }}>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                                            {user.customFields.map((cf: any) => (
+                                            {user.customFields.filter((cf: any) => cf.field.target === 'USER').map((cf: any) => (
                                                 <div key={cf.id} style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
                                                     <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
                                                         <Tag size={16} />
@@ -272,11 +272,11 @@ export default async function UserDetailsPage({ params }: { params: Promise<{ id
                                 </div>
 
                                 {/* Custom Fields */}
-                                {user.client.customFields && user.client.customFields.length > 0 && (
+                                {user.client.customFields && user.client.customFields.filter((cf: any) => cf.field.target === 'CLIENT').length > 0 && (
                                     <div style={{ marginTop: '0.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
                                         <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '1.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Campos Adicionais</div>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                            {user.client.customFields.map((cf: any) => (
+                                            {user.client.customFields.filter((cf: any) => cf.field.target === 'CLIENT').map((cf: any) => (
                                                 <div key={cf.id} style={{ 
                                                     backgroundColor: 'var(--bg-elevated)', 
                                                     padding: '1rem', 
