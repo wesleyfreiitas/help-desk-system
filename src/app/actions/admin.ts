@@ -9,6 +9,7 @@ import { headers } from 'next/headers';
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { recordAuditLog } from '@/lib/audit';
+import { formatPhone, toUpper, formatDocument } from '@/lib/formatters';
 
 export async function createClient(formData: FormData) {
   const session = await getSession();
@@ -22,10 +23,10 @@ export async function createClient(formData: FormData) {
 
   const client = await prisma.client.create({
     data: {
-      name,
-      document,
+      name: toUpper(name)!,
+      document: formatDocument(document)!,
       email: email || null,
-      phone: phone || null,
+      phone: formatPhone(phone),
       website: website || null,
       active: formData.get('active') === 'on'
     }
@@ -142,7 +143,7 @@ export async function createUser(formData: FormData) {
         name,
         password: hashedPassword,
         role,
-        phone: phone || null,
+        phone: formatPhone(phone),
         clientId: clientId ? clientId : null,
         updatedAt: new Date(),
         deletedAt: null // Reativar!
@@ -168,7 +169,7 @@ export async function createUser(formData: FormData) {
         email,
         password: hashedPassword,
         role,
-        phone: phone || null,
+        phone: formatPhone(phone),
         clientId: clientId ? clientId : null
       }
     });
@@ -469,10 +470,10 @@ export async function updateClient(clientId: string, data: { name: string, docum
   await prisma.client.update({
     where: { id: clientId },
     data: {
-      name: data.name,
-      document: data.document,
+      name: toUpper(data.name)!,
+      document: formatDocument(data.document)!,
       email: data.email || null,
-      phone: data.phone || null,
+      phone: formatPhone(data.phone),
       website: data.website || null,
       active: data.active !== undefined ? data.active : undefined
     }
@@ -529,7 +530,7 @@ export async function updateUser(userId: string, data: { name: string, email: st
       name: data.name,
       email: data.email,
       role: data.role,
-      phone: data.phone || null,
+      phone: formatPhone(data.phone),
       clientId: data.clientId || null
     }
   });

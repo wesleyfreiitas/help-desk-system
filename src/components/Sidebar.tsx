@@ -16,6 +16,7 @@ export default function Sidebar({ user, isOpen, onClose }: { user: any, isOpen: 
     { label: 'Dashboard', href: '/dashboard', roles: ['ADMIN', 'ATTENDANT', 'CLIENT', 'ORG_MANAGER', 'ORG_MEMBER'] },
     { label: 'Chamados', href: '/tickets', roles: ['ADMIN', 'ATTENDANT', 'CLIENT', 'ORG_MANAGER', 'ORG_MEMBER'] },
     { label: 'Empresas', href: '/companies', roles: ['ADMIN', 'ATTENDANT'] },
+    { label: 'Departamentos', href: '/departments', roles: ['ADMIN'] },
     { label: 'Produtos', href: '/products', roles: ['ADMIN'] },
     { label: 'Categorias', href: '/categories', roles: ['ADMIN'] },
     { label: 'Usuários', href: '/users', roles: ['ADMIN', 'ATTENDANT'] },

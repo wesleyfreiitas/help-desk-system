@@ -7,6 +7,8 @@ import TicketPropertySelect from './TicketPropertySelect';
 import TicketTagsInput from './TicketTagsInput';
 import TicketEmailComposer from './TicketEmailComposer';
 import TimeTrackerDisplay from './TimeTrackerDisplay';
+import TransferDepartmentModal from './TransferDepartmentModal';
+import { getDepartments } from '@/app/actions/departments';
 import { Clock, Reply, StickyNote, Forward, XCircle, Star, MoreHorizontal, User, Mail, Phone, ExternalLink, CheckSquare, Timer, ListTodo, AlertCircle, Paperclip, Globe } from 'lucide-react';
 import WhatsAppButton from '../../users/[id]/WhatsAppButton';
 
@@ -32,6 +34,7 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
       assignee: true,
       category: true,
       requester: true,
+      department: true,
       interactions: {
         include: { user: true, attachments: true },
         orderBy: { createdAt: 'asc' }
@@ -52,6 +55,7 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
     select: { id: true, name: true },
     orderBy: { name: 'asc' }
   });
+  const departments = await getDepartments();
 
   // Opções Dinâmicas para os Selects
   const allOptions = (await prisma.$queryRaw`SELECT * FROM "TicketOption" ORDER BY "order" ASC`) as any[];
@@ -315,9 +319,33 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
           </div>
 
           <div className="property-group">
+            <label>Departamento</label>
+            {user.role !== 'CLIENT' ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {ticket.department && (
+                  <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: ticket.department.color || '#6366f1', display: 'inline-block', flexShrink: 0 }} />
+                )}
+                <span style={{ fontWeight: 500, fontSize: '0.85rem' }}>{ticket.department?.name || 'Sem departamento'}</span>
+              </div>
+            ) : (
+              <span style={{ fontWeight: 500, fontSize: '0.85rem' }}>{ticket.department?.name || 'N/A'}</span>
+            )}
+          </div>
+
+          <div className="property-group">
             <label>Tempo de Trabalho</label>
             <TimeTrackerDisplay totalSeconds={ticket.totalWorkTime || 0} lastStartedAt={ticket.lastWorkStartedAt} />
           </div>
+
+          {user.role !== 'CLIENT' && (
+            <div style={{ paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
+              <TransferDepartmentModal
+                ticketId={ticket.id}
+                currentDepartmentId={ticket.departmentId}
+                departments={departments}
+              />
+            </div>
+          )}
         </div>
 
         {/* Contact & Company Sidebar Radical Redesign (v4) */}
