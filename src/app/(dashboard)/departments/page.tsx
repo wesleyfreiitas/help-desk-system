@@ -36,20 +36,11 @@ export default async function DepartmentsPage() {
             <Link
               key={dept.id}
               href={`/departments/${dept.id}`}
-              style={{ textDecoration: 'none' }}
-            >
-              <div style={{
-                background: 'var(--surface)',
-                border: '1px solid var(--border-color)',
-                borderRadius: 'var(--radius-lg)',
-                padding: '1.5rem',
-                cursor: 'pointer',
-                transition: 'box-shadow 0.2s, transform 0.2s',
+              className="dept-card"
+              style={{
                 borderLeft: `4px solid ${dept.color || '#6366f1'}`,
               }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = 'var(--shadow-lg)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = ''; (e.currentTarget as HTMLElement).style.transform = ''; }}
-              >
+            >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                   <div>
                     <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: 'var(--text-main)' }}>{dept.name}</h3>
@@ -75,7 +66,6 @@ export default async function DepartmentsPage() {
                     <span><strong style={{ color: 'var(--text-main)' }}>{dept._count.tickets}</strong> chamados</span>
                   </div>
                 </div>
-              </div>
             </Link>
           ))}
         </div>

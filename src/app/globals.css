@@ -773,6 +773,21 @@ input[type="checkbox"]:focus, input[type="radio"]:focus {
   box-shadow: var(--shadow-md);
 }
 
+.dept-card {
+  background: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
+  text-decoration: none;
+}
+
+.dept-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
 .stat-title {
   color: var(--text-muted);
   font-size: 0.875rem;

@@ -13,7 +13,7 @@ export default async function UserDetailsPage({ params }: { params: Promise<{ id
     if (!session || session.user.role === 'CLIENT') return redirect('/tickets');
 
     const { id } = await params;
-    const user = await getUserDetails(id);
+    const user = (await getUserDetails(id)) as any;
 
     if (!user) {
         return <div style={{ padding: '2rem' }}>Usuário não encontrado.</div>;
@@ -220,6 +220,45 @@ export default async function UserDetailsPage({ params }: { params: Promise<{ id
                             </div>
                         </div>
                     </div>
+
+                    {/* Departments Card */}
+                    {(user.role === 'ADMIN' || user.role === 'ATTENDANT') && (
+                        <div className="sidebar-section-v2" style={{ marginTop: '0.75rem' }}>
+                            <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.25rem' }}>
+                                    <div style={{ width: '2px', height: '14px', backgroundColor: '#6366f1', borderRadius: '2px' }}></div>
+                                    <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                                        Departamentos
+                                    </span>
+                                </div>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                    {((user as any).departments && (user as any).departments.length > 0) ? (
+                                        (user as any).departments.map((dm: any) => (
+                                            <Link 
+                                                key={dm.id} 
+                                                href={`/departments/${dm.department.id}`}
+                                                style={{ 
+                                                    fontSize: '0.75rem', 
+                                                    fontWeight: 600, 
+                                                    padding: '4px 10px', 
+                                                    borderRadius: '6px', 
+                                                    background: 'var(--bg-elevated)', 
+                                                    border: `1px solid ${dm.department.color || '#6366f1'}4d`,
+                                                    borderLeft: `3px solid ${dm.department.color || '#6366f1'}`,
+                                                    color: 'var(--text-main)',
+                                                    textDecoration: 'none'
+                                                }}
+                                            >
+                                                {dm.department.name} {dm.isLeader && '👑'}
+                                            </Link>
+                                        ))
+                                    ) : (
+                                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Nenhum departamento</span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Company Info Card */}
                     {user.client && (

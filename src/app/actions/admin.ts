@@ -249,11 +249,14 @@ export async function getUserDetails(userId: string) {
   const isOrgUser = ['CLIENT', 'ORG_MANAGER', 'ORG_MEMBER'].includes(session?.user?.role || '');
   if (!session || isOrgUser) throw new Error('Unauthorized');
 
-  const user = await prisma.user.findUnique({
+  const user = await (prisma.user as any).findUnique({
     where: { id: userId },
     include: {
       customFields: {
         include: { field: true }
+      },
+      departments: {
+        include: { department: true }
       },
       client: {
         include: {
