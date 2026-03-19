@@ -265,6 +265,39 @@ export async function resetPasswordAction(prevState: any, formData: FormData) {
   return { success: 'Senha alterada com sucesso! Você já pode fazer login.' };
 }
 
+export async function updateProfileAction(prevState: any, formData: FormData) {
+  const session = await getSession();
+  if (!session) return { error: 'Não autorizado.' };
+
+  const name = formData.get('name') as string;
+  const phone = formData.get('phone') as string;
+  const extension = formData.get('extension') as string;
+
+  if (!name.trim()) return { error: 'O nome é obrigatório.' };
+
+  try {
+    await (prisma.user as any).update({
+      where: { id: session.user.id },
+      data: {
+        name: name.trim(),
+        phone: phone.trim() || null,
+        extension: extension.trim() || null
+      }
+    });
+
+    // Update session with new name if changed
+    await setSession({
+      ...session.user,
+      name: name.trim()
+    });
+
+    return { success: 'Perfil atualizado com sucesso!' };
+  } catch (error: any) {
+    console.error('Update Profile Error:', error);
+    return { error: error.message || 'Erro ao atualizar perfil.' };
+  }
+}
+
 export async function updatePasswordAction(prevState: any, formData: FormData) {
   const session = await getSession();
   if (!session) return { error: 'Não autorizado.' };

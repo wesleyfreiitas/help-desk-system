@@ -10,7 +10,7 @@ export default function UserListClient({ initialUsers, currentUserId, userRole, 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
   const [editingUser, setEditingUser] = useState<any | null>(null);
-  const [editForm, setEditForm] = useState({ name: '', email: '', phone: '', role: 'CLIENT', clientId: '' });
+  const [editForm, setEditForm] = useState({ name: '', email: '', phone: '', extension: '', role: 'CLIENT', clientId: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Filter users based on search
@@ -173,6 +173,7 @@ export default function UserListClient({ initialUsers, currentUserId, userRole, 
                           name: u.name,
                           email: u.email,
                           phone: u.phone || '',
+                          extension: u.extension || '',
                           role: u.role,
                           clientId: u.clientId || ''
                         });
@@ -226,6 +227,12 @@ export default function UserListClient({ initialUsers, currentUserId, userRole, 
                     <label className="form-label">Telefone</label>
                     <input type="text" className="form-control" value={editForm.phone} onChange={e => setEditForm({...editForm, phone: e.target.value})} />
                   </div>
+                  {['ADMIN', 'ATTENDANT'].includes(editForm.role) && (
+                    <div className="form-group">
+                      <label className="form-label">Ramal (Upphone)</label>
+                      <input type="text" className="form-control" placeholder="Ex: 5001" value={editForm.extension} onChange={e => setEditForm({...editForm, extension: e.target.value})} />
+                    </div>
+                  )}
                   <div className="form-group">
                     <label className="form-label">Perfil / Função</label>
                     <select className="form-control" value={editForm.role} onChange={e => setEditForm({...editForm, role: e.target.value})}>
