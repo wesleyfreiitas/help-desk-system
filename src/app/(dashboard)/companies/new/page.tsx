@@ -6,7 +6,7 @@ export default async function NewClientPage() {
   const session = await getSession();
   if (!session || session.user.role === 'CLIENT') return null;
 
-  const customFields = await getCustomFields();
+  const customFields = await getCustomFields('CLIENT');
 
   return (
     <div style={{ maxWidth: '700px', margin: '0 auto', padding: '2rem' }}>

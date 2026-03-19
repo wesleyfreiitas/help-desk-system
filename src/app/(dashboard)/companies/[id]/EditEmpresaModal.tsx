@@ -30,8 +30,8 @@ export default function EditClientModal({ client }: { client: any }) {
 
   const loadFields = async () => {
     try {
-      const f = await getCustomFields();
-      setAllFields(f.filter((field: any) => field.target !== 'USER'));
+      const f = await getCustomFields('CLIENT');
+      setAllFields(f);
     } catch (e) {}
   };
 

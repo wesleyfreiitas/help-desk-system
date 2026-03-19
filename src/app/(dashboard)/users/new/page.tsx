@@ -1,6 +1,7 @@
 import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { createUser } from '@/app/actions/admin';
+import { getCustomFields } from '@/app/actions/customFields';
 import Link from 'next/link';
 import ClientSelector from './ClientSelector'; // Criaremos isso caso seja CLIENT
 
@@ -10,7 +11,7 @@ export default async function NewUserPage() {
 
   const [clients, userFields] = await Promise.all([
     prisma.client.findMany({ orderBy: { name: 'asc' } }),
-    prisma.customField.findMany({ where: { target: 'USER' }, orderBy: { createdAt: 'asc' } })
+    getCustomFields('USER')
   ]);
 
   return (

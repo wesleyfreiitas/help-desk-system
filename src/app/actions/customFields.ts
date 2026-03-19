@@ -5,12 +5,13 @@ import { getSession } from '@/lib/auth';
 import { revalidatePath } from 'next/cache';
 import { recordAuditLog } from '@/lib/audit';
 
-export async function getCustomFields() {
+export async function getCustomFields(target?: 'CLIENT' | 'USER') {
   const session = await getSession();
   const isClient = session?.user?.role === 'CLIENT';
   if (!session || isClient) throw new Error('Unauthorized');
 
   return await prisma.customField.findMany({
+    where: target ? { target } : undefined,
     orderBy: { createdAt: 'asc' }
   });
 }

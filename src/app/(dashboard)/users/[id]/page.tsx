@@ -3,6 +3,7 @@ import { getSession } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getUserDetails } from '@/app/actions/admin';
+import { getCustomFields } from '@/app/actions/customFields';
 import { Edit, Trash2, ChevronLeft, ChevronRight, Plus, Phone, Mail, Tag, Clock, AlertCircle, Globe, ExternalLink } from 'lucide-react';
 import EditUserModal from './EditUserModal';
 import WhatsAppButton from './WhatsAppButton';
@@ -27,10 +28,7 @@ export default async function UserDetailsPage({ params }: { params: Promise<{ id
     }
     
     // Custom Fields for Users
-    const userCustomFields = await prisma.customField.findMany({
-        where: { target: 'USER' },
-        orderBy: { createdAt: 'asc' }
-    });
+    const userCustomFields = await getCustomFields('USER');
 
     // Determine the tickets to show based on user role
     // Using cast 'any' temporarily to bypass Prisma relation type mismatch if any
