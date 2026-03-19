@@ -13,6 +13,7 @@ export default function EditUserModal({ user, clients, currentRole, availableCus
     email: user.email,
     role: user.role,
     phone: user.phone || '',
+    extension: user.extension || '',
     clientId: user.clientId || ''
   });
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>(() => {
@@ -37,7 +38,8 @@ export default function EditUserModal({ user, clients, currentRole, availableCus
         name: formData.name.trim(),
         email: formData.email.trim(),
         role: formData.role,
-        phone: formData.phone.trim() || null
+        phone: formData.phone.trim() || null,
+        extension: formData.extension.trim() || null
       };
 
       const isClientRelated = ['ORG_MEMBER', 'ORG_MANAGER', 'CLIENT'].includes(formData.role);
@@ -117,6 +119,19 @@ export default function EditUserModal({ user, clients, currentRole, availableCus
                       onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                     />
                   </div>
+
+                  {['ADMIN', 'ATTENDANT'].includes(formData.role) && (
+                    <div className="form-group">
+                      <label className="form-label">Ramal (Upphone)</label>
+                      <input 
+                        type="text" 
+                        className="form-control"
+                        placeholder="Ex: 5001"
+                        value={formData.extension}
+                        onChange={(e) => setFormData(prev => ({ ...prev, extension: e.target.value }))}
+                      />
+                    </div>
+                  )}
 
                   {currentRole === 'ADMIN' && (
                     <div className="form-group">

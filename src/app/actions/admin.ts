@@ -98,6 +98,7 @@ export async function createUser(formData: FormData) {
   const role = formData.get('role') as string;
   const clientId = formData.get('clientId') as string;
   const phone = formData.get('phone') as string;
+  const extension = formData.get('extension') as string;
 
   // Verificar se o e-mail já existe (incluindo deletados para permitir reativação)
   const existingUser = await prisma.user.findUnique({
@@ -137,13 +138,14 @@ export async function createUser(formData: FormData) {
   let newUser;
   if (existingUser && existingUser.deletedAt) {
     // Reativar usuário existente
-    newUser = await prisma.user.update({
+    newUser = await (prisma.user as any).update({
       where: { id: existingUser.id },
       data: {
         name,
         password: hashedPassword,
         role,
         phone: formatPhone(phone),
+        extension: extension || null,
         clientId: clientId ? clientId : null,
         updatedAt: new Date(),
         deletedAt: null // Reativar!
@@ -163,13 +165,14 @@ export async function createUser(formData: FormData) {
     });
   } else {
     // Criar novo usuário
-    newUser = await prisma.user.create({
+    newUser = await (prisma.user as any).create({
       data: {
         name,
         email,
         password: hashedPassword,
         role,
         phone: formatPhone(phone),
+        extension: extension || null,
         clientId: clientId ? clientId : null
       }
     });
@@ -493,7 +496,7 @@ export async function updateClient(clientId: string, data: { name: string, docum
   revalidatePath('/companies');
 }
 
-export async function updateUser(userId: string, data: { name: string, email: string, role: string, phone?: string | null, clientId?: string | null }) {
+export async function updateUser(userId: string, data: { name: string, email: string, role: string, phone?: string | null, extension?: string | null, clientId?: string | null }) {
   const session = await getSession();
   const isOrgUser = ['CLIENT', 'ORG_MANAGER', 'ORG_MEMBER'].includes(session?.user?.role || '');
   if (!session || isOrgUser) throw new Error('Unauthorized');
@@ -527,13 +530,14 @@ export async function updateUser(userId: string, data: { name: string, email: st
     }
   }
 
-  await prisma.user.update({
+  await (prisma.user as any).update({
     where: { id: userId },
     data: {
       name: data.name,
       email: data.email,
       role: data.role,
       phone: formatPhone(data.phone),
+      extension: data.extension || null,
       clientId: data.clientId || null
     }
   });

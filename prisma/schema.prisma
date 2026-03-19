@@ -17,6 +17,7 @@ model User {
   password  String
   role      String   // ADMIN, ATTENDANT, ORG_MANAGER, ORG_MEMBER, CLIENT
   phone     String?
+  extension String?
   clientId  String?
   client    Client?  @relation(fields: [clientId], references: [id])
   tickets   Ticket[] @relation("TicketAssignee")

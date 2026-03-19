@@ -14,6 +14,7 @@ import {
   Share2, 
   FileJson, 
   Smartphone,
+  PhoneCall,
   CheckSquare
 } from 'lucide-react';
 
@@ -32,6 +33,7 @@ const groups = [
     title: 'Canais e Integrações',
     items: [
       { label: 'WhatsApp', href: '/settings/integrations/whatsapp', icon: Smartphone },
+      { label: 'Central Upphone', href: '/settings/integrations/upphone', icon: PhoneCall },
       { label: 'E-mail (SMTP)', href: '/settings/email', icon: Mail },
     ]
   },

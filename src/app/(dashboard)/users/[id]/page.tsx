@@ -7,6 +7,7 @@ import { getCustomFields } from '@/app/actions/customFields';
 import { Edit, Trash2, ChevronLeft, ChevronRight, Plus, Phone, Mail, Tag, Clock, AlertCircle, Globe, ExternalLink } from 'lucide-react';
 import EditUserModal from './EditUserModal';
 import WhatsAppButton from './WhatsAppButton';
+import ClickToCallButton from '@/components/ClickToCallButton';
 
 export default async function UserDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const session = await getSession();
@@ -191,10 +192,23 @@ export default async function UserDetailsPage({ params }: { params: Promise<{ id
                                             <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2px' }}>Telefone</span>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap' }}>
                                                 <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 600, whiteSpace: 'nowrap' }}>{user.phone}</span>
-                                                <div style={{ flexShrink: 0 }}>
+                                                <div style={{ flexShrink: 0, display: 'flex', gap: '4px' }}>
+                                                    <ClickToCallButton phone={user.phone} />
                                                     <WhatsAppButton phone={user.phone} contactName={user.name} />
                                                 </div>
                                             </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {user.extension && (
+                                    <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+                                        <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
+                                            <Phone size={16} />
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                                            <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2px' }}>Ramal (Upphone)</span>
+                                            <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 600 }}>{user.extension}</span>
                                         </div>
                                     </div>
                                 )}

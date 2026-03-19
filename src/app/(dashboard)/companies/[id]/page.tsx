@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { getClientDetails } from '@/app/actions/admin';
 import { Edit, Trash2, ChevronLeft, ChevronRight, Mail, Clock, Users, Upload, AlertCircle } from 'lucide-react';
 import EditEmpresaModal from './EditEmpresaModal';
+import ClickToCallButton from '@/components/ClickToCallButton';
 
 export default async function ClientDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const session = await getSession();
@@ -156,6 +157,13 @@ export default async function ClientDetailsPage({ params }: { params: Promise<{ 
                                     <span style={{ fontSize: '0.9rem' }}>{client.website || '--'}</span>
                                 </div>
                                 <div>
+                                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>Telefone</span>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{client.phone || '--'}</span>
+                                        {client.phone && <ClickToCallButton phone={client.phone} />}
+                                    </div>
+                                </div>
+                                <div>
                                     <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block' }}>CNPJ / Documento</span>
                                     <span style={{ fontSize: '0.9rem' }}>{client.document || '--'}</span>
                                 </div>
@@ -185,7 +193,10 @@ export default async function ClientDetailsPage({ params }: { params: Promise<{ 
                                             {initials}
                                         </div>
                                         <div className="contact-info-text">
-                                            <span className="contact-name">{u.name}</span>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <span className="contact-name">{u.name}</span>
+                                                {u.phone && <ClickToCallButton phone={u.phone} />}
+                                            </div>
                                             <span className="contact-role">{u.role}</span>
                                         </div>
                                     </Link>

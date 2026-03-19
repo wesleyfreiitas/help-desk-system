@@ -16,7 +16,7 @@ export default function ClientSelector({ clients }: { clients: any[] }) {
            value={role}
            onChange={(e) => setRole(e.target.value)}
            required 
-           style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none' }}
+           style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none', background: 'var(--bg-elevated)', color: 'var(--text-main)' }}
          >
            <option value="ORG_MEMBER">Membro (Cliente)</option>
            <option value="ORG_MANAGER">Gerente (Cliente)</option>
@@ -25,6 +25,19 @@ export default function ClientSelector({ clients }: { clients: any[] }) {
            <option value="CLIENT">Cliente (Legado)</option>
          </select>
       </div>
+
+      {['ADMIN', 'ATTENDANT'].includes(role) && (
+        <div className="form-group" style={{ marginBottom: 0 }}>
+           <label htmlFor="extension">Ramal (Upphone)</label>
+           <input 
+             type="text" 
+             id="extension" 
+             name="extension" 
+             placeholder="Ex: 5001" 
+             style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none', background: 'var(--bg-elevated)', color: 'var(--text-main)' }}
+           />
+        </div>
+      )}
 
       {['ORG_MEMBER', 'ORG_MANAGER', 'CLIENT'].includes(role) && (
         <div className="form-group" style={{ marginBottom: 0 }}>

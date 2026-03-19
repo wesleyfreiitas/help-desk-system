@@ -11,6 +11,7 @@ import TransferDepartmentModal from './TransferDepartmentModal';
 import { getDepartments } from '@/app/actions/departments';
 import { Clock, Reply, StickyNote, Forward, XCircle, Star, MoreHorizontal, User, Mail, Phone, ExternalLink, CheckSquare, Timer, ListTodo, AlertCircle, Paperclip, Globe } from 'lucide-react';
 import WhatsAppButton from '../../users/[id]/WhatsAppButton';
+import ClickToCallButton from '@/components/ClickToCallButton';
 
 export default async function TicketDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
@@ -456,7 +457,8 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
                         <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2px' }}>Telefone</span>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap' }}>
                           <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 600, whiteSpace: 'nowrap' }}>{creatorPhone}</span>
-                          <div style={{ flexShrink: 0 }}>
+                          <div style={{ flexShrink: 0, display: 'flex', gap: '4px' }}>
+                            <ClickToCallButton phone={creatorPhone} />
                             <WhatsAppButton phone={creatorPhone} contactName={creatorName} />
                           </div>
                         </div>
