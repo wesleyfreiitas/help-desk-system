@@ -5,8 +5,10 @@ import { createClient } from '@/app/actions/admin';
 import Link from 'next/link';
 import MultiSelectDropdown from '@/app/components/MultiSelectDropdown';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/Toast';
 
 export default function NewClientForm({ customFields }: { customFields: any[] }) {
+  const { success, error } = useToast();
   const router = useRouter();
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [customFieldValues, setCustomFieldValues] = useState<Record<string, string>>({});
@@ -26,10 +28,11 @@ export default function NewClientForm({ customFields }: { customFields: any[] })
       });
 
       await createClient(data);
+      success('Empresa criada com sucesso!');
       router.push('/companies');
       router.refresh();
-    } catch (error: any) {
-      alert('Erro ao salvar: ' + (error.message || 'Erro desconhecido'));
+    } catch (err: any) {
+      error('Erro ao salvar: ' + (err.message || 'Erro desconhecido'));
     } finally {
       setIsSaving(false);
     }

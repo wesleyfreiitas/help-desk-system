@@ -4,8 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Trash2, Search, Edit, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/Toast';
 
 export default function CategoryListClient({ initialCategories }: { initialCategories: any[] }) {
+  const { success, error } = useToast();
   const [search, setSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
@@ -44,8 +46,9 @@ export default function CategoryListClient({ initialCategories }: { initialCateg
       const ids = Array.from(selectedIds);
       await bulkDeleteCategories(ids);
       setSelectedIds(new Set());
-    } catch (error: any) {
-      alert(error.message || 'Erro ao excluir categorias');
+      success('Categoria(s) excluída(s) com sucesso!');
+    } catch (err: any) {
+      error(err.message || 'Erro ao excluir categorias');
     } finally {
       setIsDeleting(false);
     }
@@ -60,9 +63,10 @@ export default function CategoryListClient({ initialCategories }: { initialCateg
       const { updateCategory } = await import('@/app/actions/admin');
       await updateCategory(editingCategory.id, editName.trim());
       setEditingCategory(null);
+      success('Categoria atualizada com sucesso!');
       router.refresh();
-    } catch (error: any) {
-      alert(error.message || 'Erro ao atualizar categoria');
+    } catch (err: any) {
+      error(err.message || 'Erro ao atualizar categoria');
     } finally {
       setIsSaving(false);
     }

@@ -3,8 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Trash2, Search, Edit } from 'lucide-react';
+import { useToast } from '@/components/Toast';
 
 export default function ClientListClient({ initialClients }: { initialClients: any[] }) {
+  const { success, error } = useToast();
   const [search, setSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
@@ -41,8 +43,9 @@ export default function ClientListClient({ initialClients }: { initialClients: a
       const ids = Array.from(selectedIds);
       await bulkDeleteClients(ids);
       setSelectedIds(new Set());
-    } catch (error: any) {
-      alert(error.message || 'Erro ao excluir empresas');
+      success('Empresa(s) excluída(s) com sucesso!');
+    } catch (err: any) {
+      error(err.message || 'Erro ao excluir empresas');
     } finally {
       setIsDeleting(false);
     }

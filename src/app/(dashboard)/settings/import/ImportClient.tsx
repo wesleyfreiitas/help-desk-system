@@ -2,9 +2,11 @@
 
 import React, { useState, useRef } from 'react';
 import { UploadCloud, FileText, CheckCircle, AlertTriangle, X, Play } from 'lucide-react';
+import { useToast } from '@/components/Toast';
 import Papa from 'papaparse';
 
 export default function ImportClient({ organizationId }: { organizationId: string | null }) {
+  const { success, error } = useToast();
   const [file, setFile] = useState<File | null>(null);
   const [parsedData, setParsedData] = useState<any[]>([]);
   const [columns, setColumns] = useState<string[]>([]);
@@ -68,7 +70,7 @@ export default function ImportClient({ organizationId }: { organizationId: strin
 
   const processFile = (file: File) => {
     if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
-      alert('Por favor, selecione um arquivo CSV válido.');
+      error('Por favor, selecione um arquivo CSV válido.');
       return;
     }
     
@@ -108,7 +110,7 @@ export default function ImportClient({ organizationId }: { organizationId: strin
       },
       error: (err) => {
         console.error('Error parsing CSV:', err);
-        alert('Erro ao processar o arquivo CSV.');
+        error('Erro ao processar o arquivo CSV.');
       }
     });
   };
@@ -121,7 +123,7 @@ export default function ImportClient({ organizationId }: { organizationId: strin
     // Validate required fields
     const missing = systemFields.filter(f => f.required && !mapping[f.key]);
     if (missing.length > 0) {
-      alert(`Por favor, mapeie os campos obrigatórios: ${missing.map(m => m.label).join(', ')}`);
+      error(`Por favor, mapeie os campos obrigatórios: ${missing.map(m => m.label).join(', ')}`);
       return;
     }
 

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Phone, Check, RefreshCw, AlertCircle } from 'lucide-react';
 import { sendWhatsAppMessage } from '@/app/actions/settings';
+import { useToast } from '@/components/Toast';
 
 const WhatsAppIcon = ({ size = 16 }: { size?: number }) => (
   <svg 
@@ -40,10 +41,11 @@ export default function WhatsAppButton({
 }) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const { error } = useToast();
 
   const handleClick = async () => {
     if (!phone) {
-      alert('Este contato não possui telefone cadastrado.');
+      error('Este contato não possui telefone cadastrado.');
       return;
     }
 

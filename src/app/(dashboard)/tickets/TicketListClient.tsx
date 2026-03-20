@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useTransition } from 'react';
 import Link from 'next/link';
 import { UserPlus, CheckCircle, RefreshCcw, Merge, ChevronDown, Check, MessageSquare } from 'lucide-react';
 import { updateTicketField, bulkUpdateStatus, bulkAssign, bulkDelete, bulkMerge } from '../../actions/ticket';
+import { useToast } from '@/components/Toast';
 
 interface Props {
   tickets: any[];
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export default function TicketListClient({ tickets, userId, users, options }: Props) {
+  const { success, error } = useToast();
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null); // 'TICKET_ID-field' or 'bulk-assign'
   const [showBulkUpdateModal, setShowBulkUpdateModal] = useState(false);
@@ -55,9 +57,10 @@ export default function TicketListClient({ tickets, userId, users, options }: Pr
       try {
         const result = await action();
         setSelectedIds(new Set());
+        success(successMsg);
         if (onComplete) onComplete(result);
       } catch (err: any) {
-        alert(err.message || 'Erro ao realizar ação em massa');
+        error(err.message || 'Erro ao realizar ação em massa');
       }
     });
   };
@@ -87,9 +90,10 @@ export default function TicketListClient({ tickets, userId, users, options }: Pr
     startTransition(async () => {
       try {
         await updateTicketField(ticketId, field, value);
+        success('Chamado atualizado com sucesso!');
       } catch (err) {
         console.error('Failed to update ticket field:', err);
-        alert('Erro ao atualizar o chamado.');
+        error('Erro ao atualizar o chamado.');
       }
     });
   };
@@ -167,7 +171,7 @@ export default function TicketListClient({ tickets, userId, users, options }: Pr
                 disabled={isPending}
                 onClick={() => {
                   if (selectedIdsArray.length < 2) {
-                    alert('Selecione ao menos 2 chamados para mesclar');
+                    error('Selecione ao menos 2 chamados para mesclar');
                     return;
                   }
                   
@@ -175,7 +179,7 @@ export default function TicketListClient({ tickets, userId, users, options }: Pr
                   const selectedTickets = tickets.filter(t => selectedIdsArray.includes(t.id));
                   const hasClosed = selectedTickets.some(t => ['FECHADO', 'RESOLVIDO', 'CANCELADO'].includes(t.status));
                   if (hasClosed) {
-                    alert('Não é possível mesclar chamados que já foram encerrados (Fechado/Resolvido/Cancelado).');
+                    error('Não é possível mesclar chamados que já foram encerrados (Fechado/Resolvido/Cancelado).');
                     return;
                   }
 

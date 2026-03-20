@@ -3,8 +3,10 @@
 import { useState } from 'react';
 import { SSOConfig, updateSSOConfig } from '@/app/actions/sso';
 import { Save, Globe, Key, AlertCircle } from 'lucide-react';
+import { useToast } from '@/components/Toast';
 
 export default function SSOSettingsClient({ initialConfig }: { initialConfig: SSOConfig }) {
+  const { success, error } = useToast();
   const [config, setConfig] = useState<SSOConfig>(initialConfig);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -12,9 +14,9 @@ export default function SSOSettingsClient({ initialConfig }: { initialConfig: SS
     setIsSaving(true);
     try {
       await updateSSOConfig(config);
-      alert('Configurações de SSO salvas com sucesso!');
-    } catch (error) {
-      alert('Erro ao salvar configurações de SSO');
+      success('Configurações de SSO salvas com sucesso!');
+    } catch (err) {
+      error('Erro ao salvar configurações de SSO');
     } finally {
       setIsSaving(false);
     }

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Plus, Edit2, Trash2, Save, X, MessageSquare } from 'lucide-react';
 import { createCannedResponse, updateCannedResponse, deleteCannedResponse } from '@/app/actions/canned-responses';
+import { useToast } from '@/components/Toast';
 
 interface CannedResponse {
   id: string;
@@ -15,6 +16,7 @@ interface CannedResponsesManagerProps {
 }
 
 export default function CannedResponsesManager({ initialResponses }: CannedResponsesManagerProps) {
+  const { success, error } = useToast();
   const [responses, setResponses] = useState<CannedResponse[]>(initialResponses);
   const [isEditing, setIsEditing] = useState<string | null>(null); // 'new' or id
   const [formData, setFormData] = useState({ title: '', content: '' });
@@ -42,9 +44,10 @@ export default function CannedResponsesManager({ initialResponses }: CannedRespo
         setResponses(responses.map(r => r.id === isEditing ? updated : r));
       }
       handleCancel();
-    } catch (error) {
-      console.error(error);
-      alert('Erro ao salvar resposta rápida.');
+      success('Resposta rápida salva com sucesso!');
+    } catch (err) {
+      console.error(err);
+      error('Erro ao salvar resposta rápida.');
     } finally {
       setIsSaving(false);
     }
@@ -55,9 +58,10 @@ export default function CannedResponsesManager({ initialResponses }: CannedRespo
     try {
       await deleteCannedResponse(id);
       setResponses(responses.filter(r => r.id !== id));
-    } catch (error) {
-      console.error(error);
-      alert('Erro ao excluir resposta rápida.');
+      success('Resposta rápida excluída com sucesso!');
+    } catch (err) {
+      console.error(err);
+      error('Erro ao excluir resposta rápida.');
     }
   };
 

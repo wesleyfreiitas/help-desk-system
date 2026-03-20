@@ -4,6 +4,7 @@ import React, { useState, useRef } from 'react';
 import { Reply, Paperclip, X } from 'lucide-react';
 import { addInteraction } from '@/app/actions/ticket';
 import RichTextEditor from '@/components/RichTextEditor';
+import { useToast } from '@/components/Toast';
 
 interface Props {
   ticketId: string;
@@ -11,6 +12,7 @@ interface Props {
 }
 
 export default function TicketEmailComposer({ ticketId, userRole }: Props) {
+  const { error } = useToast();
   const [files, setFiles] = useState<File[]>([]);
   const formRef = useRef<HTMLFormElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -35,7 +37,7 @@ export default function TicketEmailComposer({ ticketId, userRole }: Props) {
           // Mas como vamos adicionar o input dentro do form, eles irão.
           const res = await addInteraction(ticketId, formData);
           if (res?.error) {
-            alert(res.error);
+            error(res.error);
           } else {
             formRef.current?.reset();
             setFiles([]);

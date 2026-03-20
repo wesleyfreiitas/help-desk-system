@@ -3,8 +3,10 @@
 import { useState } from 'react';
 import { Plus, Trash2, Settings2 } from 'lucide-react';
 import { createCustomField, deleteCustomField, updateCustomField } from '@/app/actions/customFields';
+import { useToast } from '@/components/Toast';
 
 export default function CustomFieldsClient({ initialFields }: { initialFields: any[] }) {
+  const { success, error } = useToast();
   const [fields, setFields] = useState(initialFields);
   const [isAdding, setIsAdding] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -26,8 +28,9 @@ export default function CustomFieldsClient({ initialFields }: { initialFields: a
         setFields([...fields, field]);
       }
       handleClose();
+      success('Campo processado com sucesso!');
     } catch (err: any) {
-      alert(err.message || 'Erro ao processar campo');
+      error(err.message || 'Erro ao processar campo');
     } finally {
       setIsSubmitting(false);
     }
@@ -53,8 +56,9 @@ export default function CustomFieldsClient({ initialFields }: { initialFields: a
     try {
       await deleteCustomField(id);
       setFields(fields.filter(f => f.id !== id));
+      success('Campo excluído com sucesso!');
     } catch (err: any) {
-      alert(err.message || 'Erro ao excluir');
+      error(err.message || 'Erro ao excluir');
     }
   };
 

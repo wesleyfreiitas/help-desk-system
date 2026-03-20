@@ -4,8 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Trash2, Search, Edit } from 'lucide-react';
 import Combobox from '@/components/Combobox';
+import { useToast } from '@/components/Toast';
 
 export default function UserListClient({ initialUsers, currentUserId, userRole, clients }: { initialUsers: any[], currentUserId: string, userRole: string, clients: any[] }) {
+  const { success, error } = useToast();
   const [search, setSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
@@ -39,7 +41,7 @@ export default function UserListClient({ initialUsers, currentUserId, userRole, 
     if (!confirm(`Tem certeza que deseja excluir ${selectedIds.size} usuário(s)?`)) return;
 
     if (selectedIds.has(currentUserId)) {
-      alert('Você não pode excluir seu próprio usuário.');
+      error('Você não pode excluir seu próprio usuário.');
       return;
     }
 
@@ -49,8 +51,9 @@ export default function UserListClient({ initialUsers, currentUserId, userRole, 
       const ids = Array.from(selectedIds);
       await bulkDeleteUsers(ids);
       setSelectedIds(new Set());
-    } catch (error: any) {
-      alert(error.message || 'Erro ao excluir usuários');
+      success('Usuário(s) excluído(s) com sucesso!');
+    } catch (err: any) {
+      error(err.message || 'Erro ao excluir usuários');
     } finally {
       setIsDeleting(false);
     }
@@ -208,7 +211,7 @@ export default function UserListClient({ initialUsers, currentUserId, userRole, 
                 setEditingUser(null);
                 window.location.reload();
               } catch (err: any) {
-                alert(err.message || 'Erro ao atualizar');
+                error(err.message || 'Erro ao atualizar');
               } finally {
                 setIsSubmitting(false);
               }

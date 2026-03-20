@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { upsertTicketOption, deleteTicketOption, updateTicketOptionsOrder } from '@/app/actions/settings';
 import { Trash2, Plus, GripVertical, Pencil, X } from 'lucide-react';
+import { useToast } from '@/components/Toast';
 
 interface Option {
   id: string;
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export default function OptionsClient({ initialOptions }: Props) {
+  const { success, error } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [options, setOptions] = useState(initialOptions);
@@ -109,9 +111,9 @@ export default function OptionsClient({ initialOptions }: Props) {
       const currentFiltered = options.filter(o => o.type === activeTab);
       await updateTicketOptionsOrder(currentFiltered.map(o => o.id));
       router.refresh();
-    } catch (error) {
-      console.error('Erro ao salvar ordem:', error);
-      alert('Erro ao salvar nova ordem.');
+    } catch (err) {
+      console.error('Erro ao salvar ordem:', err);
+      error('Erro ao salvar nova ordem.');
     } finally {
       setIsUpdatingOrder(false);
     }

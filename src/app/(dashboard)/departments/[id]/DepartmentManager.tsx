@@ -4,8 +4,10 @@ import { useState, useTransition } from 'react';
 import { addDepartmentMember, removeDepartmentMember, updateDepartment, deleteDepartment } from '@/app/actions/departments';
 import { useRouter } from 'next/navigation';
 import { UserPlus, Trash2, Crown, Settings2 } from 'lucide-react';
+import { useToast } from '@/components/Toast';
 
 export default function DepartmentManager({ department, nonMembers }: { department: any; nonMembers: any[] }) {
+  const { success, error } = useToast();
   const [selectedUser, setSelectedUser] = useState('');
   const [isLeader, setIsLeader] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -43,9 +45,10 @@ export default function DepartmentManager({ department, nonMembers }: { departme
     startTransition(async () => {
       try {
         await deleteDepartment(department.id);
+        success('Departamento excluído com sucesso!');
         router.push('/departments');
       } catch (e: any) {
-        alert(e.message);
+        error(e.message);
       }
     });
   };

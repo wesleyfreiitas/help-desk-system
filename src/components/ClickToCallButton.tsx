@@ -3,8 +3,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { PhoneCall, Loader2, PhoneForwarded, PhoneOff } from 'lucide-react';
 import { triggerClickToCall, getCallStatus, notifyCallEndWebhook } from '@/app/actions/upphone';
+import { useToast } from '@/components/Toast';
 
 export default function ClickToCallButton({ phone, ticketId }: { phone: string, ticketId?: string }) {
+  const { error } = useToast();
   const [status, setStatus] = useState<'idle' | 'calling' | 'monitoring' | 'finished' | 'error'>('idle');
   const [currentChannelId, setCurrentChannelId] = useState<string | null>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -58,8 +60,8 @@ export default function ClickToCallButton({ phone, ticketId }: { phone: string, 
       }
 
       startMonitoring(channelid);
-    } catch (error: any) {
-      alert(error.message || 'Falha ao iniciar chamada');
+    } catch (err: any) {
+      error(err.message || 'Falha ao iniciar chamada');
       setStatus('idle');
     }
   };

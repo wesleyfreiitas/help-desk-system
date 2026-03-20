@@ -3,10 +3,12 @@
 import { useState } from 'react';
 import { X, Edit } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/Toast';
 
 import MultiSelectDropdown from '@/app/components/MultiSelectDropdown';
 
 export default function EditUserModal({ user, clients, currentRole, availableCustomFields = [] }: { user: any, clients: any[], currentRole: string, availableCustomFields?: any[] }) {
+  const { success, error } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: user.name,
@@ -58,9 +60,10 @@ export default function EditUserModal({ user, clients, currentRole, availableCus
       }
 
       setIsOpen(false);
+      success('Usuário atualizado com sucesso!');
       router.refresh();
-    } catch (error: any) {
-      alert(error.message || 'Erro ao atualizar usuário');
+    } catch (err: any) {
+      error(err.message || 'Erro ao atualizar usuário');
     } finally {
       setIsSaving(false);
     }

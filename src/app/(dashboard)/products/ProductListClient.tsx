@@ -4,8 +4,10 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Trash2, Search, Edit, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/Toast';
 
 export default function ProductListClient({ initialProducts }: { initialProducts: any[] }) {
+  const { success, error } = useToast();
   const [search, setSearch] = useState('');
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
@@ -44,8 +46,9 @@ export default function ProductListClient({ initialProducts }: { initialProducts
       const ids = Array.from(selectedIds);
       await bulkDeleteProducts(ids);
       setSelectedIds(new Set());
-    } catch (error: any) {
-      alert(error.message || 'Erro ao excluir produtos');
+      success('Produto(s) excluído(s) com sucesso!');
+    } catch (err: any) {
+      error(err.message || 'Erro ao excluir produtos');
     } finally {
       setIsDeleting(false);
     }
@@ -62,9 +65,10 @@ export default function ProductListClient({ initialProducts }: { initialProducts
         name: editForm.name.trim()
       });
       setEditingProduct(null);
+      success('Produto atualizado com sucesso!');
       router.refresh();
-    } catch (error: any) {
-      alert(error.message || 'Erro ao atualizar produto');
+    } catch (err: any) {
+      error(err.message || 'Erro ao atualizar produto');
     } finally {
       setIsSaving(false);
     }

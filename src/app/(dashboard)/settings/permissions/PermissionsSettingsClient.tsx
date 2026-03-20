@@ -3,8 +3,10 @@
 import { useState } from 'react';
 import { RolePermissions, updatePermissions } from '@/app/actions/permissions';
 import { Save, Info, ShieldCheck } from 'lucide-react';
+import { useToast } from '@/components/Toast';
 
 export default function PermissionsSettingsClient({ initialPermissions }: { initialPermissions: RolePermissions }) {
+  const { success, error } = useToast();
   const [permissions, setPermissions] = useState<RolePermissions>(initialPermissions);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -52,9 +54,9 @@ export default function PermissionsSettingsClient({ initialPermissions }: { init
     setIsSaving(true);
     try {
       await updatePermissions(permissions);
-      alert('Permissões salvas com sucesso!');
-    } catch (error) {
-      alert('Erro ao salvar permissões');
+      success('Permissões salvas com sucesso!');
+    } catch (err) {
+      error('Erro ao salvar permissões');
     } finally {
       setIsSaving(false);
     }

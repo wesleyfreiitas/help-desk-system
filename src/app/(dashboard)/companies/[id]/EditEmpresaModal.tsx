@@ -6,8 +6,10 @@ import { useRouter } from 'next/navigation';
 import { getCustomFields } from '@/app/actions/customFields';
 import { updateCustomFieldValues, updateClient } from '@/app/actions/admin';
 import MultiSelectDropdown from '@/app/components/MultiSelectDropdown';
+import { useToast } from '@/components/Toast';
 
 export default function EditClientModal({ client }: { client: any }) {
+  const { success, error: toastError } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: client.name,
@@ -62,11 +64,11 @@ export default function EditClientModal({ client }: { client: any }) {
       }
 
       setIsOpen(false);
+      success('Empresa atualizada com sucesso!');
       router.refresh();
-      // Optional: alert('Empresa atualizada com sucesso!'); 
     } catch (error: any) {
       console.error('Erro ao atualizar:', error);
-      alert('Erro ao salvar: ' + (error.message || 'Verifique sua conexão ou permissões.'));
+      toastError('Erro ao salvar: ' + (error.message || 'Verifique sua conexão ou permissões.'));
     } finally {
       setIsSaving(false);
     }
