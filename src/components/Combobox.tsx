@@ -83,11 +83,12 @@ export default function Combobox({
   }, [items, searchTerm]);
 
   useEffect(() => {
-    const parentField = containerRef.current?.closest('.nt-field');
+    // Universal "lift": finds the nearest form field container to elevate it
+    const parentField = containerRef.current?.closest('.nt-field, .form-group, .nt-contact-row');
     if (isOpen && parentField) {
-      parentField.classList.add('is-open');
+      parentField.classList.add('is-combobox-open');
     } else if (parentField) {
-      parentField.classList.remove('is-open');
+      parentField.classList.remove('is-combobox-open');
     }
 
     const handleClickOutside = (event: MouseEvent) => {
@@ -98,7 +99,7 @@ export default function Combobox({
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      if (parentField) parentField.classList.remove('is-open'); // Cleanup
+      if (parentField) parentField.classList.remove('is-combobox-open'); // Cleanup
     };
   }, [isOpen]);
 
@@ -158,7 +159,7 @@ export default function Combobox({
       style={{ 
         position: 'relative', 
         width: '100%', 
-        zIndex: isOpen ? 1000 : 1 
+        zIndex: isOpen ? 99999 : 1 
       }}
     >
       {/* Trigger */}
@@ -244,11 +245,12 @@ export default function Combobox({
           backdropFilter: 'blur(12px)',
           border: '1px solid var(--border-color)',
           borderRadius: 'var(--radius-lg)',
-          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+          boxShadow: '0 12px 40px -8px rgba(0, 0, 0, 0.2), 0 8px 16px -8px rgba(0, 0, 0, 0.1)',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
           maxHeight: '420px',
+          zIndex: 999999,
           animation: 'comboboxIn 0.2s ease-out forwards',
         }}>
           {/* Search Box */}

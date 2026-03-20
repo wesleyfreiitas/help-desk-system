@@ -2257,9 +2257,15 @@ input[type="checkbox"]:focus, input[type="radio"]:focus {
   background: var(--primary-light);
 }
 
-.nt-field.is-open {
-  z-index: 1000 !important;
-  position: relative;
+/* Elevates parent container when a combobox is open inside it */
+.is-combobox-open {
+  z-index: 9999 !important;
+  position: relative !important;
+}
+
+/* Ensure parents don't clip dropdowns */
+.modal-body, .new-ticket-body {
+  overflow: visible !important;
 }
 
 .nt-field:last-child {

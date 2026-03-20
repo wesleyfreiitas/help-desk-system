@@ -22,14 +22,24 @@ export default function MultiSelectDropdown({
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const parentField = containerRef.current?.closest('.nt-field, .form-group');
+    if (isOpen && parentField) {
+      parentField.classList.add('is-combobox-open');
+    } else if (parentField) {
+      parentField.classList.remove('is-combobox-open');
+    }
+
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      if (parentField) parentField.classList.remove('is-combobox-open');
+    };
+  }, [isOpen]);
 
   const toggleOption = (option: string) => {
     const newValues = selectedValues.includes(option)
