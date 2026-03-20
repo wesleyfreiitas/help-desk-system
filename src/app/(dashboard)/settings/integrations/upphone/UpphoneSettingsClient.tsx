@@ -88,6 +88,22 @@ export default function UpphoneSettingsClient({ initialConfig }: { initialConfig
                 required
               />
             </div>
+
+            <div className="form-group-v2" style={{ gridColumn: '1 / span 2', marginTop: '0.5rem' }}>
+              <div className="toggle-field">
+                <label className="switch" style={{ width: '38px', height: '20px' }}>
+                  <input 
+                    type="checkbox" 
+                    checked={config.ignoreSsl || false} 
+                    onChange={e => setConfig({ ...config, ignoreSsl: e.target.checked })}
+                  />
+                  <span className="slider round"></span>
+                </label>
+                <span className="toggle-label" style={{ fontSize: '0.85rem' }}>
+                   Ignorar erros de SSL (Não recomendado - use apenas se o servidor tiver certificados inválidos)
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 

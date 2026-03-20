@@ -4,14 +4,19 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { getSession } from '@/lib/auth';
 
-// Solução para erro UNABLE_TO_VERIFY_LEAF_SIGNATURE na API Upphone
-// Isso permite chamadas para servidores com certificados SSL incompletos ou não confiáveis
-if (process.env.NODE_ENV !== 'production') {
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-} else {
-  // Em produção, se o erro persistir, o usuário pode forçar via variável de ambiente
-  // mas aqui habilitamos como fallback para garantir o funcionamento da telefonia
-  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+// A verificação de SSL será controlada pela configuração do usuário
+// Helper para chamadas com bypass opcional de SSL
+async function upphoneFetch(url: string, options: any = {}, ignoreSsl = false) {
+  if (ignoreSsl) {
+    // Nota: NODE_TLS_REJECT_UNAUTHORIZED afeta todo o processo Node.
+    // Como o usuário solicitou especificamente esse controle, ativamos se necessário.
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+  } else {
+    // Reset para o padrão (pode haver conflito se outras ações rodarem em paralelo,
+    // mas é a limitação do Node com fetch global sem bibliotecas externas)
+    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '1';
+  }
+  return fetch(url, options);
 }
 
 export async function getUpphoneConfig() {
@@ -83,9 +88,10 @@ export async function triggerClickToCall(destinationPhone: string) {
 
   // Upphone API call
   const url = `${baseUrl}?src=${src}&dst=${dst}&token=${token}`;
+  const ignoreSsl = config.ignoreSsl || false;
 
   try {
-    const response = await fetch(url);
+    const response = await upphoneFetch(url, {}, ignoreSsl);
     if (!response.ok) {
       throw new Error(`Erro na API Upphone: ${response.statusText}`);
     }
@@ -115,9 +121,10 @@ export async function getCallStatus(channelid: string) {
   const urlObj = new URL(baseUrl);
   const pollingBase = `${urlObj.origin}/confast/api/v1/channel/status`;
   const pollingUrl = `${pollingBase}?uniqueid=${channelid}&token=${token}`;
+  const ignoreSsl = config.ignoreSsl || false;
 
   try {
-    const response = await fetch(pollingUrl);
+    const response = await upphoneFetch(pollingUrl, {}, ignoreSsl);
     if (response.status === 204) return { status: 'finished', end: true };
     if (!response.ok) throw new Error('Erro ao consultar status');
     
@@ -140,14 +147,19 @@ export async function notifyCallEndWebhook(channelid: string, ticketId: string) 
   const webhookUrl = 'https://uppon-dev.absolutatecnologia.com.br/webhook/e5601aa3-d692-494d-a53f-f2fda7ca60dd';
   
   try {
-    const response = await fetch(webhookUrl, {
+    // Buscamos a config para saber se ignoramos SSL
+    const setting = await prisma.systemSetting.findUnique({ where: { key: 'upphone_config' } });
+    const config = setting ? JSON.parse(setting.value) : {};
+    const ignoreSsl = config.ignoreSsl || false;
+
+    const response = await upphoneFetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         "id da ligação": channelid,
         "id do ticket": ticketId || ""
       })
-    });
+    }, ignoreSsl);
     
     return { success: response.ok };
   } catch (error) {
