@@ -315,7 +315,7 @@ export async function updateTicketField(ticketId: string, field: string, value: 
   }
 
   // Allowed fields check
-  const allowedFields = ['productId', 'categoryId', 'assigneeId', 'status', 'priority', 'type', 'tags', 'source'];
+  const allowedFields = ['productId', 'categoryId', 'assigneeId', 'status', 'priority', 'type', 'tags', 'source', 'departmentId'];
   if (!allowedFields.includes(field)) {
     throw new Error('Invalid field update');
   }

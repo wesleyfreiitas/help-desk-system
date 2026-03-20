@@ -7,7 +7,6 @@ import TicketPropertySelect from './TicketPropertySelect';
 import TicketTagsInput from './TicketTagsInput';
 import TicketEmailComposer from './TicketEmailComposer';
 import TimeTrackerDisplay from './TimeTrackerDisplay';
-import TransferDepartmentModal from './TransferDepartmentModal';
 import { getDepartments } from '@/app/actions/departments';
 import { Clock, Reply, StickyNote, Forward, XCircle, Star, MoreHorizontal, User, Mail, Phone, ExternalLink, CheckSquare, Timer, ListTodo, AlertCircle, Paperclip, Globe } from 'lucide-react';
 import WhatsAppButton from '../../users/[id]/WhatsAppButton';
@@ -320,14 +319,15 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
           </div>
 
           <div className="property-group">
-            <label>Departamento</label>
+            <label>Equipe</label>
             {user.role !== 'CLIENT' ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {ticket.department && (
-                  <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: ticket.department.color || '#6366f1', display: 'inline-block', flexShrink: 0 }} />
-                )}
-                <span style={{ fontWeight: 500, fontSize: '0.85rem' }}>{ticket.department?.name || 'Sem departamento'}</span>
-              </div>
+              <TicketPropertySelect
+                ticketId={ticket.id}
+                field="departmentId"
+                currentValue={ticket.departmentId}
+                options={departments}
+                placeholder="Sem departamento"
+              />
             ) : (
               <span style={{ fontWeight: 500, fontSize: '0.85rem' }}>{ticket.department?.name || 'N/A'}</span>
             )}
@@ -340,11 +340,9 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
 
           {user.role !== 'CLIENT' && (
             <div style={{ paddingTop: '1rem', borderTop: '1px solid var(--border-color)' }}>
-              <TransferDepartmentModal
-                ticketId={ticket.id}
-                currentDepartmentId={ticket.departmentId}
-                departments={departments}
-              />
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+                Alterações são salvas automaticamente
+              </p>
             </div>
           )}
         </div>
