@@ -83,14 +83,24 @@ export default function Combobox({
   }, [items, searchTerm]);
 
   useEffect(() => {
+    const parentField = containerRef.current?.closest('.nt-field');
+    if (isOpen && parentField) {
+      parentField.classList.add('is-open');
+    } else if (parentField) {
+      parentField.classList.remove('is-open');
+    }
+
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      if (parentField) parentField.classList.remove('is-open'); // Cleanup
+    };
+  }, [isOpen]);
 
   const handleSelect = (item: ComboboxItem | null) => {
     const newVal = item ? item.id : '';

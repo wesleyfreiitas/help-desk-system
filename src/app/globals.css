@@ -2255,7 +2255,11 @@ input[type="checkbox"]:focus, input[type="radio"]:focus {
 
 .nt-field:hover {
   background: var(--primary-light);
-  opacity: 0.9;
+}
+
+.nt-field.is-open {
+  z-index: 1000 !important;
+  position: relative;
 }
 
 .nt-field:last-child {
