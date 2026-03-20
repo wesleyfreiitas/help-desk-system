@@ -1,9 +1,8 @@
-import fs from 'fs';
-import path from 'path';
+import { prisma } from './prisma';
 
 /**
- * Registra logs de chamadas para APIs externas.
- * Salva no arquivo logs/external_api.log na raiz do projeto.
+ * Registra logs de chamadas para APIs externas no Banco de Dados.
+ * Substitui o log em arquivo para compatibilidade com ambientes serverless/restritos.
  */
 export async function logExternalApi(
   service: string,
@@ -14,17 +13,7 @@ export async function logExternalApi(
   response: any
 ) {
   try {
-    const logDir = path.join(process.cwd(), 'logs');
-    
-    // Garantir que a pasta logs existe
-    if (!fs.existsSync(logDir)) {
-      fs.mkdirSync(logDir, { recursive: true });
-    }
-
-    const logFile = path.join(logDir, 'external_api.log');
-    const timestamp = new Date().toLocaleString('pt-BR');
-    
-    // Mascarar tokens sensíveis no log se necessário
+    // Mascarar tokens sensíveis no log
     let safeUrl = url;
     if (url.includes('token=')) {
       safeUrl = url.replace(/token=[^&]+/, 'token=***');
@@ -36,15 +25,19 @@ export async function logExternalApi(
       if (safePayload.token) safePayload.token = '***';
     }
 
-    const logEntry = `[${timestamp}] ${service.toUpperCase()} | ${method} | ${safeUrl}
-REQUEST: ${JSON.stringify(safePayload)}
-STATUS: ${status}
-RESPONSE: ${JSON.stringify(response)}
---------------------------------------------------------------------------------\n\n`;
-
-    fs.appendFileSync(logFile, logEntry);
+    // Tenta salvar no banco de dados
+    await prisma.externalApiLog.create({
+      data: {
+        service: service.toUpperCase(),
+        method,
+        url: safeUrl,
+        payload: payload ? (typeof safePayload === 'string' ? safePayload : JSON.stringify(safePayload)) : null,
+        status,
+        response: response ? (typeof response === 'string' ? response : JSON.stringify(response)) : null,
+      }
+    });
   } catch (err) {
     // Falha silenciosa no log para não quebrar a aplicação principal
-    console.error('Failed to write to external_api.log:', err);
+    console.error('Failed to save external API log to database:', err);
   }
 }

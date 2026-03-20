@@ -31,7 +31,7 @@ async function upphoneFetch(service: string, url: string, options: any = {}, ign
       const req = https.request(url, reqOptions, async (res) => {
         let body = '';
         res.on('data', chunk => body += chunk);
-        res.on('end', () => {
+        res.on('end', async () => {
           const responseProxy = {
             ok: res.statusCode! >= 200 && res.statusCode! < 300,
             status: res.statusCode!,
@@ -41,13 +41,13 @@ async function upphoneFetch(service: string, url: string, options: any = {}, ign
             clone: () => responseProxy // Simplificado para o logger
           } as any;
 
-          logExternalApi(service, url, options.method || 'GET', options.body || {}, res.statusCode!, body);
+          await logExternalApi(service, url, options.method || 'GET', options.body || {}, res.statusCode!, body);
           resolve(responseProxy);
         });
       });
 
-      req.on('error', (error) => {
-        logExternalApi(service, url, options.method || 'GET', options.body || {}, 0, { error: error.message });
+      req.on('error', async (error) => {
+        await logExternalApi(service, url, options.method || 'GET', options.body || {}, 0, { error: error.message });
         reject(error);
       });
 
@@ -72,10 +72,10 @@ async function upphoneFetch(service: string, url: string, options: any = {}, ign
       data = '(falha ao ler corpo)';
     }
 
-    logExternalApi(service, url, options.method || 'GET', options.body || {}, response.status, data);
+    await logExternalApi(service, url, options.method || 'GET', options.body || {}, response.status, data);
     return response;
   } catch (error: any) {
-    logExternalApi(service, url, options.method || 'GET', options.body || {}, 0, { error: error.message });
+    await logExternalApi(service, url, options.method || 'GET', options.body || {}, 0, { error: error.message });
     throw error;
   }
 }
