@@ -3,20 +3,81 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { getSession } from '@/lib/auth';
+import { logExternalApi } from '@/lib/apiLogger';
+import https from 'https';
 
 // A verificação de SSL será controlada pela configuração do usuário
-// Helper para chamadas com bypass opcional de SSL
-async function upphoneFetch(url: string, options: any = {}, ignoreSsl = false) {
-  if (ignoreSsl) {
-    // Nota: NODE_TLS_REJECT_UNAUTHORIZED afeta todo o processo Node.
-    // Como o usuário solicitou especificamente esse controle, ativamos se necessário.
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-  } else {
-    // Reset para o padrão (pode haver conflito se outras ações rodarem em paralelo,
-    // mas é a limitação do Node com fetch global sem bibliotecas externas)
-    process.env.NODE_TLS_REJECT_UNAUTHORIZED = '1';
+// Helper para chamadas com bypass opcional de SSL e Log
+async function upphoneFetch(service: string, url: string, options: any = {}, ignoreSsl = false) {
+  const urlObj = new URL(url);
+  
+  // Opções para a requisição
+  const fetchOptions: any = {
+    ...options,
+  };
+
+  // Se ignoreSsl for true, precisamos de um agente customizado.
+  // Como o fetch global do Node não aceita 'agent', usamos uma alternativa ou o dispatcher se disponível.
+  // Para evitar o Warning global de process.env, usamos o modulo 'https' nativo para criar a requisição se ignoreSsl for true.
+  
+  if (ignoreSsl && url.startsWith('https')) {
+    return new Promise<Response>((resolve, reject) => {
+      const reqOptions = {
+        method: options.method || 'GET',
+        headers: options.headers || {},
+        rejectUnauthorized: false
+      };
+
+      const req = https.request(url, reqOptions, async (res) => {
+        let body = '';
+        res.on('data', chunk => body += chunk);
+        res.on('end', () => {
+          const responseProxy = {
+            ok: res.statusCode! >= 200 && res.statusCode! < 300,
+            status: res.statusCode!,
+            headers: new Headers(res.headers as any),
+            json: async () => JSON.parse(body),
+            text: async () => body,
+            clone: () => responseProxy // Simplificado para o logger
+          } as any;
+
+          logExternalApi(service, url, options.method || 'GET', options.body || {}, res.statusCode!, body);
+          resolve(responseProxy);
+        });
+      });
+
+      req.on('error', (error) => {
+        logExternalApi(service, url, options.method || 'GET', options.body || {}, 0, { error: error.message });
+        reject(error);
+      });
+
+      if (options.body) req.write(options.body);
+      req.end();
+    });
   }
-  return fetch(url, options);
+
+  // Fallback para fetch padrão se não precisar ignorar SSL
+  try {
+    const response = await fetch(url, options);
+    const clonedRes = response.clone();
+    let data;
+    try {
+      const contentType = clonedRes.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        data = await clonedRes.json();
+      } else {
+        data = await clonedRes.text();
+      }
+    } catch (e) {
+      data = '(falha ao ler corpo)';
+    }
+
+    logExternalApi(service, url, options.method || 'GET', options.body || {}, response.status, data);
+    return response;
+  } catch (error: any) {
+    logExternalApi(service, url, options.method || 'GET', options.body || {}, 0, { error: error.message });
+    throw error;
+  }
 }
 
 export async function getUpphoneConfig() {
@@ -91,7 +152,7 @@ export async function triggerClickToCall(destinationPhone: string) {
   const ignoreSsl = config.ignoreSsl || false;
 
   try {
-    const response = await upphoneFetch(url, {}, ignoreSsl);
+    const response = await upphoneFetch('ClickToCall', url, {}, ignoreSsl);
     if (!response.ok) {
       throw new Error(`Erro na API Upphone: ${response.statusText}`);
     }
@@ -124,7 +185,7 @@ export async function getCallStatus(channelid: string) {
   const ignoreSsl = config.ignoreSsl || false;
 
   try {
-    const response = await upphoneFetch(pollingUrl, {}, ignoreSsl);
+    const response = await upphoneFetch('CallStatus', pollingUrl, {}, ignoreSsl);
     if (response.status === 204) return { status: 'finished', end: true };
     if (!response.ok) throw new Error('Erro ao consultar status');
     
@@ -152,7 +213,7 @@ export async function notifyCallEndWebhook(channelid: string, ticketId: string) 
     const config = setting ? JSON.parse(setting.value) : {};
     const ignoreSsl = config.ignoreSsl || false;
 
-    const response = await upphoneFetch(webhookUrl, {
+    const response = await upphoneFetch('WebhookCallEnd', webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
