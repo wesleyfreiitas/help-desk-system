@@ -44,7 +44,7 @@ export default function EditUserModal({ user, clients, currentRole, availableCus
         extension: formData.extension.trim() || null
       };
 
-      const isClientRelated = ['ORG_MEMBER', 'ORG_MANAGER', 'CLIENT'].includes(formData.role);
+      const isClientRelated = ['ORG_MEMBER', 'ORG_MANAGER'].includes(formData.role);
       if (isClientRelated) {
           payload.clientId = formData.clientId;
       } else {
@@ -69,7 +69,7 @@ export default function EditUserModal({ user, clients, currentRole, availableCus
     }
   };
 
-  const isClientRelated = ['ORG_MEMBER', 'ORG_MANAGER', 'CLIENT'].includes(formData.role);
+  const isClientRelated = ['ORG_MEMBER', 'ORG_MANAGER'].includes(formData.role);
 
   const handleCustomFieldChange = (fieldId: string, value: string) => {
     setCustomFieldValues(prev => ({ ...prev, [fieldId]: value }));
@@ -142,14 +142,13 @@ export default function EditUserModal({ user, clients, currentRole, availableCus
                       <select 
                         className="form-control"
                         value={formData.role}
-                        onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value, clientId: !['ORG_MEMBER', 'ORG_MANAGER', 'CLIENT'].includes(e.target.value) ? '' : prev.clientId }))}
+                        onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value, clientId: !['ORG_MEMBER', 'ORG_MANAGER'].includes(e.target.value) ? '' : prev.clientId }))}
                         required
                       >
                         <option value="ORG_MEMBER">Membro (Cliente)</option>
                         <option value="ORG_MANAGER">Gerente (Cliente)</option>
                         <option value="ATTENDANT">Staff (Atendente)</option>
                         <option value="ADMIN">Administrador</option>
-                        <option value="CLIENT">Cliente (Legado)</option>
                       </select>
                     </div>
                   )}

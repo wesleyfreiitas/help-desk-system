@@ -22,7 +22,6 @@ export default function ClientSelector({ clients }: { clients: any[] }) {
            <option value="ORG_MANAGER">Gerente (Cliente)</option>
            <option value="ATTENDANT">Staff (Atendente)</option>
            <option value="ADMIN">Administrador</option>
-           <option value="CLIENT">Cliente (Legado)</option>
          </select>
       </div>
 
@@ -39,7 +38,7 @@ export default function ClientSelector({ clients }: { clients: any[] }) {
         </div>
       )}
 
-      {['ORG_MEMBER', 'ORG_MANAGER', 'CLIENT'].includes(role) && (
+      {['ORG_MEMBER', 'ORG_MANAGER'].includes(role) && (
         <div className="form-group" style={{ marginBottom: 0 }}>
            <label>Empresa (Apenas para Membros/Gerentes)</label>
            <Combobox 

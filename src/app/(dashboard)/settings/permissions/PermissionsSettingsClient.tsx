@@ -14,7 +14,6 @@ export default function PermissionsSettingsClient({ initialPermissions }: { init
     { id: 'ATTENDANT', label: 'Staff (Atendente)' },
     { id: 'ORG_MANAGER', label: 'Gerente (Cliente)' },
     { id: 'ORG_MEMBER', label: 'Membro (Cliente)' },
-    { id: 'CLIENT', label: 'Cliente (Legado)' },
   ];
 
   const resources = [

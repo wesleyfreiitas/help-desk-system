@@ -30,9 +30,6 @@ const DEFAULT_PERMISSIONS: RolePermissions = {
   ORG_MEMBER: {
     users: { view: true, create: false, edit: false, delete: false },
     tickets: { view: true, create: true, edit: false, delete: false },
-  },
-  CLIENT: {
-    tickets: { view: true, create: true, edit: false, delete: false },
   }
 };
 

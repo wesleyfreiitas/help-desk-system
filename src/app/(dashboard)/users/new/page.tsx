@@ -3,11 +3,15 @@ import { prisma } from '@/lib/prisma';
 import { createUser } from '@/app/actions/admin';
 import { getCustomFields } from '@/app/actions/customFields';
 import Link from 'next/link';
-import ClientSelector from './ClientSelector'; // Criaremos isso caso seja CLIENT
+import ClientSelector from './ClientSelector';
+import { hasPermission } from '@/lib/permissions';
 
 export default async function NewUserPage() {
   const session = await getSession();
-  if (!session || session.user.role !== 'ADMIN') return null;
+  if (!session) return null;
+
+  const canCreate = await hasPermission(session.user.role, 'users', 'create');
+  if (!canCreate) return null;
 
   const [clients, userFields] = await Promise.all([
     prisma.client.findMany({ orderBy: { name: 'asc' } }),

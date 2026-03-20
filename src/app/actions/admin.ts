@@ -10,6 +10,7 @@ import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import { recordAuditLog } from '@/lib/audit';
 import { formatPhone, toUpper, formatDocument } from '@/lib/formatters';
+import { hasPermission } from '@/lib/permissions';
 
 export async function createClient(formData: FormData) {
   const session = await getSession();
@@ -90,7 +91,10 @@ export async function createProduct(formData: FormData) {
 
 export async function createUser(formData: FormData) {
   const session = await getSession();
-  if (!session || (session.user.role !== 'ADMIN' && session.user.role !== 'ATTENDANT')) throw new Error('Unauthorized');
+  if (!session) throw new Error('Unauthorized');
+
+  const canCreate = await hasPermission(session.user.role, 'users', 'create');
+  if (!canCreate) throw new Error('Você não tem permissão para criar usuários.');
 
   const name = formData.get('name') as string;
   const email = formData.get('email') as string;
@@ -99,6 +103,11 @@ export async function createUser(formData: FormData) {
   const clientId = formData.get('clientId') as string;
   const phone = formData.get('phone') as string;
   const extension = formData.get('extension') as string;
+
+  // Segurança extra: apenas ADMIN pode criar outros ADMINs
+  if (role === 'ADMIN' && session.user.role !== 'ADMIN') {
+    throw new Error('Apenas Administradores podem criar outros usuários com o perfil de Administrador.');
+  }
 
   // Verificar se o e-mail já existe (incluindo deletados para permitir reativação)
   const existingUser = await prisma.user.findUnique({
