@@ -7,26 +7,26 @@ import ClickToCallButton from '@/components/ClickToCallButton';
 import WhatsAppButton from '@/app/(dashboard)/users/[id]/WhatsAppButton';
 
 interface Props {
-  creatorName: string;
-  creatorEmail: string;
-  creatorPhone: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string;
   clientName: string;
   clientDocument: string;
   clientWebsite?: string;
-  creatorUserId?: string;   // para linkar ao perfil do usuário
+  contactUserId?: string;   // para linkar ao perfil do usuário
   clientId?: string;        // para linkar à empresa
   ticketId?: string;        // para o ClickToCallButton
   customFields?: any[];
 }
 
 export default function TicketContactSidebar({
-  creatorName,
-  creatorEmail,
-  creatorPhone,
+  contactName,
+  contactEmail,
+  contactPhone,
   clientName,
   clientDocument,
   clientWebsite,
-  creatorUserId,
+  contactUserId,
   clientId,
   ticketId,
   customFields = [],
@@ -34,7 +34,7 @@ export default function TicketContactSidebar({
   const [contatoOpen, setContatoOpen] = useState(true);
   const [empresaOpen, setEmpresaOpen] = useState(true);
 
-  const initials = creatorName.split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  const initials = contactName.split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase();
 
   return (
     <div className="tc-sidebar">
@@ -42,12 +42,12 @@ export default function TicketContactSidebar({
       <div className="tc-header">
         <div className="tc-avatar">{initials}</div>
 
-        {creatorUserId ? (
-          <Link href={`/users/${creatorUserId}`} className="tc-name tc-link">
-            {creatorName}
+        {contactUserId ? (
+          <Link href={`/users/${contactUserId}`} className="tc-name tc-link">
+            {contactName}
           </Link>
         ) : (
-          <div className="tc-name">{creatorName}</div>
+          <div className="tc-name">{contactName}</div>
         )}
 
         {clientId ? (
@@ -68,26 +68,26 @@ export default function TicketContactSidebar({
 
         {contatoOpen && (
           <div className="tc-section-body">
-            {creatorEmail && (
+            {contactEmail && (
               <div className="tc-row">
                 <Mail size={15} className="tc-row-icon" />
                 <div className="tc-row-content">
                   <span className="tc-row-label">EMAIL</span>
-                  <span className="tc-row-value">{creatorEmail}</span>
+                  <span className="tc-row-value">{contactEmail}</span>
                 </div>
               </div>
             )}
 
-            {creatorPhone && (
+            {contactPhone && (
               <div className="tc-row">
                 <Phone size={15} className="tc-row-icon" />
                 <div className="tc-row-content">
                   <span className="tc-row-label">TELEFONE</span>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                    <span className="tc-row-value">{creatorPhone}</span>
+                    <span className="tc-row-value">{contactPhone}</span>
                     <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
-                      <ClickToCallButton phone={creatorPhone} ticketId={ticketId} />
-                      <WhatsAppButton phone={creatorPhone} contactName={creatorName} />
+                      <ClickToCallButton phone={contactPhone} ticketId={ticketId} />
+                      <WhatsAppButton phone={contactPhone} contactName={contactName} />
                     </div>
                   </div>
                 </div>

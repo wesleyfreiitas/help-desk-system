@@ -81,11 +81,15 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
     return true;
   });
 
-  // Requester = cliente solicitante, openedBy = quem realmente clicou em "criar"
-  const requesterUser = ticket.requester || ticket.client.users?.[0];
-  const creatorName = openedBy?.name || requesterUser?.name || ticket.client.name;
-  const creatorEmail = openedBy?.role === 'CLIENT' ? openedBy.email : (requesterUser?.email || ticket.client.email || '');
-  const creatorPhone = openedBy?.phone || requesterUser?.phone || ticket.client.phone || '';
+  // Requester = cliente solicitante (contato para a lateral)
+  const contactUser = ticket.requester || ticket.client.users?.[0];
+  const contactName = contactUser?.name || ticket.client.name;
+  const contactEmail = contactUser?.email || ticket.client.email || '';
+  const contactPhone = contactUser?.phone || ticket.client.phone || '';
+  const contactUserId = contactUser?.id;
+
+  // Creator = quem realmente clicou em "criar" (para o cabeçalho)
+  const creatorName = openedBy?.name || contactName;
   
   // Label que descreve quem criou
   const openedByLabel = openedBy
@@ -349,14 +353,14 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
         {/* Contact Sidebar */}
         <div className="ticket-contact-sidebar">
           <TicketContactSidebar
-            creatorName={creatorName}
-            creatorEmail={creatorEmail}
-            creatorPhone={creatorPhone}
+            contactName={contactName}
+            contactEmail={contactEmail}
+            contactPhone={contactPhone}
             clientName={ticket.client.name}
             clientDocument={ticket.client.document}
             clientWebsite={ticket.client.website}
             customFields={ticket.client.customFields}
-            creatorUserId={openedBy?.id || requesterUser?.id}
+            contactUserId={contactUserId}
             clientId={ticket.clientId}
             ticketId={ticket.id}
           />
