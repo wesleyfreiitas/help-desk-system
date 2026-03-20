@@ -54,12 +54,10 @@ export default function ClickToCallButton({ phone, ticketId }: { phone: string, 
     try {
       const result = await triggerClickToCall(phone);
       
-      const data = result.data;
-      const channelid = data?.channelid || data?.UniqueID || data?.unique_id || data?.channel_id;
+      const channelid = result.channelId;
       
       if (!channelid) {
-        // Mostrar o retorno real para ajudar no diagnóstico
-        const responseStr = data ? JSON.stringify(data) : 'sem resposta';
+        const responseStr = result.data ? JSON.stringify(result.data) : 'sem resposta';
         throw new Error(`Upphone: channelid não retornado. Resposta: ${responseStr}`);
       }
 

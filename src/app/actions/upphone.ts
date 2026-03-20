@@ -157,7 +157,24 @@ export async function triggerClickToCall(destinationPhone: string) {
       throw new Error(`Erro na API Upphone: ${response.statusText}`);
     }
     const data = await response.json();
-    return { success: true, data };
+
+    // Extração robusta do identificador da ligação (channelid / uniqueid)
+    // Algumas versões da API retornam no topo, outras dentro de um objeto 'response'
+    const channelId = 
+      data?.channelid || 
+      data?.uniqueid || 
+      data?.UniqueID || 
+      data?.unique_id || 
+      data?.channel_id || 
+      data?.response?.channelid || 
+      data?.response?.uniqueid ||
+      data?.uniqueid; // Fallback final
+
+    return { 
+      success: true, 
+      data, 
+      channelId: channelId || null 
+    };
   } catch (error: any) {
     console.error('Upphone ClickToCall Error:', error);
     throw new Error(error.message || 'Falha ao realizar chamada');
