@@ -79,9 +79,69 @@ export async function triggerClickToCall(destinationPhone: string) {
     if (!response.ok) {
       throw new Error(`Erro na API Upphone: ${response.statusText}`);
     }
-    return { success: true };
+    const data = await response.json();
+    return { success: true, data };
   } catch (error: any) {
     console.error('Upphone ClickToCall Error:', error);
     throw new Error(error.message || 'Falha ao realizar chamada');
+  }
+}
+
+export async function getCallStatus(channelid: string) {
+  const session = await getSession();
+  if (!session) throw new Error('Unauthorized');
+
+  const setting = await prisma.systemSetting.findUnique({
+    where: { key: 'upphone_config' }
+  });
+
+  if (!setting) throw new Error('Configuração não encontrada');
+  const config = JSON.parse(setting.value);
+  const { baseUrl, token } = config;
+
+  // Extract base domain from the click2call URL
+  // Example: https://upphone.absolutatelecom.com.br/confast/modules/api/click2call_v2.php
+  // To: https://upphone.absolutatelecom.com.br/confast/api/v1/channel/status
+  const urlObj = new URL(baseUrl);
+  const pollingBase = `${urlObj.origin}/confast/api/v1/channel/status`;
+  const pollingUrl = `${pollingBase}?uniqueid=${channelid}&token=${token}`;
+
+  try {
+    const response = await fetch(pollingUrl);
+    if (response.status === 204) return { status: 'finished', end: true };
+    if (!response.ok) throw new Error('Erro ao consultar status');
+    
+    const data = await response.json();
+    // Finish status: "down", "busy", "unknown"
+    const finishedStatus = ['down', 'busy', 'unknown'];
+    const isFinished = finishedStatus.includes(data.status?.toLowerCase());
+    
+    return { 
+      status: data.status, 
+      end: isFinished 
+    };
+  } catch (error) {
+    console.error('getCallStatus error:', error);
+    throw error;
+  }
+}
+
+export async function notifyCallEndWebhook(channelid: string, ticketId: string) {
+  const webhookUrl = 'https://uppon-dev.absolutatecnologia.com.br/webhook/e5601aa3-d692-494d-a53f-f2fda7ca60dd';
+  
+  try {
+    const response = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        "id da ligação": channelid,
+        "id do ticket": ticketId || ""
+      })
+    });
+    
+    return { success: response.ok };
+  } catch (error) {
+    console.error('Webhook notification error:', error);
+    return { success: false };
   }
 }

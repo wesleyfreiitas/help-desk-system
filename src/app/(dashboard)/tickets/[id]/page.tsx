@@ -458,7 +458,7 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap' }}>
                           <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 600, whiteSpace: 'nowrap' }}>{creatorPhone}</span>
                           <div style={{ flexShrink: 0, display: 'flex', gap: '4px' }}>
-                            <ClickToCallButton phone={creatorPhone} />
+                            <ClickToCallButton phone={creatorPhone} ticketId={ticket.id} />
                             <WhatsAppButton phone={creatorPhone} contactName={creatorName} />
                           </div>
                         </div>
