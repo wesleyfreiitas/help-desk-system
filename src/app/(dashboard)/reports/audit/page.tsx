@@ -12,7 +12,13 @@ import {
   Activity,
   History,
   Database,
-  ArrowRight
+  ArrowRight,
+  ExternalLink,
+  Code2,
+  ChevronDown,
+  ChevronRight,
+  Wifi,
+  Terminal
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -42,6 +48,14 @@ export default async function AuditPage({
     include: {
       user: true,
     },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    take: 100,
+  }) : [];
+
+  // Busca logs de API externa
+  const apiLogs = activeTab === 'api' ? await prisma.externalApiLog.findMany({
     orderBy: {
       createdAt: 'desc',
     },
@@ -148,6 +162,25 @@ export default async function AuditPage({
           >
             <Activity size={16} /> Ações e CRUD
           </Link>
+          <Link 
+            href="/reports/audit?tab=api"
+            style={{ 
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 16px',
+              borderRadius: '8px',
+              fontSize: '0.85rem',
+              fontWeight: 600,
+              textDecoration: 'none',
+              transition: 'var(--transition)',
+              backgroundColor: activeTab === 'api' ? 'var(--bg-card)' : 'transparent',
+              color: activeTab === 'api' ? 'var(--primary)' : 'var(--text-muted)',
+              boxShadow: activeTab === 'api' ? 'var(--shadow-sm)' : 'none'
+            }}
+          >
+            <Wifi size={16} /> Integrações (API)
+          </Link>
         </div>
       </header>
 
@@ -156,7 +189,7 @@ export default async function AuditPage({
           accessLogs.length === 0 ? (
             <EmptyState message="Nenhum registro de acesso encontrado." />
           ) : (
-            accessLogs.map((log) => (
+            accessLogs.map((log: any) => (
               <AccessLogCard key={log.id} log={log} getInitials={getInitials} />
             ))
           )
@@ -166,7 +199,7 @@ export default async function AuditPage({
           auditLogs.length === 0 ? (
             <EmptyState message="Nenhum registro de ação encontrado no banco de dados." />
           ) : (
-            auditLogs.map((log) => (
+            auditLogs.map((log: any) => (
               <AuditLogCard 
                 key={log.id} 
                 log={log} 
@@ -175,6 +208,18 @@ export default async function AuditPage({
                 getResourceLabel={getResourceLabel}
               />
             ))
+          )
+        )}
+        
+        {activeTab === 'api' && (
+          apiLogs.length === 0 ? (
+            <EmptyState message="Nenhum log de API externa encontrado." />
+          ) : (
+            <div style={{ display: 'grid', gap: '1rem' }}>
+              {apiLogs.map((log: any) => (
+                <ApiLogCard key={log.id} log={log} />
+              ))}
+            </div>
           )
         )}
       </div>
@@ -464,4 +509,113 @@ function UserAgent({ ua }: { ua?: string | null }) {
       {ua}
     </div>
   );
+}
+
+function ApiLogCard({ log }: { log: any }) {
+  // O componente de log de API precisa ser interativo (Client Component) ou usar checkbox/peer hack para expandir sem JS no AuditPage (que é Server Component)
+  // Como AuditPage é Server Component, vou carregar um componente cliente aqui para os logs de API ou usar um sumário simples.
+  // Vou criar um componente cliente inline ou separado. Para simplicidade e eficácia, usaremos um detalhe expansível nativo <details>.
+  
+  const isError = log.status >= 400 || log.status === 0;
+  
+  return (
+    <div style={{
+      ...cardStyle,
+      borderColor: isError ? '#fecaca' : 'var(--border-color)',
+      borderLeft: `4px solid ${isError ? '#ef4444' : 'var(--primary)'}`,
+      background: isError ? '#fffafb' : 'var(--surface)'
+    }} className="audit-card">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+             <span style={{ 
+              fontSize: '0.65rem', 
+              fontWeight: 800, 
+              backgroundColor: isError ? '#fee2e2' : '#dcfce7', 
+              color: isError ? '#991b1b' : '#166534',
+              padding: '2px 8px',
+              borderRadius: '999px'
+            }}>
+              {log.status === 0 ? 'FALHA' : log.status}
+            </span>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-main)' }}>
+              {log.service.toUpperCase()}
+            </span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+              {log.method}
+            </span>
+          </div>
+          <div style={{ 
+            fontSize: '0.9rem', 
+            color: 'var(--text-main)', 
+            fontFamily: 'monospace', 
+            backgroundColor: 'var(--bg-elevated)',
+            padding: '4px 8px',
+            borderRadius: '6px',
+            wordBreak: 'break-all',
+            marginBottom: '8px'
+          }}>
+            {log.url}
+          </div>
+        </div>
+        <DateTime label="Chamado em" date={log.createdAt} />
+      </div>
+
+      <details className="api-log-details">
+        <summary style={{ 
+          cursor: 'pointer', 
+          fontSize: '0.8rem', 
+          fontWeight: 600, 
+          color: 'var(--primary)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '4px',
+          listStyle: 'none'
+        }}>
+          <Code2 size={14} /> Ver Detalhes JSON (Request/Response)
+        </summary>
+        <div style={{ 
+          marginTop: '1rem', 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+          gap: '1rem' 
+        }}>
+          <div>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Payload (Enviado)</div>
+            <pre style={jsonPreStyle}>{log.payload ? formatJson(log.payload) : 'N/A'}</pre>
+          </div>
+          <div>
+            <div style={{ fontSize: '0.65rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '4px' }}>Resposta</div>
+            <pre style={{...jsonPreStyle, color: isError ? '#991b1b' : 'inherit'}}>{log.response ? formatJson(log.response) : 'N/A'}</pre>
+          </div>
+        </div>
+      </details>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        .api-log-details summary::-webkit-details-marker { display: none; }
+        .api-log-details[open] summary { margin-bottom: 0.5rem; }
+      `}} />
+    </div>
+  );
+}
+
+const jsonPreStyle: any = {
+  backgroundColor: 'var(--bg-color)',
+  padding: '12px',
+  borderRadius: '8px',
+  fontSize: '0.75rem',
+  fontFamily: 'monospace',
+  overflowX: 'auto',
+  margin: 0,
+  border: '1px solid var(--border-color)',
+  maxHeight: '300px'
+};
+
+function formatJson(str: string) {
+  try {
+    const obj = JSON.parse(str);
+    return JSON.stringify(obj, null, 2);
+  } catch (e) {
+    return str;
+  }
 }
