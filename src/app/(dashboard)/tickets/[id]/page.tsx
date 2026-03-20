@@ -356,6 +356,9 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
             clientDocument={ticket.client.document}
             clientWebsite={ticket.client.website}
             customFields={ticket.client.customFields}
+            creatorUserId={openedBy?.id || requesterUser?.id}
+            clientId={ticket.clientId}
+            ticketId={ticket.id}
           />
         </div>
       </div>

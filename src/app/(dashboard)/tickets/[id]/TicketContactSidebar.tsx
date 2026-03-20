@@ -2,6 +2,9 @@
 
 import { useState } from 'react';
 import { ChevronUp, ChevronDown, Mail, Phone } from 'lucide-react';
+import Link from 'next/link';
+import ClickToCallButton from '@/components/ClickToCallButton';
+import WhatsAppButton from '@/app/(dashboard)/users/[id]/WhatsAppButton';
 
 interface Props {
   creatorName: string;
@@ -10,11 +13,10 @@ interface Props {
   clientName: string;
   clientDocument: string;
   clientWebsite?: string;
-  creatorId?: string;
-  clientId?: string;
+  creatorUserId?: string;   // para linkar ao perfil do usuário
+  clientId?: string;        // para linkar à empresa
+  ticketId?: string;        // para o ClickToCallButton
   customFields?: any[];
-  userPhone?: string;
-  userExtension?: string;
 }
 
 export default function TicketContactSidebar({
@@ -24,6 +26,9 @@ export default function TicketContactSidebar({
   clientName,
   clientDocument,
   clientWebsite,
+  creatorUserId,
+  clientId,
+  ticketId,
   customFields = [],
 }: Props) {
   const [contatoOpen, setContatoOpen] = useState(true);
@@ -36,8 +41,22 @@ export default function TicketContactSidebar({
       {/* Header do contato */}
       <div className="tc-header">
         <div className="tc-avatar">{initials}</div>
-        <div className="tc-name">{creatorName}</div>
-        <div className="tc-company">{clientName}</div>
+
+        {creatorUserId ? (
+          <Link href={`/users/${creatorUserId}`} className="tc-name tc-link">
+            {creatorName}
+          </Link>
+        ) : (
+          <div className="tc-name">{creatorName}</div>
+        )}
+
+        {clientId ? (
+          <Link href={`/companies/${clientId}`} className="tc-company tc-link">
+            {clientName}
+          </Link>
+        ) : (
+          <div className="tc-company">{clientName}</div>
+        )}
       </div>
 
       {/* Seção Contato Info */}
@@ -46,6 +65,7 @@ export default function TicketContactSidebar({
           <span>CONTATO INFO</span>
           {contatoOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
+
         {contatoOpen && (
           <div className="tc-section-body">
             {creatorEmail && (
@@ -57,12 +77,19 @@ export default function TicketContactSidebar({
                 </div>
               </div>
             )}
+
             {creatorPhone && (
               <div className="tc-row">
                 <Phone size={15} className="tc-row-icon" />
                 <div className="tc-row-content">
                   <span className="tc-row-label">TELEFONE</span>
-                  <span className="tc-row-value">{creatorPhone}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                    <span className="tc-row-value">{creatorPhone}</span>
+                    <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+                      <ClickToCallButton phone={creatorPhone} ticketId={ticketId} />
+                      <WhatsAppButton phone={creatorPhone} contactName={creatorName} />
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -76,6 +103,7 @@ export default function TicketContactSidebar({
           <span>EMPRESA</span>
           {empresaOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </button>
+
         {empresaOpen && (
           <div className="tc-section-body">
             {clientDocument && (
@@ -84,16 +112,24 @@ export default function TicketContactSidebar({
                 <span className="tc-row-value">{clientDocument}</span>
               </div>
             )}
+
             {customFields.map((cf: any) => (
               <div key={cf.id} className="tc-field">
                 <span className="tc-row-label">{cf.field?.name?.toUpperCase()}</span>
                 <span className="tc-row-value">{cf.value === 'true' ? 'Sim' : cf.value === 'false' ? 'Não' : cf.value || '--'}</span>
               </div>
             ))}
+
             {clientWebsite && (
               <div className="tc-field">
                 <span className="tc-row-label">WEBSITE</span>
-                <a href={clientWebsite.startsWith('http') ? clientWebsite : `https://${clientWebsite}`} target="_blank" rel="noopener noreferrer" className="tc-row-value" style={{ color: 'var(--primary)', textDecoration: 'none' }}>
+                <a
+                  href={clientWebsite.startsWith('http') ? clientWebsite : `https://${clientWebsite}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="tc-row-value"
+                  style={{ color: 'var(--primary)', textDecoration: 'none' }}
+                >
                   {clientWebsite}
                 </a>
               </div>
@@ -148,6 +184,16 @@ export default function TicketContactSidebar({
           font-weight: 500;
         }
 
+        .tc-link {
+          text-decoration: none;
+          transition: color 0.15s;
+        }
+
+        .tc-link:hover {
+          color: var(--primary) !important;
+          text-decoration: underline;
+        }
+
         .tc-section {
           border-bottom: 1px solid var(--border-color);
         }
@@ -199,7 +245,7 @@ export default function TicketContactSidebar({
         .tc-row-content {
           display: flex;
           flex-direction: column;
-          gap: 2px;
+          gap: 4px;
           min-width: 0;
         }
 
