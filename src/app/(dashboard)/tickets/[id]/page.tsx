@@ -7,10 +7,9 @@ import TicketPropertySelect from './TicketPropertySelect';
 import TicketTagsInput from './TicketTagsInput';
 import TicketEmailComposer from './TicketEmailComposer';
 import TimeTrackerDisplay from './TimeTrackerDisplay';
+import TicketContactSidebar from './TicketContactSidebar';
 import { getDepartments } from '@/app/actions/departments';
-import { Clock, Reply, StickyNote, Forward, XCircle, Star, MoreHorizontal, User, Mail, Phone, ExternalLink, CheckSquare, Timer, ListTodo, AlertCircle, Paperclip, Globe } from 'lucide-react';
-import WhatsAppButton from '../../users/[id]/WhatsAppButton';
-import ClickToCallButton from '@/components/ClickToCallButton';
+import { Clock, Mail } from 'lucide-react';
 
 export default async function TicketDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
@@ -39,7 +38,7 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
         include: { user: true, attachments: true },
         orderBy: { createdAt: 'asc' }
       }
-    }
+    } as any
   });
 
   if (!ticketResult) {
@@ -347,212 +346,17 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
           )}
         </div>
 
-        {/* Contact & Company Sidebar Radical Redesign (v4) */}
-        <div className="ticket-contact-sidebar" style={{ 
-          display: 'flex', 
-          flexDirection: 'column', 
-          gap: '2rem',
-          padding: '0'
-        }}>
-          {/* Main Container - Glassmorphism-like feel */}
-          <div style={{ 
-            backgroundColor: 'var(--bg-card)',
-            borderRadius: 'var(--radius-xl)',
-            border: '1px solid var(--border-color)',
-            boxShadow: 'var(--premium-shadow)',
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column'
-          }}>
-            {/* Header Section with subtle gradient */}
-            <div style={{ 
-              padding: '2rem 1.5rem 1.5rem',
-              background: 'linear-gradient(to bottom, var(--bg-elevated), transparent)',
-              borderBottom: '1px solid var(--border-color)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              textAlign: 'center'
-            }}>
-              <div style={{ 
-                width: '64px', 
-                height: '64px', 
-                borderRadius: '20px', 
-                background: 'linear-gradient(135deg, var(--primary) 0%, #0ea5e9 100%)',
-                color: 'white',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 700,
-                fontSize: '1.5rem',
-                marginBottom: '1rem',
-                boxShadow: '0 8px 16px -4px rgba(2, 132, 199, 0.4)',
-                flexShrink: 0
-              }}>
-                {creatorName.slice(0, 2).toUpperCase()}
-              </div>
-              
-              <Link 
-                href={`/users/${openedBy?.id || requesterUser?.id || '#'}`}
-                style={{ 
-                  fontSize: '1.25rem', 
-                  fontWeight: 800, 
-                  color: 'var(--text-main)',
-                  textDecoration: 'none',
-                  letterSpacing: '-0.02em',
-                  marginBottom: '0.25rem'
-                }}
-              >
-                {creatorName}
-              </Link>
-              
-              <Link 
-                href={`/companies/${ticket.clientId}`}
-                style={{ 
-                  fontSize: '0.875rem', 
-                  fontWeight: 600, 
-                  color: 'var(--primary)',
-                  textDecoration: 'none',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                {ticket.client.name} <ExternalLink size={12} />
-              </Link>
-            </div>
-
-            <div style={{ padding: '0 1.5rem 1.75rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              
-              {/* Contact Details Group */}
-              <div className="sidebar-section-v2">
-                <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.25rem' }}>
-                    <div style={{ width: '2px', height: '14px', backgroundColor: 'var(--primary)', borderRadius: '2px' }}></div>
-                    <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                      Contato
-                    </span>
-                  </div>
-
-                  {creatorEmail && (
-                    <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
-                      <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                        <Mail size={16} />
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                        <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2px' }}>Email</span>
-                        <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 500, wordBreak: 'break-word', lineHeight: '1.2' }}>{creatorEmail}</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {creatorPhone && (
-                    <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
-                      <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                        <Phone size={16} />
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                        <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2px' }}>Telefone</span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap' }}>
-                          <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 600, whiteSpace: 'nowrap' }}>{creatorPhone}</span>
-                          <div style={{ flexShrink: 0, display: 'flex', gap: '4px' }}>
-                            <ClickToCallButton phone={creatorPhone} ticketId={ticket.id} />
-                            <WhatsAppButton phone={creatorPhone} contactName={creatorName} />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Company Details Group */}
-              <div className="sidebar-section-v2">
-                <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.25rem' }}>
-                    <div style={{ width: '2px', height: '14px', backgroundColor: 'var(--primary)', borderRadius: '2px' }}></div>
-                    <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                      Empresa
-                    </span>
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
-                    <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                      <Globe size={16} />
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                      <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2px' }}>CNPJ / Documento</span>
-                      <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 500 }}>{ticket.client.document || '--'}</span>
-                    </div>
-                  </div>
-
-                  {ticket.client.website && (
-                    <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
-                      <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                        <ExternalLink size={16} />
-                      </div>
-                      <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                        <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2px' }}>Website</span>
-                        <a 
-                          href={ticket.client.website.startsWith('http') ? ticket.client.website : `https://${ticket.client.website}`} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          style={{ fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 600, textDecoration: 'none', wordBreak: 'break-all' }}
-                        >
-                          Acessar Site
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Custom Fields Group (Conditional) */}
-              {ticket.client.customFields && ticket.client.customFields.length > 0 && (
-                <div className="sidebar-section-v2">
-                  <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.25rem' }}>
-                      <div style={{ width: '2px', height: '14px', backgroundColor: 'var(--info)', borderRadius: '2px' }}></div>
-                      <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                        Específico
-                      </span>
-                    </div>
-
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                      {ticket.client.customFields.map((cf: any) => (
-                        <div key={cf.id} style={{ 
-                          backgroundColor: 'var(--bg-elevated)', 
-                          padding: '0.75rem 1rem', 
-                          borderRadius: '12px',
-                          border: '1px solid var(--border-color)'
-                        }}>
-                          <span style={{ 
-                            fontSize: '0.65rem', 
-                            fontWeight: 800, 
-                            color: 'var(--text-muted)', 
-                            textTransform: 'uppercase',
-                            display: 'block',
-                            marginBottom: '4px'
-                          }}>
-                            {cf.field.name}
-                          </span>
-                          <div style={{ 
-                            fontSize: '0.85rem', 
-                            color: 'var(--text-main)', 
-                            fontWeight: 500,
-                            lineHeight: '1.5',
-                            whiteSpace: 'pre-wrap'
-                          }}>
-                            {cf.value === 'true' ? 'Sim' : cf.value === 'false' ? 'Não' : cf.value || '--'}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+        {/* Contact Sidebar */}
+        <div className="ticket-contact-sidebar">
+          <TicketContactSidebar
+            creatorName={creatorName}
+            creatorEmail={creatorEmail}
+            creatorPhone={creatorPhone}
+            clientName={ticket.client.name}
+            clientDocument={ticket.client.document}
+            clientWebsite={ticket.client.website}
+            customFields={ticket.client.customFields}
+          />
         </div>
       </div>
     </div>
