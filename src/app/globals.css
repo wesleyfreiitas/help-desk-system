@@ -1208,6 +1208,8 @@ input[type="checkbox"]:focus, input[type="radio"]:focus {
   overflow: hidden;
   text-overflow: ellipsis;
   text-decoration: none;
+  flex: 1;
+  min-width: 0;
 }
 
 .ticket-title:hover {
