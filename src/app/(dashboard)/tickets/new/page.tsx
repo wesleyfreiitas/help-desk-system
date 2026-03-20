@@ -17,7 +17,10 @@ export default async function NewTicketPage(props: { searchParams: Promise<{ con
   // Contatos: usuários com role CLIENT (possuem clientId)
   const contacts = isInternalUser
     ? await prisma.user.findMany({
-        where: { role: 'CLIENT', deletedAt: null },
+        where: { 
+          role: { in: ['CLIENT', 'ORG_MANAGER', 'ORG_MEMBER'] }, 
+          deletedAt: null 
+        },
         include: { client: true },
         orderBy: { name: 'asc' },
       })

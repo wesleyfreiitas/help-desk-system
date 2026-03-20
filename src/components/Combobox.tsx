@@ -46,13 +46,20 @@ export default function Combobox({
     items.find(item => item.id === selectedValue), 
   [items, selectedValue]);
 
+  const removeAccents = (str: string) => {
+    return str.normalize('NFD').replace(/[\u0300-\u036f]/g, "");
+  };
+
   const filteredItems = useMemo(() => {
-    if (!searchTerm) return items;
-    const term = searchTerm.toLowerCase();
-    return items.filter(item => 
-      item.label.toLowerCase().includes(term) || 
-      (item.subLabel && item.subLabel.toLowerCase().includes(term))
-    );
+    const term = removeAccents(searchTerm.trim().toLowerCase());
+    if (!term) return items;
+    
+    return items.filter(item => {
+      const label = removeAccents(item.label.toLowerCase());
+      const subLabel = item.subLabel ? removeAccents(item.subLabel.toLowerCase()) : '';
+      
+      return label.includes(term) || subLabel.includes(term);
+    });
   }, [items, searchTerm]);
 
   useEffect(() => {
