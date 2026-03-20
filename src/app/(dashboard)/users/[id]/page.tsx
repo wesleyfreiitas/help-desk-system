@@ -4,7 +4,19 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getUserDetails } from '@/app/actions/admin';
 import { getCustomFields } from '@/app/actions/customFields';
-import { Edit, Trash2, ChevronLeft, ChevronRight, Plus, Phone, Mail, Tag, Clock, AlertCircle, Globe, ExternalLink } from 'lucide-react';
+import { 
+    Mail, 
+    Calendar, 
+    ArrowLeft, 
+    CheckCircle2, 
+    Clock, 
+    Edit, 
+    User,
+    Shield,
+    Trash2,
+    Plus
+} from 'lucide-react';
+import UserContactSidebar from './UserContactSidebar';
 import EditUserModal from './EditUserModal';
 import WhatsAppButton from './WhatsAppButton';
 import ClickToCallButton from '@/components/ClickToCallButton';
@@ -160,196 +172,8 @@ export default async function UserDetailsPage({ params }: { params: Promise<{ id
                 </div>
 
                 {/* Right Sidebar */}
-                <div className="detail-sidebar ticket-contact-sidebar">
-                    {/* Contact Info Card */}
-                    <div className="sidebar-section-v2">
-                        <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                            {/* Group Header */}
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.25rem' }}>
-                                <div style={{ width: '2px', height: '14px', backgroundColor: 'var(--primary)', borderRadius: '2px' }}></div>
-                                <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                                    Contato
-                                </span>
-                            </div>
-
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                                <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
-                                    <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                                        <Mail size={16} />
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                                        <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2px' }}>Email</span>
-                                        <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 500, wordBreak: 'break-word', lineHeight: '1.2' }}>{user.email}</span>
-                                    </div>
-                                </div>
-
-                                {user.phone && (
-                                    <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
-                                        <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                                            <Phone size={16} />
-                                        </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                                            <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2px' }}>Telefone</span>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'nowrap' }}>
-                                                <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 600, whiteSpace: 'nowrap' }}>{user.phone}</span>
-                                                <div style={{ flexShrink: 0, display: 'flex', gap: '4px' }}>
-                                                    <ClickToCallButton phone={user.phone} />
-                                                    <WhatsAppButton phone={user.phone} contactName={user.name} />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {user.extension && (
-                                    <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
-                                        <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                                            <Phone size={16} />
-                                        </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                                            <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2px' }}>Ramal (Upphone)</span>
-                                            <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 600 }}>{user.extension}</span>
-                                        </div>
-                                    </div>
-                                )}
-
-                                {/* User Custom Fields */}
-                                {user.customFields && user.customFields.filter((cf: any) => cf.field.target === 'USER').length > 0 && (
-                                    <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1.25rem', marginTop: '0.25rem' }}>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                                            {user.customFields.filter((cf: any) => cf.field.target === 'USER').map((cf: any) => (
-                                                <div key={cf.id} style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
-                                                    <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                                                        <Tag size={16} />
-                                                    </div>
-                                                    <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                                                        <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2px' }}>{cf.field.name}</span>
-                                                        <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 500, lineHeight: '1.2' }}>{cf.value || '--'}</span>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Departments Card */}
-                    {(user.role === 'ADMIN' || user.role === 'ATTENDANT') && (
-                        <div className="sidebar-section-v2" style={{ marginTop: '0.75rem' }}>
-                            <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.25rem' }}>
-                                    <div style={{ width: '2px', height: '14px', backgroundColor: '#6366f1', borderRadius: '2px' }}></div>
-                                    <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                                        Departamentos
-                                    </span>
-                                </div>
-                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                                    {((user as any).departments && (user as any).departments.length > 0) ? (
-                                        (user as any).departments.map((dm: any) => (
-                                            <Link 
-                                                key={dm.id} 
-                                                href={`/departments/${dm.department.id}`}
-                                                style={{ 
-                                                    fontSize: '0.75rem', 
-                                                    fontWeight: 600, 
-                                                    padding: '4px 10px', 
-                                                    borderRadius: '6px', 
-                                                    background: 'var(--bg-elevated)', 
-                                                    border: `1px solid ${dm.department.color || '#6366f1'}4d`,
-                                                    borderLeft: `3px solid ${dm.department.color || '#6366f1'}`,
-                                                    color: 'var(--text-main)',
-                                                    textDecoration: 'none'
-                                                }}
-                                            >
-                                                {dm.department.name} {dm.isLeader && '👑'}
-                                            </Link>
-                                        ))
-                                    ) : (
-                                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Nenhum departamento</span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Company Info Card */}
-                    {user.client && (
-                        <div className="sidebar-section-v2" style={{ marginTop: '0.75rem' }}>
-                            <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                                {/* Group Header */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '0.25rem' }}>
-                                    <div style={{ width: '2px', height: '14px', backgroundColor: 'var(--primary)', borderRadius: '2px' }}></div>
-                                    <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                                        Empresa
-                                    </span>
-                                </div>
-
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-                                    <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
-                                        <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                                            <Globe size={16} />
-                                        </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                                            <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2px' }}>Razão Social</span>
-                                            <Link href={`/companies/${user.client.id}`} style={{ fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 700, textDecoration: 'none', lineHeight: '1.2' }}>
-                                                {user.client.name}
-                                            </Link>
-                                        </div>
-                                    </div>
-    
-                                    <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
-                                        <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)', flexShrink: 0 }}>
-                                            <Tag size={16} />
-                                        </div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                                            <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2px' }}>CNPJ / Documento</span>
-                                            <span style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 500 }}>{user.client.document || '--'}</span>
-                                        </div>
-                                    </div>
-
-                                    {user.client.website && (
-                                        <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
-                                            <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: 'var(--bg-elevated)', color: 'var(--text-muted)' }}>
-                                                <ExternalLink size={16} />
-                                            </div>
-                                            <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-                                                <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: '2px' }}>Website</span>
-                                                <a href={user.client.website.startsWith('http') ? user.client.website : `https://${user.client.website}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.85rem', color: 'var(--primary)', fontWeight: 600, textDecoration: 'none', wordBreak: 'break-all' }}>
-                                                    {user.client.website}
-                                                </a>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Custom Fields */}
-                                {user.client.customFields && user.client.customFields.filter((cf: any) => cf.field.target === 'CLIENT').length > 0 && (
-                                    <div style={{ marginTop: '0.5rem', borderTop: '1px solid var(--border-color)', paddingTop: '1.5rem' }}>
-                                        <div style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', marginBottom: '1.25rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Campos Adicionais</div>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                                            {user.client.customFields.filter((cf: any) => cf.field.target === 'CLIENT').map((cf: any) => (
-                                                <div key={cf.id} style={{ 
-                                                    backgroundColor: 'var(--bg-elevated)', 
-                                                    padding: '1rem', 
-                                                    borderRadius: '12px',
-                                                    border: '1px solid var(--border-color)'
-                                                }}>
-                                                    <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: '4px' }}>
-                                                        {cf.field.name}
-                                                    </span>
-                                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 500, lineHeight: '1.5' }}>
-                                                        {cf.value || '--'}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
+                <div className="detail-sidebar">
+                    <UserContactSidebar user={user} />
                 </div>
             </div>
         </div>
