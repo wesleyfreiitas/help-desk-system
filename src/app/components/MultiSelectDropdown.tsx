@@ -82,7 +82,18 @@ export default function MultiSelectDropdown({
                 <div className="ms-dropdown-checkbox">
                   {isSelected && <Check size={12} color="white" />}
                 </div>
-                <span>{option}</span>
+                <span 
+                  title={option}
+                  style={{ 
+                    flex: 1, 
+                    minWidth: 0,
+                    whiteSpace: 'normal',
+                    wordBreak: 'break-word',
+                    lineHeight: '1.2'
+                  }}
+                >
+                  {option}
+                </span>
               </div>
             );
           })}

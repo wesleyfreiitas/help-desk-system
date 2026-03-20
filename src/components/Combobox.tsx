@@ -204,13 +204,21 @@ export default function Combobox({
               {getInitials(selectedItem.label)}
             </div>
           )}
-          <span style={{ 
-            color: selectedItem ? 'var(--text-main)' : 'var(--text-muted)',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            fontWeight: selectedItem ? '500' : '400'
-          }}>
+          <span 
+            title={selectedItem ? selectedItem.label : (placeholder || "")}
+            style={{ 
+              color: selectedItem ? 'var(--text-main)' : 'var(--text-muted)',
+              whiteSpace: 'normal',
+              wordBreak: 'break-word',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+              fontWeight: selectedItem ? '500' : '400',
+              lineHeight: '1.2',
+              flex: 1
+            }}
+          >
             {selectedItem ? selectedItem.label : placeholder}
           </span>
         </div>
@@ -240,7 +248,9 @@ export default function Combobox({
           position: 'absolute',
           top: 'calc(100% + 8px)',
           left: 0,
-          right: 0,
+          minWidth: '100%',
+          width: 'max-content',
+          maxWidth: '350px',
           background: 'var(--surface)',
           backdropFilter: 'blur(12px)',
           border: '1px solid var(--border-color)',
@@ -350,12 +360,15 @@ export default function Combobox({
                     </div>
 
                     <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minWidth: 0 }}>
-                      <span style={{ 
-                        fontWeight: isSelected ? '600' : '500',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
-                      }}>
+                      <span 
+                        title={item.label}
+                        style={{ 
+                          fontWeight: isSelected ? '600' : '500',
+                          whiteSpace: 'normal',
+                          wordBreak: 'break-word',
+                          lineHeight: '1.2'
+                        }}
+                      >
                         {item.label}
                       </span>
                       {item.subLabel && (
