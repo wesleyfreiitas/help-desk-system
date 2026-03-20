@@ -4,6 +4,7 @@ import { createUser } from '@/app/actions/admin';
 import { getCustomFields } from '@/app/actions/customFields';
 import Link from 'next/link';
 import ClientSelector from './ClientSelector';
+import Combobox from '@/components/Combobox';
 import { hasPermission } from '@/lib/permissions';
 
 export default async function NewUserPage() {
@@ -85,17 +86,32 @@ export default async function NewUserPage() {
                   <div key={field.id} className="form-group" style={{ gridColumn: field.type === 'TEXTAREA' ? '1 / span 2' : 'auto', marginBottom: 0 }}>
                     <label className="form-label" style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{field.name}</label>
                     {field.type === 'BOOLEAN' ? (
-                      <select name={`cf_${field.id}`} className="form-control">
-                        <option value="false">Não</option>
-                        <option value="true">Sim</option>
-                      </select>
+                      <Combobox 
+                        name={`cf_${field.id}`}
+                        defaultValue="false"
+                        items={[
+                          { id: 'false', label: 'Não' },
+                          { id: 'true', label: 'Sim' }
+                        ]}
+                      />
                     ) : field.type === 'SELECT' || field.type === 'MULTISELECT' ? (
-                      <select name={`cf_${field.id}`} className="form-control" multiple={field.type === 'MULTISELECT'}>
-                        <option value="">Selecione...</option>
-                        {field.options?.split(',').map((opt: string) => (
-                          <option key={opt.trim()} value={opt.trim()}>{opt.trim()}</option>
-                        ))}
-                      </select>
+                      field.type === 'MULTISELECT' ? (
+                        <select name={`cf_${field.id}`} className="form-control" multiple>
+                          <option value="">Selecione...</option>
+                          {field.options?.split(',').map((opt: string) => (
+                            <option key={opt.trim()} value={opt.trim()}>{opt.trim()}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <Combobox 
+                          name={`cf_${field.id}`}
+                          placeholder="Selecione..."
+                          items={field.options?.split(',').map((opt: string) => ({
+                            id: opt.trim(),
+                            label: opt.trim()
+                          })) || []}
+                        />
+                      )
                     ) : field.type === 'TEXTAREA' ? (
                       <textarea 
                         name={`cf_${field.id}`}

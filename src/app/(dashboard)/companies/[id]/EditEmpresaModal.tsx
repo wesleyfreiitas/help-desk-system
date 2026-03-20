@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { getCustomFields } from '@/app/actions/customFields';
 import { updateCustomFieldValues, updateClient } from '@/app/actions/admin';
 import MultiSelectDropdown from '@/app/components/MultiSelectDropdown';
+import Combobox from '@/components/Combobox';
 import { useToast } from '@/components/Toast';
 
 export default function EditClientModal({ client }: { client: any }) {
@@ -172,14 +173,15 @@ export default function EditClientModal({ client }: { client: any }) {
                           <div key={field.id} className="form-group" style={{ gridColumn: field.type === 'TEXTAREA' ? '1 / span 2' : 'auto' }}>
                             <label className="form-label" style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{field.name}</label>
                             {field.type === 'BOOLEAN' ? (
-                              <select 
-                                value={customFieldValues[field.id] || 'false'} 
-                                onChange={e => handleCustomFieldChange(field.id, e.target.value)}
-                                className="form-control nt-select"
-                              >
-                                <option value="true">Sim</option>
-                                <option value="false">Não</option>
-                              </select>
+                              <Combobox 
+                                name={`cf_${field.id}`}
+                                defaultValue={customFieldValues[field.id] || 'false'}
+                                onChange={val => handleCustomFieldChange(field.id, val || 'false')}
+                                items={[
+                                  { id: 'true', label: 'Sim' },
+                                  { id: 'false', label: 'Não' }
+                                ]}
+                              />
                             ) : field.type === 'SELECT' || field.type === 'MULTISELECT' ? (
                               field.type === 'MULTISELECT' ? (
                                 <MultiSelectDropdown
@@ -188,16 +190,16 @@ export default function EditClientModal({ client }: { client: any }) {
                                   onChange={(values) => handleCustomFieldChange(field.id, values.join(','))}
                                 />
                               ) : (
-                                <select 
-                                  value={customFieldValues[field.id] || ''} 
-                                  onChange={e => handleCustomFieldChange(field.id, e.target.value)}
-                                  className="form-control nt-select"
-                                >
-                                  <option value="">Selecione...</option>
-                                  {field.options?.split(',').map((opt: string) => (
-                                    <option key={opt.trim()} value={opt.trim()}>{opt.trim()}</option>
-                                  ))}
-                                </select>
+                                <Combobox 
+                                  name={`cf_${field.id}`}
+                                  defaultValue={customFieldValues[field.id] || ''}
+                                  placeholder="Selecione..."
+                                  onChange={val => handleCustomFieldChange(field.id, val || '')}
+                                  items={field.options?.split(',').map((opt: string) => ({
+                                    id: opt.trim(),
+                                    label: opt.trim()
+                                  })) || []}
+                                />
                               )
                             ) : field.type === 'TEXTAREA' ? (
                               <textarea 

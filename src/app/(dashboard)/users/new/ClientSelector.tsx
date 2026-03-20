@@ -10,19 +10,18 @@ export default function ClientSelector({ clients }: { clients: any[] }) {
     <>
       <div className="form-group" style={{ marginBottom: 0 }}>
          <label htmlFor="role">Perfil de Acesso</label>
-         <select 
-           id="role" 
+         <Combobox 
            name="role" 
-           value={role}
-           onChange={(e) => setRole(e.target.value)}
+           defaultValue={role}
+           onChange={(val) => setRole(val || 'ORG_MEMBER')}
            required 
-           style={{ width: '100%', padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', outline: 'none', background: 'var(--bg-elevated)', color: 'var(--text-main)' }}
-         >
-           <option value="ORG_MEMBER">Membro (Cliente)</option>
-           <option value="ORG_MANAGER">Gerente (Cliente)</option>
-           <option value="ATTENDANT">Staff (Atendente)</option>
-           <option value="ADMIN">Administrador</option>
-         </select>
+           items={[
+             { id: 'ORG_MEMBER', label: 'Membro (Cliente)' },
+             { id: 'ORG_MANAGER', label: 'Gerente (Cliente)' },
+             { id: 'ATTENDANT', label: 'Staff (Atendente)' },
+             { id: 'ADMIN', label: 'Administrador' }
+           ]}
+         />
       </div>
 
       {['ADMIN', 'ATTENDANT'].includes(role) && (

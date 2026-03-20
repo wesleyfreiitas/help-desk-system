@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/components/Toast';
 
 import MultiSelectDropdown from '@/app/components/MultiSelectDropdown';
+import Combobox from '@/components/Combobox';
 
 export default function EditUserModal({ user, clients, currentRole, availableCustomFields = [] }: { user: any, clients: any[], currentRole: string, availableCustomFields?: any[] }) {
   const { success, error } = useToast();
@@ -139,34 +140,36 @@ export default function EditUserModal({ user, clients, currentRole, availableCus
                   {currentRole === 'ADMIN' && (
                     <div className="form-group">
                       <label className="form-label">Perfil / Função *</label>
-                      <select 
-                        className="form-control"
-                        value={formData.role}
-                        onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value, clientId: !['ORG_MEMBER', 'ORG_MANAGER'].includes(e.target.value) ? '' : prev.clientId }))}
+                      <Combobox
+                        name="role"
+                        defaultValue={formData.role}
+                        onChange={(val) => setFormData(prev => ({ 
+                          ...prev, 
+                          role: val || '', 
+                          clientId: !['ORG_MEMBER', 'ORG_MANAGER'].includes(val || '') ? '' : prev.clientId 
+                        }))}
                         required
-                      >
-                        <option value="ORG_MEMBER">Membro (Cliente)</option>
-                        <option value="ORG_MANAGER">Gerente (Cliente)</option>
-                        <option value="ATTENDANT">Staff (Atendente)</option>
-                        <option value="ADMIN">Administrador</option>
-                      </select>
+                        items={[
+                          { id: 'ORG_MEMBER', label: 'Membro (Cliente)' },
+                          { id: 'ORG_MANAGER', label: 'Gerente (Cliente)' },
+                          { id: 'ATTENDANT', label: 'Staff (Atendente)' },
+                          { id: 'ADMIN', label: 'Administrador' }
+                        ]}
+                      />
                     </div>
                   )}
 
                   {isClientRelated && (
                     <div className="form-group">
                       <label className="form-label">Empresa Vinculada *</label>
-                      <select 
-                        className="form-control"
-                        value={formData.clientId}
-                        onChange={(e) => setFormData(prev => ({ ...prev, clientId: e.target.value }))}
+                      <Combobox
+                        name="clientId"
+                        defaultValue={formData.clientId}
+                        placeholder="Selecione a empresa..."
+                        onChange={(val) => setFormData(prev => ({ ...prev, clientId: val || '' }))}
                         required={isClientRelated}
-                      >
-                        <option value="">Selecione a empresa...</option>
-                        {clients.map(c => (
-                          <option key={c.id} value={c.id}>{c.name}</option>
-                        ))}
-                      </select>
+                        items={clients.map(c => ({ id: c.id, label: c.name }))}
+                      />
                     </div>
                   )}
 

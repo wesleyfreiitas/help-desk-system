@@ -105,42 +105,44 @@ export default async function NewTicketPage(props: { searchParams: Promise<{ con
               {/* Tipo */}
               <div className="nt-field">
                 <label className="nt-label">Tipo</label>
-                <select name="type" className="nt-select">
-                  <option value="">--</option>
-                  {typeOptions.map(opt => (
-                    <option key={opt.id} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
+                <Combobox 
+                  name="type"
+                  placeholder="— Selecione o tipo —"
+                  allowClear
+                  items={typeOptions.map(opt => ({ id: opt.value, label: opt.label }))}
+                />
               </div>
 
               {/* Fonte */}
               <div className="nt-field">
                 <label className="nt-label">Fonte</label>
-                <select name="source" className="nt-select" defaultValue="Portal">
-                  {sourceOptions.map(opt => (
-                    <option key={opt.id} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
+                <Combobox 
+                  name="source"
+                  defaultValue="Portal"
+                  items={sourceOptions.map(opt => ({ id: opt.value, label: opt.label }))}
+                />
               </div>
 
               {/* Status */}
               <div className="nt-field">
                 <label className="nt-label">Status <span className="nt-required">*</span></label>
-                <select name="status" className="nt-select" defaultValue="ABERTO">
-                  {statusOptions.map(opt => (
-                    <option key={opt.id} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
+                <Combobox 
+                  name="status"
+                  defaultValue="ABERTO"
+                  required
+                  items={statusOptions.map(opt => ({ id: opt.value, label: opt.label }))}
+                />
               </div>
 
               {/* Prioridade */}
               <div className="nt-field">
                 <label className="nt-label">Prioridade <span className="nt-required">*</span></label>
-                <select name="priority" className="nt-select" defaultValue="BAIXA">
-                  {priorityOptions.map(opt => (
-                    <option key={opt.id} value={opt.value}>{opt.label}</option>
-                  ))}
-                </select>
+                <Combobox 
+                  name="priority"
+                  defaultValue="BAIXA"
+                  required
+                  items={priorityOptions.map(opt => ({ id: opt.value, label: opt.label }))}
+                />
               </div>
             </>
           )}

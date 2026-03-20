@@ -14,6 +14,7 @@ interface Props {
 export default function TicketEmailComposer({ ticketId, userRole }: Props) {
   const { error } = useToast();
   const [files, setFiles] = useState<File[]>([]);
+  const [resetKey, setResetKey] = useState(0);
   const formRef = useRef<HTMLFormElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -41,6 +42,7 @@ export default function TicketEmailComposer({ ticketId, userRole }: Props) {
           } else {
             formRef.current?.reset();
             setFiles([]);
+            setResetKey(prev => prev + 1);
           }
         }}
         encType="multipart/form-data"
@@ -49,6 +51,7 @@ export default function TicketEmailComposer({ ticketId, userRole }: Props) {
         {/* Editor de Texto Rico */}
         <div className="email-composer-body" style={{ border: 'none', padding: 0 }}>
           <RichTextEditor 
+            key={resetKey}
             name="message" 
             placeholder="Digite sua resposta aqui..." 
             required 
