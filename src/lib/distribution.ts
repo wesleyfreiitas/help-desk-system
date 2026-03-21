@@ -44,22 +44,29 @@ export async function assignTicket(ticketId: string) {
 
   } else if (config.mode === 'LEAST_ASSIGNED') {
     // Menor Carga (Contar chamados abertos dos atendentes selecionados)
-    const counts = await Promise.all(
-      config.attendantIds.map(async (id) => {
-        const count = await prisma.ticket.count({
-          where: {
-            assigneeId: id,
-            status: { in: ['ABERTO', 'EM_ANDAMENTO', 'PENDENTE', 'AGUARDANDO_CLIENTE'] },
-            deletedAt: null
-          }
-        });
-        return { id, count };
-      })
-    );
+    // Otimizado: Usar groupBy para fazer tudo em uma única query
+    const counts = await prisma.ticket.groupBy({
+      by: ['assigneeId'],
+      where: {
+        assigneeId: { in: config.attendantIds },
+        status: { in: ['ABERTO', 'EM_ANDAMENTO', 'PENDENTE', 'AGUARDANDO_CLIENTE'] },
+        deletedAt: null
+      },
+      _count: {
+        id: true
+      }
+    });
+
+    // Mapear os resultados e incluir atendentes com 0 chamados (que podem não aparecer no groupBy)
+    const statsMap = new Map(counts.map(c => [c.assigneeId, c._count.id]));
+    const fullStats = config.attendantIds.map(id => ({
+      id,
+      count: statsMap.get(id) || 0
+    }));
 
     // Ordenar por quem tem menos e pegar o primeiro
-    counts.sort((a, b) => a.count - b.count);
-    selectedAssigneeId = counts[0].id;
+    fullStats.sort((a, b) => a.count - b.count);
+    selectedAssigneeId = fullStats[0].id;
   }
 
   if (selectedAssigneeId) {

@@ -12,8 +12,22 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log do erro para monitoramento
+    // Log do erro para console (local)
     console.error('Root Error Boundary:', error);
+
+    // Enviar para o Log Persistente no Banco de Dados
+    fetch('/api/system/log-error', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        error: {
+          message: error.message,
+          stack: error.stack,
+        },
+        url: typeof window !== 'undefined' ? window.location.href : '',
+        digest: error.digest,
+      }),
+    }).catch(err => console.error('Failed to report error to system logs:', err));
   }, [error]);
 
   return (

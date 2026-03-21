@@ -18,18 +18,13 @@ export async function addInteraction(ticketId: string, formData: FormData) {
 
   if (!message) return { error: 'Mensagem é obrigatória' };
 
-  const ticket = await prisma.ticket.findUnique({
-    where: { id: ticketId }
-  });
+  // Fetch ticket and user parallel to reduce round-trips
+  const [ticket, userExists] = await Promise.all([
+    prisma.ticket.findUnique({ where: { id: ticketId } }),
+    prisma.user.findUnique({ where: { id: session.user.id }, select: { id: true } })
+  ]);
 
   if (!ticket) return { error: 'Chamado não encontrado' };
-
-  // Verificar se o usuário da sessão existe no banco
-  const userExists = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { id: true }
-  });
-
   if (!userExists) {
     throw new Error('Sessão inválida. Faça logout e login novamente.');
   }
@@ -53,7 +48,8 @@ export async function addInteraction(ticketId: string, formData: FormData) {
     }
   });
 
-  await recordAuditLog({
+  // Record Audit Log (Non-blocking)
+  recordAuditLog({
     action: 'CREATE',
     resource: 'TICKET_INTERACTION',
     resourceId: interaction.id,
@@ -138,7 +134,7 @@ export async function changeTicketStatus(ticketId: string, formData: FormData) {
     data: updateData
   });
 
-  await recordAuditLog({
+  recordAuditLog({
     action: 'UPDATE',
     resource: 'TICKET_STATUS',
     resourceId: ticketId,
@@ -155,9 +151,9 @@ export async function changeTicketStatus(ticketId: string, formData: FormData) {
 
   if (fullTicket) {
     if (['ABERTO', 'EM_ANDAMENTO'].includes(status) && ['RESOLVIDO', 'FECHADO'].includes(ticket.status)) {
-      await sendTicketEmail(fullTicket, 'REOPENED');
+      sendTicketEmail(fullTicket, 'REOPENED');
     } else if (status === 'RESOLVIDO') {
-      await sendTicketEmail(fullTicket, 'RESOLVED');
+      sendTicketEmail(fullTicket, 'RESOLVED');
     }
   }
 }
@@ -258,7 +254,7 @@ export async function createTicket(formData: FormData) {
     } as any
   });
 
-  await recordAuditLog({
+  recordAuditLog({
     action: 'CREATE',
     resource: 'TICKET',
     resourceId: ticket.id,
@@ -275,6 +271,7 @@ export async function createTicket(formData: FormData) {
         userId: session.user.id,
         message: "Arquivo(s) anexado(s) na abertura do chamado.",
         isInternal: true,
+        source: "SYSTEM",
         attachments: {
           create: validFiles.map(file => ({
             filename: file.name,
@@ -293,12 +290,12 @@ export async function createTicket(formData: FormData) {
   });
 
   if (ticketWithRequester) {
-    await sendTicketEmail(ticketWithRequester, 'NEW');
+    sendTicketEmail(ticketWithRequester, 'NEW');
   }
 
   // Atribuição Automática (somente se status for ABERTO e não tiver atendente)
   if (status === 'ABERTO' && !assigneeId) {
-    await assignTicket(ticket.id);
+    assignTicket(ticket.id);
   }
 
   redirect(`/tickets/${ticket.id}`);
@@ -369,7 +366,7 @@ export async function updateTicketField(ticketId: string, field: string, value: 
     }
   });
 
-  await recordAuditLog({
+  recordAuditLog({
     action: 'UPDATE',
     resource: 'TICKET_FIELD',
     resourceId: ticketId,
@@ -379,9 +376,9 @@ export async function updateTicketField(ticketId: string, field: string, value: 
   // Notificações por e-mail
   if (field === 'status' && value) {
     if (['ABERTO', 'EM_ANDAMENTO'].includes(value) && ['RESOLVIDO', 'FECHADO'].includes(currentTicket.status)) {
-      await sendTicketEmail(ticket, 'REOPENED');
+      sendTicketEmail(ticket, 'REOPENED');
     } else if (value === 'RESOLVIDO') {
-      await sendTicketEmail(ticket, 'RESOLVED');
+      sendTicketEmail(ticket, 'RESOLVED');
     }
   }
 
@@ -492,7 +489,8 @@ export async function bulkMerge(ticketIds: string[]) {
         ticketId: t.id,
         userId: session.user.id,
         message: `Este chamado foi mesclado ao chamado <a href="/tickets/${oldest.id}" class="nt-link">#${oldest.protocol}</a>.`,
-        isInternal: true
+        isInternal: true,
+        source: "SYSTEM"
       }
     });
 
@@ -502,7 +500,8 @@ export async function bulkMerge(ticketIds: string[]) {
         ticketId: oldest.id,
         userId: session.user.id,
         message: `O chamado <a href="/tickets/${t.id}" class="nt-link">#${t.protocol}</a> foi mesclado a este.`,
-        isInternal: true
+        isInternal: true,
+        source: "SYSTEM"
       }
     });
 

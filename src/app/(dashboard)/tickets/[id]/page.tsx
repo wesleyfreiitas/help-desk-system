@@ -9,7 +9,7 @@ import TicketEmailComposer from './TicketEmailComposer';
 import TimeTrackerDisplay from './TimeTrackerDisplay';
 import TicketContactSidebar from './TicketContactSidebar';
 import { getDepartments } from '@/app/actions/departments';
-import { Clock, Mail } from 'lucide-react';
+import { Clock, Mail, Sparkles, Settings } from 'lucide-react';
 
 export default async function TicketDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
@@ -171,12 +171,21 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
                 <div key={interaction.id} className={`interaction-card ${interaction.isInternal ? 'internal' : ''}`}>
                   <div className="interaction-header">
                     <div className="interaction-user-info">
-                      <div className="interaction-avatar" style={{ background: interaction.isInternal ? '#fbbf24' : 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' }}>
-                        {initials}
+                      <div className="interaction-avatar" style={{ 
+                        background: 
+                          interaction.source === 'AI' ? 'linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%)' :
+                          interaction.source === 'SYSTEM' ? 'linear-gradient(135deg, #64748b 0%, #334155 100%)' :
+                          interaction.isInternal ? '#fbbf24' : 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)' 
+                      }}>
+                        {interaction.source === 'AI' ? <Sparkles size={16} color="white" /> :
+                         interaction.source === 'SYSTEM' ? <Settings size={16} color="white" /> :
+                         initials}
                       </div>
                       <div>
                         <span className="interaction-author">{interaction.user.name}</span>
-                        {interaction.isInternal && <span className="badge-internal">Nota Interna</span>}
+                        {interaction.source === 'AI' && <span className="badge-ai">🪄 Nota da IA</span>}
+                        {interaction.source === 'SYSTEM' && <span className="badge-system">⚡ Automação</span>}
+                        {interaction.isInternal && !interaction.source?.match(/AI|SYSTEM/) && <span className="badge-internal">🔒 Nota Interna</span>}
                         <span className="interaction-via">{interaction.isInternal ? '' : 'respondeu'}</span>
                         <span className="interaction-time">· {getRelativeTime(interaction.createdAt)} ({new Date(interaction.createdAt).toLocaleDateString('pt-BR', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })} às {new Date(interaction.createdAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })})</span>
                       </div>

@@ -13,6 +13,7 @@ interface RichTextEditorProps {
   initialValue?: string;
   minHeight?: string;
   required?: boolean;
+  onChange?: (content: string) => void;
 }
 
 export default function RichTextEditor({ 
@@ -20,7 +21,8 @@ export default function RichTextEditor({
   placeholder = "Digite aqui...", 
   initialValue = "",
   minHeight = "200px",
-  required = false
+  required = false,
+  onChange
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const [content, setContent] = useState(initialValue);
@@ -36,13 +38,17 @@ export default function RichTextEditor({
   const execCommand = (command: string, value?: string) => {
     document.execCommand(command, false, value);
     if (editorRef.current) {
-      setContent(editorRef.current.innerHTML);
+      const newContent = editorRef.current.innerHTML;
+      setContent(newContent);
+      if (onChange) onChange(newContent);
     }
   };
 
   const handleInput = () => {
     if (editorRef.current) {
-      setContent(editorRef.current.innerHTML);
+      const newContent = editorRef.current.innerHTML;
+      setContent(newContent);
+      if (onChange) onChange(newContent);
     }
   };
 

@@ -175,6 +175,7 @@ model Interaction {
   user        User     @relation(fields: [userId], references: [id])
   message     String
   isInternal  Boolean  @default(false)
+  source      String   @default("MANUAL") // MANUAL, AI, SYSTEM
   attachments Attachment[]
   messageId   String?  @unique
   createdAt   DateTime @default(now())

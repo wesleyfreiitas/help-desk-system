@@ -41,3 +41,30 @@ export async function logExternalApi(
     console.error('Failed to save external API log to database:', err);
   }
 }
+
+/**
+ * Registra erros do sistema (runtime, database, etc.) no Banco de Dados.
+ */
+export async function logSystemError(context: string, error: any, details?: any) {
+  try {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : null;
+    
+    await prisma.externalApiLog.create({
+      data: {
+        service: 'SYSTEM_ERROR',
+        method: context.toUpperCase(),
+        url: details?.url || 'INTERNAL',
+        status: 500,
+        payload: details ? JSON.stringify(details) : null,
+        response: JSON.stringify({
+          message: errorMessage,
+          stack: errorStack
+        })
+      }
+    });
+  } catch (err) {
+    console.error('CRITICAL: Failed to log system error to database:', err);
+    console.error('Original Error:', error);
+  }
+}

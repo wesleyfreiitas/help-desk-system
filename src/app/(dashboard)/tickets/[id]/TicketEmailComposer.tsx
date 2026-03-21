@@ -15,13 +15,36 @@ export default function TicketEmailComposer({ ticketId, userRole }: Props) {
   const { error } = useToast();
   const [files, setFiles] = useState<File[]>([]);
   const [resetKey, setResetKey] = useState(0);
+  const [initialDraft, setInitialDraft] = useState('');
+  const [isDraftSaved, setIsDraftSaved] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const draftKey = `ticket-draft-${ticketId}`;
+
+  // Carregar rascunho do localStorage ao montar
+  React.useEffect(() => {
+    const savedDraft = localStorage.getItem(draftKey);
+    if (savedDraft) {
+      setInitialDraft(savedDraft);
+      setIsDraftSaved(true);
+    }
+  }, [ticketId, draftKey]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const newFiles = Array.from(e.target.files);
       setFiles(prev => [...prev, ...newFiles]);
+    }
+  };
+
+  const handleMessageChange = (content: string) => {
+    if (content && content !== '<br>' && content !== '') {
+      localStorage.setItem(draftKey, content);
+      setIsDraftSaved(true);
+    } else {
+      localStorage.removeItem(draftKey);
+      setIsDraftSaved(false);
     }
   };
 
@@ -34,14 +57,17 @@ export default function TicketEmailComposer({ ticketId, userRole }: Props) {
       <form 
         ref={formRef}
         action={async (formData) => {
-          // Os arquivos não vão automaticamente via Server Action se não estiverem no input
-          // Mas como vamos adicionar o input dentro do form, eles irão.
           const res = await addInteraction(ticketId, formData);
           if (res?.error) {
             error(res.error);
           } else {
+            // Limpar rascunho após o envio bem-sucedido
+            localStorage.removeItem(draftKey);
+            setIsDraftSaved(false);
+            
             formRef.current?.reset();
             setFiles([]);
+            setInitialDraft('');
             setResetKey(prev => prev + 1);
           }
         }}
@@ -51,9 +77,11 @@ export default function TicketEmailComposer({ ticketId, userRole }: Props) {
         {/* Editor de Texto Rico */}
         <div className="email-composer-body" style={{ border: 'none', padding: 0 }}>
           <RichTextEditor 
-            key={resetKey}
+            key={`${ticketId}-${resetKey}`}
             name="message" 
             placeholder="Digite sua resposta aqui..." 
+            initialValue={initialDraft}
+            onChange={handleMessageChange}
             required 
             minHeight="200px"
           />
@@ -85,7 +113,10 @@ export default function TicketEmailComposer({ ticketId, userRole }: Props) {
             )}
           </div>
           <div className="email-composer-footer-right">
-            <span className="ec-saved-label">Salvo</span>
+            <span className={`ec-saved-label ${isDraftSaved ? 'visible' : ''}`}>
+              {isDraftSaved && <span style={{fontSize: '10px'}}>✔️</span>}
+              {isDraftSaved ? 'Rascunho salvo' : 'Aguardando...'}
+            </span>
             <button type="submit" className="ec-send-btn">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="22" y1="2" x2="11" y2="13"></line>
