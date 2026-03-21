@@ -234,8 +234,8 @@ export async function notifyCallEndWebhook(channelid: string, ticketId: string) 
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        "id da ligação": channelid,
-        "id do ticket": ticketId || ""
+        "uniqueid": channelid,
+        "ticketId": ticketId || ""
       })
     }, ignoreSsl);
     
